@@ -22,10 +22,8 @@ public class GridPlacement : MonoBehaviour
     void Update()
     {
         Vector3 mousePos = MouseToWorldSpace();
-        if (mousePos != Vector3.zero)
-        {
-            objectToPlace.transform.position = MouseToWorldSpace();
-        }
+        Vector3Int cellPos = grid.WorldToCell(mousePos);
+        objectToPlace.transform.position = grid.GetCellCenterWorld(cellPos);
     }
 
 
@@ -38,9 +36,8 @@ public class GridPlacement : MonoBehaviour
         {
             Vector3 targetPos = hit.point;
             return targetPos;
-
         }
 
-        return Vector3.zero;
+        return new Vector3(-100, -100, -100);
     }
 }
