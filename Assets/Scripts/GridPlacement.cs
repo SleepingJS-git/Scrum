@@ -5,6 +5,8 @@ public class GridPlacement : MonoBehaviour
 {
     [SerializeField]
     GameObject objectToPlace;
+    GameObject previewObject;
+    Renderer previewRenderer;
 
     [SerializeField]
     Grid grid;
@@ -15,7 +17,11 @@ public class GridPlacement : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        objectToPlace = Instantiate(objectToPlace);
+        previewObject = Instantiate(objectToPlace);
+        previewObject.layer = 2;
+        previewRenderer = previewObject.GetComponent<Renderer>();
+        Color previewColor = previewRenderer.material.color;
+        previewRenderer.material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.1f);
     }
 
     // Update is called once per frame
@@ -23,7 +29,12 @@ public class GridPlacement : MonoBehaviour
     {
         Vector3 mousePos = MouseToWorldSpace();
         Vector3Int cellPos = grid.WorldToCell(mousePos);
-        objectToPlace.transform.position = grid.GetCellCenterWorld(cellPos);
+        previewObject.transform.position = grid.GetCellCenterWorld(cellPos);
+        
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            Instantiate(objectToPlace, previewObject.transform.position, Quaternion.identity);
+        }
     }
 
 
