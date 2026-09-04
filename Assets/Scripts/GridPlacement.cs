@@ -1,22 +1,30 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class GridPlacement : MonoBehaviour
 {
+    // The prefab being placed
     [SerializeField]
     GameObject objectToPlace;
+
+    // Track the preview for the placeable object
     GameObject previewObject;
     Renderer previewRenderer;
 
+    // The grid being placed on
     [SerializeField]
     Grid grid;
 
     [SerializeField]
     Camera buildCam;
 
+    private Dictionary<Vector3Int, int> occupiedCells = new Dictionary<Vector3Int, int>();
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Create the preview object and make it transparent
         previewObject = Instantiate(objectToPlace);
         previewObject.layer = 2;
         previewRenderer = previewObject.GetComponent<Renderer>();
@@ -27,17 +35,39 @@ public class GridPlacement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Find the position of the mouse on the grid, show the preview there
         Vector3 mousePos = MouseToWorldSpace();
         Vector3Int cellPos = grid.WorldToCell(mousePos);
+
+        // If the cell is occupied
+        if (IsCellTaken(cellPos))
+        {
+            // Check if the mouse is on the x or y border of the grid space and shift the cell position accordingly
+            if (mousePos.x % 1 == 0)
+            {
+                cellPos = new Vector3Int(cellPos.x - 1, cellPos.y, cellPos.z);
+            }
+            else
+            {
+                cellPos = new Vector3Int(cellPos.x, cellPos.y, cellPos.z - 1);
+            }
+        }
+
+        // Set the preview object's position to the center of the grid cell
         previewObject.transform.position = grid.GetCellCenterWorld(cellPos);
-        
+
+        // If left-clicked, create the object at the location of the preview
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             Instantiate(objectToPlace, previewObject.transform.position, Quaternion.identity);
+            OccupyCell(cellPos, 0);
         }
     }
 
-
+    /// <summary>
+    /// Get the world space of the mouse based on a raycast from the camera
+    /// </summary>
+    /// <returns>World space of the mouse</returns>
     private Vector3 MouseToWorldSpace()
     {
         Ray ray = buildCam.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -50,5 +80,28 @@ public class GridPlacement : MonoBehaviour
         }
 
         return new Vector3(-100, -100, -100);
+    }
+
+    /// <summary>
+    /// Check whether a cell on the grid is occupied
+    /// </summary>
+    /// <param name="position"> Position of the cell being checked </param>
+    /// <returns> True if the cell is currently taken </returns>
+    bool IsCellTaken(Vector3Int position)
+    {
+        return occupiedCells.ContainsKey(position);
+    }
+
+    /// <summary>
+    /// Sets a cell to occupied
+    /// </summary>
+    /// <param name="position"> Position of the occupied cell </param>
+    /// <param name="objectID"> ID of the object at that position (Currently useless, will update for tracking what type of object is placed </param>
+    void OccupyCell(Vector3Int position, int objectID)
+    {
+        if (!IsCellTaken(position))
+        {
+            occupiedCells.Add(position, objectID);
+        }
     }
 }
