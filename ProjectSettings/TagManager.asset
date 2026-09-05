@@ -2,8 +2,12 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - Ground
+  - Wall
+  - Interactable
+  - Hitbox
   layers:
   - Default
   - TransparentFX
@@ -11,15 +15,15 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ground
+  - Wall
+  - Entity
+  - Player
+  - Buildable
+  - Interactable
+  - Projectile
+  - Ragdoll
+  - WeaponOverlay
   - 
   - 
   - 
@@ -50,27 +54,3 @@ TagManager:
   - Light Layer 5
   - Light Layer 6
   - Light Layer 7
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
