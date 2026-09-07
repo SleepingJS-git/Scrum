@@ -487,12 +487,12 @@ MonoBehaviour:
   moveSpeed: 6
   groundAccel: 35
   groundDecel: 45
-  jumpHeight: 5
+  jumpHeight: 3
   gravityScale: 15
-  upwardGravMult: 3
+  upwardGravMult: 2
   airAccel: 2
   airDecel: 3
-  airborneDamp: 15
+  airborneDamp: 0.1
   maxAirSpeed: 15
 --- !u!114 &5570463379167910784
 MonoBehaviour:
