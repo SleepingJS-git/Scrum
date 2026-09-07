@@ -7,9 +7,11 @@ public class PlayerLook : MonoBehaviour
     public Vector2 sensitivity;
 
     private float xRot;
-    public void Init()
+    public void Init(bool camEnabled)
     {
         xRot = 0f;
+
+        cam.gameObject.SetActive(camEnabled);
     }
 
     /// <summary>
@@ -21,8 +23,6 @@ public class PlayerLook : MonoBehaviour
         // Camera rotation for looking up and down
         xRot -= input.y * sensitivity.y;
         xRot = Mathf.Clamp(xRot, -80f, 80f);    // Prevents looking behind by moving up and down
-
-        Debug.Log($"X: {input.x * sensitivity.x} | Y: {input.y * sensitivity.y}");
 
         // Apply up/down rotation to camera transform
         cam.transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);

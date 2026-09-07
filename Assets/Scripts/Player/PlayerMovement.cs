@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -28,43 +29,46 @@ public class PlayerMovement : MonoBehaviour
         isMoving = false;
     }
 
+    public void Jump()
+    {
+        if (cc.isGrounded) velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+    }
+
     /// <summary>
     /// This does the movement for vertical (walking) and horizontal (gravity)
     /// </summary>
     /// <param name="moveInput"></param>
     public void Move(Vector3 moveInput)
     {
+        bool wasGrounded = cc.isGrounded;
+
         isMoving = moveInput.sqrMagnitude > 0.0001f;
 
         // The actual direction relative to the way the player is facing
         Vector3 moveDir = transform.right * moveInput.x + transform.forward * moveInput.z;
+        moveDir.Normalize();
         
         // Cache the current speed
-        currentSpeed = moveSpeed;
-
-        if (!isMoving) currentSpeed = 0f;
+        currentSpeed = isMoving ? moveSpeed : 0f;
 
         Vector3 targetVelocity = currentSpeed * moveDir;
-        // When we leave the ground, cache the current horizontal velocity to preserve momentum
-        if (!cc.isGrounded)
-        {
-            targetVelocity = airborneDir + (moveDir * airborneDamp);
-
-            // Optional clamp so air control can't stack you into crazy speed
-            float max = Mathf.Max(moveSpeed, maxAirSpeed);
-            if (targetVelocity.magnitude > max)
-                targetVelocity = targetVelocity.normalized * max;
-        }
-
-        // Based on movement and grounded, check if we accelerate or decelerate on the ground or in the air
-        float accel = cc.isGrounded
-            ? (isMoving ? groundAccel : groundDecel)    // If is grounded, accelerate if moving or decelerate if not
-            : (isMoving ? airAccel : airDecel); // If not, accelerate in the air if inputting movement or decelerate if not
-            airborneDir = moveDir;
         
+
+        // If is grounded, accelerate if moving or decelerate if not
+        float accel = isMoving ? groundAccel : groundDecel;
+
+        float velY = velocity.y;
+        targetVelocity.y = 0f;
+        velocity.y = 0f;
+
         // Accelerate current velocity to target
         velocity = Vector3.MoveTowards(velocity, targetVelocity, accel * Time.deltaTime);
-    
+        velocity.y = velY;
+
+        // Cache momentum when leaving the ground
+        if (!cc.isGrounded && wasGrounded)
+            airborneDir = velocity;
+
         // Gravity
         if (cc.isGrounded && velocity.y < 0f)
             velocity.y = -2f;
