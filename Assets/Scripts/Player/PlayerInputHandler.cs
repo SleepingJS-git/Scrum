@@ -13,9 +13,10 @@ public class PlayerInputHandler : MonoBehaviour
     private Vector3 _moveInput;
     private Vector2 _mouseLookInput;
     private Vector2 _gamePadInput;
-    public void Init()
+    public void Init(bool enableInput)
     {
         playerInput = GetComponent<PlayerInput>();
+        playerInput.enabled = enableInput;
         move = GetComponent<PlayerMovement>();
         _moveInput = Vector3.zero;
         _mouseLookInput = Vector2.zero;

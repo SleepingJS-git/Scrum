@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -59,7 +60,7 @@ public class PlayerMovement : MonoBehaviour
         float velY = velocity.y;
         targetVelocity.y = 0f;
         velocity.y = 0f;
-        
+
         // Accelerate current velocity to target
         velocity = Vector3.MoveTowards(velocity, targetVelocity, accel * Time.deltaTime);
         velocity.y = velY;
