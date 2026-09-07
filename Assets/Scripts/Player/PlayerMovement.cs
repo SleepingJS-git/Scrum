@@ -28,6 +28,11 @@ public class PlayerMovement : MonoBehaviour
         isMoving = false;
     }
 
+    public void Jump()
+    {
+        if (cc.isGrounded) velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+    }
+
     /// <summary>
     /// This does the movement for vertical (walking) and horizontal (gravity)
     /// </summary>
