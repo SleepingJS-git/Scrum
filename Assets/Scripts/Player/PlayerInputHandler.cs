@@ -7,6 +7,7 @@ using static UnityEngine.InputSystem.InputAction;
 /// </summary>
 public class PlayerInputHandler : MonoBehaviour
 {
+    private PlayerMovement move;
     private PlayerInput playerInput;
     public Vector3 MoveInput => new Vector3(_moveInput.x, 0f, _moveInput.y);
     private Vector3 _moveInput;
@@ -15,7 +16,7 @@ public class PlayerInputHandler : MonoBehaviour
     public void Init()
     {
         playerInput = GetComponent<PlayerInput>();
-
+        move = GetComponent<PlayerMovement>();
         _moveInput = Vector3.zero;
         _mouseLookInput = Vector2.zero;
     }
@@ -61,6 +62,8 @@ public class PlayerInputHandler : MonoBehaviour
     }
     public void OnJump(CallbackContext ctx)
     {
-        
+        if (move != null)
+            if (ctx.started)
+               move.Jump();
     }
 }

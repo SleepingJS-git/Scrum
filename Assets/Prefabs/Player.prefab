@@ -319,7 +319,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 0.70719, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2186028548986188083}
@@ -409,7 +409,19 @@ MonoBehaviour:
     m_ActionId: 18514f70-23c0-4fce-a641-bb84618b638c
     m_ActionName: 'FPS Controls/Look[/Mouse/delta]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5283261713411698337}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnJump
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: af4eb582-8171-4ab7-b864-5f85fbec16e7
     m_ActionName: 'FPS Controls/Jump[/Keyboard/space]'
   - m_PersistentCalls:
@@ -429,7 +441,7 @@ MonoBehaviour:
     m_ActionId: 6db2da1f-e661-4697-a6f3-93abded2119a
     m_ActionName: 'FPS Controls/Gamepad Look[/DualSenseGamepadHID/rightStick]'
   m_NeverAutoSwitchControlSchemes: 1
-  m_DefaultControlScheme: Gamepad
+  m_DefaultControlScheme: Keyboard & Mouse
   m_DefaultActionMap: FPS Controls
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -475,13 +487,13 @@ MonoBehaviour:
   moveSpeed: 6
   groundAccel: 35
   groundDecel: 45
-  jumpHeight: 2
-  gravityScale: 9.81
+  jumpHeight: 5
+  gravityScale: 15
   upwardGravMult: 3
-  airAccel: 8
-  airDecel: 6
-  airborneDamp: 0.15
-  maxAirSpeed: 7
+  airAccel: 2
+  airDecel: 3
+  airborneDamp: 15
+  maxAirSpeed: 15
 --- !u!114 &5570463379167910784
 MonoBehaviour:
   m_ObjectHideFlags: 0
