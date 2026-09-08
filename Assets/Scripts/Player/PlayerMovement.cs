@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -11,16 +12,8 @@ public class PlayerMovement : MonoBehaviour
     public float jumpHeight;        // How high the player jumps
     public float gravityScale;      // Gravity
     public float upwardGravMult;    // How fast the player jumps
-
-    [Header("Airborne")]
-    public float airAccel;
-    public float airDecel;    // The acceleration and deceleration of being in the air
-    public float airborneDamp;          // Influence of control while in air
-    public float maxAirSpeed;           // The max speed while in air to prevent crazy b-hopping
-
     private bool isMoving;
     private Vector3 velocity;                // Actual Velocity    
-    private Vector3 airborneDir;        // Direction moving while airborne
     private CharacterController cc; 
     public void Init()
     {
@@ -59,14 +52,10 @@ public class PlayerMovement : MonoBehaviour
         float velY = velocity.y;
         targetVelocity.y = 0f;
         velocity.y = 0f;
-        
+
         // Accelerate current velocity to target
         velocity = Vector3.MoveTowards(velocity, targetVelocity, accel * Time.deltaTime);
         velocity.y = velY;
-
-        // Cache momentum when leaving the ground
-        if (!cc.isGrounded && wasGrounded)
-            airborneDir = velocity;
 
         // Gravity
         if (cc.isGrounded && velocity.y < 0f)
