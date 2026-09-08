@@ -5,44 +5,53 @@ using UnityEngine;
 /// The main class that stores references to all the other player scripts and also controls them.
 /// If you want to reference a child script, it must go through here.
 /// </summary>
-public class Player : NetworkBehaviour
+public class Player : Entity
 {
     [HideInInspector] public PlayerInputHandler input;
+    [HideInInspector] public PlayerCombat combat;
     [HideInInspector] public PlayerMovement move;
     [HideInInspector] public PlayerLook look;
-
-    NetworkVariable<int> HEALTH = new NetworkVariable<int>(
-        100, 
-        NetworkVariableReadPermission.Everyone, 
-        NetworkVariableWritePermission.Owner
-    );
-
     /// <summary>
-    /// Initializes all the player scripts. Eventually, we'll have to move everything into networking's version of Start()
+    /// When the object is spawned on the network, intialize these scripts.
+    /// 
+    /// Each connected player is a client that runs this script on their computer. So if there were 4 players, 
+    /// then there would be 16 instances of this script running. If it was 2, then there would be 4.
+    /// 
+    /// For each player, it checks if this player script (out of all the others) is the one they are controlling.
+    /// If this script is the one that is controlling the player's then IsOwner = true!
     /// </summary>
     public override void OnNetworkSpawn()
     {
+        // Value for health is set
+        base.OnNetworkSpawn();
         input = GetComponent<PlayerInputHandler>();
+        combat = GetComponent<PlayerCombat>();
         move = GetComponent<PlayerMovement>();
         look = GetComponent<PlayerLook>();
 
         // For Debug rn, toggle first person immediately
         ToggleFirstPerson(true);
 
+        // Check if the computer running this script is the client.
+        // If it is then IsOwner = true.
         input.Init(IsOwner);
         move.Init();
         look.Init(IsOwner);
+        combat.Init(IsOwner, look.cam.transform, this);
     }
 
     void Update()
     {
+        // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
         
         move.Move(input.MoveInput);
+        combat.PrimaryInput(input.PrimaryInput);
     }
 
     void LateUpdate()
     {
+        // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
         look.Look(input.LookInput());
     }
