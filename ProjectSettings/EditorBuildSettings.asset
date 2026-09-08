@@ -11,6 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Player Networking.unity
     guid: b0cfdc570e1181f4ea97a48bf7ca7a7f
+  - enabled: 1
+    path: Assets/Scenes/UI Testing.unity
+    guid: 60b53cf9f2249e442942d277ae0bae23
+  - enabled: 1
+    path: Assets/Scenes/LevelGrayboxing.unity
+    guid: 7a69aafc724c7554dbc523c610bb5482
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
