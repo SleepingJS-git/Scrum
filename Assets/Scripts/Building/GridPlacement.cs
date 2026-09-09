@@ -19,11 +19,22 @@ public class GridPlacement : MonoBehaviour
     [SerializeField]
     Camera buildCam;
 
+    float rotation = 0;
+
+    private PlayerInput playerInput;
+    private InputAction placeAction;
+    private InputAction rotateLeftAction;
+    private InputAction rotateRightAction;
+
     private Dictionary<Vector3Int, int> occupiedCells = new Dictionary<Vector3Int, int>();
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        playerInput = GetComponent<PlayerInput>();
+        placeAction = playerInput.actions.FindAction("Place");
+        rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
+        rotateRightAction = playerInput.actions.FindAction("Rotate Right");
         // Create the preview object and make it transparent
         previewObject = Instantiate(objectToPlace);
         previewObject.layer = 2;
@@ -56,10 +67,27 @@ public class GridPlacement : MonoBehaviour
         // Set the preview object's position to the center of the grid cell
         previewObject.transform.position = grid.GetCellCenterWorld(cellPos);
 
-        // If left-clicked, create the object at the location of the preview
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (rotateRightAction.WasPressedThisFrame())
         {
-            Instantiate(objectToPlace, previewObject.transform.position, Quaternion.identity);
+            rotation += 90;
+            if (rotation >= 360)
+            {
+                rotation = 0;
+            }
+        }
+        if (rotateLeftAction.WasPressedThisFrame())
+        {
+            if (rotation <= 0)
+            {
+                rotation = 360;
+            }
+            rotation -= 90;
+        }
+        previewObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+        // If left-clicked, create the object at the location of the preview
+        if (placeAction.WasPressedThisFrame())
+        {
+            Instantiate(objectToPlace, previewObject.transform.position, Quaternion.Euler(0, rotation, 0));
             OccupyCell(cellPos, 0);
         }
     }
