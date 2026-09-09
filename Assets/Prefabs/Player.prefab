@@ -467,6 +467,7 @@ GameObject:
   - component: {fileID: 7517925231291135140}
   - component: {fileID: 5570463379167910784}
   - component: {fileID: 5042190757247243880}
+  - component: {fileID: 5329963382740541591}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -504,7 +505,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 34816
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -637,6 +638,38 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 91b9cb02-f194-4184-8f6a-e12b4a1c6d08
     m_ActionName: 'FPS Controls/Secondary Fire[/Mouse/rightButton]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5283261713411698337}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnInteract
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 73d37a29-658a-4939-826b-f24de59a7915
+    m_ActionName: 'FPS Controls/Interact[/Keyboard/f]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5283261713411698337}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnDrop
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 5888b30c-617c-4cd5-94c7-b167b3e5c015
+    m_ActionName: 'FPS Controls/Drop Weapon[/Keyboard/q]'
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Keyboard & Mouse
   m_DefaultActionMap: FPS Controls
@@ -654,8 +687,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2600626673
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 2508019869
+  InScenePlacedSourceGlobalObjectIdHash: 2508019869
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -663,7 +696,7 @@ MonoBehaviour:
   SynchronizeTransform: 1
   m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
@@ -700,6 +733,8 @@ MonoBehaviour:
   combat: {fileID: 0}
   move: {fileID: 0}
   look: {fileID: 0}
+  interaction: {fileID: 0}
+  playerHudPrefab: {fileID: 3345661794966301860, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
 --- !u!114 &-6506580030181524236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -804,4 +839,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentWeapon: {fileID: 0}
   weaponHolder: {fileID: 6241798226129361827}
-  testWeapon: {fileID: 11400000, guid: af31be7b8d98a9d4eae899c120916e7f, type: 2}
+  weaponDropTemplate: {fileID: 5600722298518792889, guid: 41ddd7b311ad69c45a84f250e8f311af, type: 3}
+--- !u!114 &5329963382740541591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7342539564703258927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc4047f7919255b4a8721db042655af4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reach: 3
+  _selected: {fileID: 0}
+  _hud: {fileID: 0}

@@ -11,6 +11,12 @@ public class Player : Entity
     [HideInInspector] public PlayerCombat combat;
     [HideInInspector] public PlayerMovement move;
     [HideInInspector] public PlayerLook look;
+    [HideInInspector] public PlayerInteraction interaction;
+
+    // I know this is messy. This is a test. Eventually I want to have a singleton manager have a variable
+    // so the player can reference it themselves.
+    [SerializeField] private PlayerHud playerHudPrefab;
+    private PlayerHud _hud;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -28,16 +34,25 @@ public class Player : Entity
         combat = GetComponent<PlayerCombat>();
         move = GetComponent<PlayerMovement>();
         look = GetComponent<PlayerLook>();
+        interaction = GetComponent<PlayerInteraction>();
 
-        // For Debug rn, toggle first person immediately
-        ToggleFirstPerson(true);
+        if (IsOwner)
+        {
+            // For Debug rn, toggle first person immediately
+            ToggleFirstPerson(true);
+
+            _hud = Instantiate(playerHudPrefab);
+        }
 
         // Check if the computer running this script is the client.
         // If it is then IsOwner = true.
         input.Init(IsOwner);
         move.Init();
         look.Init(IsOwner);
-        combat.Init(IsOwner, look.cam.transform, this);
+        combat.Init(IsOwner, look.cam.transform, _hud);
+        interaction.Init(IsOwner, look.cam.transform, _hud);
+
+
     }
 
     void Update()
@@ -47,6 +62,7 @@ public class Player : Entity
         
         move.Move(input.MoveInput);
         combat.PrimaryInput(input.PrimaryInput);
+        interaction.Interaction();
     }
 
     void LateUpdate()

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3794326340829016825}
   - component: {fileID: 8714880010617462545}
   m_Layer: 0
-  m_Name: Test
+  m_Name: Test Bullet Hole
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
