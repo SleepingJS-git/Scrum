@@ -16,15 +16,17 @@ public class Weapon : MonoBehaviour
     public int currentBullets;
     public int maxBullets;
     public int bulletsPerShot;
-    public int totalBullets;
+    public int bulletsInMag;
     public float reloadSpeed;
     public float bulletSpread;
     public GameObject trailObj;
     public GameObject residue;
-    private bool used = false;
     protected float _lastShootTime;
     public bool IsReady { get { return _lastShootTime + fireRate < Time.time; } }
+    public bool NeedsReload { get { return currentBullets == 0; }}
+    public bool HasNoAmmo { get { return currentBullets == 0 && bulletsInMag == 0;}}
     private OnHitData _onHitData;
+    private RuntimeWeapon _runtimeWeapon;
     /// <summary>
     /// Initializes the weapon by giving the stats and effects it needs.
     /// </summary>
@@ -41,7 +43,7 @@ public class Weapon : MonoBehaviour
 
         // Runtime values
         currentBullets = weapon.currentBulletCount;
-        totalBullets = weapon.totalBulletCount;
+        bulletsInMag = weapon.bulletsInMag;
 
         // Weapon info
         weaponName = data.weaponName;
@@ -62,7 +64,14 @@ public class Weapon : MonoBehaviour
             residue = hs.residue;
         }
 
-        used = true;
+        _runtimeWeapon = weapon;
+    }
+
+    public RuntimeWeapon SaveRuntimeData()
+    {
+        _runtimeWeapon.currentBulletCount = currentBullets;
+        _runtimeWeapon.bulletsInMag = bulletsInMag;
+        return _runtimeWeapon;
     }
 
     /// <summary>

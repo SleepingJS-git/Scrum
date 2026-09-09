@@ -574,7 +574,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f780f67e629095c459b625301a1efdc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  message: Press 'F' Spawn New Cube
+  message: Press 'E' Spawn New Cube
   active: 1
   onInteraction:
     m_PersistentCalls:
@@ -822,6 +822,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: af31be7b8d98a9d4eae899c120916e7f, type: 2}
   holder: {fileID: 812842154}
   weaponDropTemplate: {fileID: 5600722298518792889, guid: 41ddd7b311ad69c45a84f250e8f311af, type: 3}
+  spawnTime: 3
 --- !u!4 &957472153
 Transform:
   m_ObjectHideFlags: 0

@@ -118,4 +118,12 @@ public class PlayerInputHandler : MonoBehaviour
             _main.interaction.OnInteract();
         }
     }
+
+    public void OnDrop(CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            _main.combat.DropWeapon();
+        }
+    }
 }

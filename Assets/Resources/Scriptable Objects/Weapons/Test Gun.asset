@@ -20,7 +20,7 @@ MonoBehaviour:
   fireRate: 0.075
   bulletCount: 16
   bulletsPerShot: 1
-  magCount: 0
+  magCount: 2
   reloadSpeed: 1.5
   bulletSpread: 0.01
   weaponTemplate: {fileID: 1531586593044186660, guid: 3c50185d73fd84d46854c3e8fd4da8ef, type: 3}

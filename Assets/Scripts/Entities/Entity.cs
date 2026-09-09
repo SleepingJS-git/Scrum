@@ -12,11 +12,7 @@ public abstract class Entity : NetworkBehaviour
     [SerializeField] private UnityEvent onDeathEffects;
     private event Action OnDeath; 
     private OnHitData lastHitData;
-    public NetworkVariable<int> health = new(
-        0,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
-    );
+    public NetworkVariable<int> health = new();
     public NetworkVariable<bool> isAlive = new(
         true,
         NetworkVariableReadPermission.Everyone,

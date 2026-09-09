@@ -48,6 +48,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 3745850788733270865}
+  throwForce: 25
+  upForce: 12.5
 --- !u!54 &3745850788733270865
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -56,7 +58,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6728952483380854393}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 4
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -88,7 +90,7 @@ SphereCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 192
+    m_Bits: 35520
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -108,7 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f780f67e629095c459b625301a1efdc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  message: '''F'' to Pick Up'
+  message: '''E'' to Pick Up'
   active: 1
   onInteraction:
     m_PersistentCalls:

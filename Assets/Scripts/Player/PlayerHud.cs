@@ -4,6 +4,6 @@ using UnityEngine;
 public class PlayerHud : MonoBehaviour
 {
     public TextMeshProUGUI interactText;
-    public TextMeshProUGUI ammoText;
-    public TextMeshProUGUI totalAmmo;
+    public TextMeshProUGUI ammo;
+    public TextMeshProUGUI weaponName;
 }
