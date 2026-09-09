@@ -529,7 +529,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10a9a2af5b55584eb630f9dda63eb02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectToPlace: {fileID: 4852773443757510493, guid: 440169d2761a1524db52bebf4a9e3789, type: 3}
+  buildable: {fileID: 4980473174890129493, guid: a9a8aaeba8524944cae0e0e5b4745af6, type: 3}
   grid: {fileID: 607848983}
   buildCam: {fileID: 503030856}
 --- !u!4 &755794274

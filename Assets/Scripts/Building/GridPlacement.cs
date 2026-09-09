@@ -6,6 +6,7 @@ public class GridPlacement : MonoBehaviour
 {
     // The prefab being placed
     [SerializeField]
+    Buildable buildable;
     GameObject objectToPlace;
 
     // Track the preview for the placeable object
@@ -28,6 +29,8 @@ public class GridPlacement : MonoBehaviour
 
     private Dictionary<Vector3Int, int> occupiedCells = new Dictionary<Vector3Int, int>();
 
+    private Vector2 offset = Vector2.zero;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -35,10 +38,13 @@ public class GridPlacement : MonoBehaviour
         placeAction = playerInput.actions.FindAction("Place");
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
+
+        objectToPlace = buildable.gameObject;
         // Create the preview object and make it transparent
         previewObject = Instantiate(objectToPlace);
+        previewRenderer = previewObject.GetComponent<Buildable>().ObjectRenderer;
         previewObject.layer = 2;
-        previewRenderer = previewObject.GetComponent<Renderer>();
+        previewRenderer.gameObject.layer = 2;
         Color previewColor = previewRenderer.material.color;
         previewRenderer.material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.1f);
     }
@@ -131,5 +137,10 @@ public class GridPlacement : MonoBehaviour
         {
             occupiedCells.Add(position, objectID);
         }
+    }
+
+    void UpdateOffset()
+    {
+
     }
 }
