@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 
+
 public class AreaEffector3D : MonoBehaviour
 {   
     [Tooltip("Direction the force is applied in.")]
@@ -11,6 +12,8 @@ public class AreaEffector3D : MonoBehaviour
     [SerializeField] private float force;
     [Tooltip("The collider that will apply the force, will make the selected collider a trigger.")]
     [SerializeField] private Collider effectArea;
+    [Tooltip("Whether or not to use this objects forward transform as the force direction.")]
+    [SerializeField] private bool useForwardTransform;
 
     // Start is called before the first frame update
     void Start()
@@ -22,14 +25,28 @@ public class AreaEffector3D : MonoBehaviour
     {
         Rigidbody areaEffectee;
         CharacterController characterEffected;
-        
-        if(other.gameObject.TryGetComponent<Rigidbody>(out areaEffectee))
+
+        if (useForwardTransform)
         {
-            areaEffectee.AddForceAtPosition(forceDir * force, other.ClosestPoint(this.transform.position));
+            if (other.gameObject.TryGetComponent<Rigidbody>(out areaEffectee))
+            {
+                areaEffectee.AddForceAtPosition(transform.forward * force, other.ClosestPoint(this.transform.position));
+            }
+            else if (other.gameObject.TryGetComponent<CharacterController>(out characterEffected))
+            {
+                characterEffected.SimpleMove(transform.forward * force);
+            }
         }
-        else if (other.gameObject.TryGetComponent<CharacterController>(out characterEffected))
+        else
         {
-            characterEffected.SimpleMove(forceDir * force);
+            if (other.gameObject.TryGetComponent<Rigidbody>(out areaEffectee))
+            {
+                areaEffectee.AddForceAtPosition(forceDir * force, other.ClosestPoint(this.transform.position));
+            }
+            else if (other.gameObject.TryGetComponent<CharacterController>(out characterEffected))
+            {
+                characterEffected.SimpleMove(forceDir * force);
+            }
         }
     }
 }
