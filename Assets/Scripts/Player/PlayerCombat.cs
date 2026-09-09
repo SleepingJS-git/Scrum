@@ -8,28 +8,28 @@ public class PlayerCombat : MonoBehaviour
 {
     public Weapon currentWeapon;
     public Transform weaponHolder;
-    public WeaponData testWeapon;
     private event Action OnPrimaryFire; 
     private event Action OnSecondaryFire; 
     private bool _canFire;
-    private bool isOwner;
-    private Transform camTransform;
-    private Player main;
+    private bool _isOwner;
+    private Transform _cam;
+    private Player _main;
+    private PlayerHud _hud;
     /// <summary>
     /// Initialize Player Combat. If the client is the owner, then save camera transform for shooting and enable firing
     /// </summary>
     /// <param name="owner"></param>
     /// <param name="cam"></param>
-    public void Init(bool owner, Transform cam, Player player)
+    public void Init(bool owner, Transform cam, PlayerHud h)
     {
-        isOwner = owner;
+        _isOwner = owner;
 
-        if (isOwner)
+        if (_isOwner)
         {
-            camTransform = cam;
+            _cam = cam;
             _canFire = true;
-            main = player;
-            EquipWeapon(testWeapon); // Test Weapon
+            _main = GetComponent<Player>();
+            _hud = h;
         }
 
     }
@@ -52,15 +52,15 @@ public class PlayerCombat : MonoBehaviour
     {
         if (currentWeapon.IsReady)
         {
-            currentWeapon.Fire(camTransform.position, camTransform.forward);
+            currentWeapon.Fire(_cam.position, _cam.forward);
         }
     }
 
     /// <summary>
     /// Creates the weapon given the WeaponData. Then it sets the action for primary firing.
     /// </summary>
-    /// <param name="weaponData"></param>
-    public void EquipWeapon(WeaponData weaponData)
+    /// <param name="weapon"></param>
+    public void EquipWeapon(RuntimeWeapon weapon)
     {
         // Clear Primary Fire Action
         OnPrimaryFire = null;
@@ -68,12 +68,12 @@ public class PlayerCombat : MonoBehaviour
         currentWeapon = null;   // Replace with Drop Logic Later
 
         // Create the new gun
-        currentWeapon = Instantiate(weaponData.weaponModel, weaponHolder);
+        currentWeapon = Instantiate(weapon.data.weaponTemplate, weaponHolder);
         // The weapon is empty, so fill the weapon with its stats.
-        currentWeapon.Init(weaponData, main);
+        currentWeapon.Init(weapon, _main);
 
         // If the weapon is hitscan, give it the normal gun firing behavior
-        if (weaponData.WeaponType == WeaponType.Hitscan)
+        if (currentWeapon.weaponType == WeaponType.Hitscan)
         {
             OnPrimaryFire = FireWeapon;
         }

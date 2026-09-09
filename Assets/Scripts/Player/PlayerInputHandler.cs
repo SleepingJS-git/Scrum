@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
@@ -8,6 +9,7 @@ using static UnityEngine.InputSystem.InputAction;
 public class PlayerInputHandler : MonoBehaviour
 {
     private PlayerMovement move;
+    private Player _main;
     private PlayerInput playerInput;
     public Vector3 MoveInput => new Vector3(_moveInput.x, 0f, _moveInput.y);
     public bool PrimaryInput => _primaryInput;
@@ -21,9 +23,15 @@ public class PlayerInputHandler : MonoBehaviour
     {
         playerInput = GetComponent<PlayerInput>();
         playerInput.enabled = enableInput;
-        move = GetComponent<PlayerMovement>();
-        _moveInput = Vector3.zero;
-        _mouseLookInput = Vector2.zero;
+        if (enableInput)
+        {
+            move = GetComponent<PlayerMovement>();
+            _moveInput = Vector3.zero;
+            _mouseLookInput = Vector2.zero;
+            _main = GetComponent<Player>();
+        }
+        
+
     }
 
     /// <summary>
@@ -101,5 +109,13 @@ public class PlayerInputHandler : MonoBehaviour
             _secondaryInput = true;
         else if (ctx.canceled)
             _secondaryInput = false;
+    }
+
+    public void OnInteract(CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            _main.interaction.OnInteract();
+        }
     }
 }

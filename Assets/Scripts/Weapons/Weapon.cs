@@ -2,12 +2,10 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-public class Weapon : NetworkBehaviour
+public class Weapon : MonoBehaviour
 {
     // Position in which the bullets come from (in view of player, not actual)
     public Transform firingPoint;
-    public Collider _collider;
-    public Rigidbody _rigidBody;
     [Header("Weapon Stats - Don't Touch")]
     public string weaponName;
     public string weaponID;
@@ -18,6 +16,7 @@ public class Weapon : NetworkBehaviour
     public int currentBullets;
     public int maxBullets;
     public int bulletsPerShot;
+    public int totalBullets;
     public float reloadSpeed;
     public float bulletSpread;
     public GameObject trailObj;
@@ -30,24 +29,28 @@ public class Weapon : NetworkBehaviour
     /// Initializes the weapon by giving the stats and effects it needs.
     /// </summary>
     /// <param name="data"></param>
-    public void Init(WeaponData data, Entity holder)
+    public void Init(RuntimeWeapon weapon, Entity holder)
     {
+        WeaponData data = weapon.data;
+
         // Create OnHitData
         _onHitData = new OnHitData()
         {
             damage = data.damage, attacker = holder
         };
 
-        if (used) return;
+        // Runtime values
+        currentBullets = weapon.currentBulletCount;
+        totalBullets = weapon.totalBulletCount;
 
-
+        // Weapon info
         weaponName = data.weaponName;
         weaponID = data.weaponID;
         firingType = data.firingType;
         weaponType = data.WeaponType;
         damage = data.damage;
         fireRate = data.fireRate;
-        currentBullets = data.bulletCount;
+
         maxBullets = data.bulletCount;
         bulletsPerShot = data.bulletsPerShot;
         reloadSpeed = data.reloadSpeed;

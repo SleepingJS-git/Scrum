@@ -12,11 +12,14 @@ public abstract class WeaponData : ScriptableObject
     [Range(0.01f, 1f)] public float fireRate;
     public int bulletCount;
     public int bulletsPerShot;
+    public int magCount;
     public float reloadSpeed;
     [Range(0f, 1f), Tooltip("0 means precise - 1 shit ain't landing bruh")] 
     public float bulletSpread;
+    [Header("FPS Weapon")]
+    public Weapon weaponTemplate;
     [Header("Weapon Objects")]
-    public Weapon weaponModel;
+    public GameObject weaponModel;
     public GameObject shootingEffect;
 }
 
