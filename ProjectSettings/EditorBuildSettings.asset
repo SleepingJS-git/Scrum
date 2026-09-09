@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LevelGrayboxing.unity
     guid: 7a69aafc724c7554dbc523c610bb5482
+  - enabled: 1
+    path: Assets/Scenes/TrapTesting.unity
+    guid: 5af9ae97850c36b47a140e1d0d7532a4
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
