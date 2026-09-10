@@ -69,7 +69,6 @@ public class WeaponDrop : NetworkBehaviour
     private void EquipServerRpc(int currentBullets, int reserveBullets, RpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
-
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out NetworkClient client))
         {
             EquipClientRpc(currentBullets, reserveBullets, clientId);

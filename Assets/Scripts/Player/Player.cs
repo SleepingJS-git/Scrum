@@ -17,6 +17,7 @@ public class Player : Entity
     // so the player can reference it themselves.
     [SerializeField] private PlayerHud playerHudPrefab;
     [SerializeField] private PlayerHud _hud;
+
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -43,7 +44,7 @@ public class Player : Entity
 
             _hud = Instantiate(playerHudPrefab);
 
-
+            SpawnServerRpc();
         }
 
         // Check if the computer running this script is the client.
@@ -104,5 +105,23 @@ public class Player : Entity
         drop.CreateWeapon(currentBullets, reserveBullets, rotation);
 
         drop.NetworkObject.Spawn();
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SpawnServerRpc(RpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        Vector3 pos = PlayerSpawner.GetSpawnPoint(clientId).transform.position;
+        pos.y+= 1f;
+        SpawnClientRpc(pos, clientId);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SpawnClientRpc(Vector3 pos, ulong clientId)
+    {
+        if (NetworkManager.Singleton.LocalClientId != clientId)
+            return;
+
+        transform.position = pos;
     }
 }
