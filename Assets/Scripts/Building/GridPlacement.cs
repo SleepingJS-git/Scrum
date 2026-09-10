@@ -29,7 +29,7 @@ public class GridPlacement : MonoBehaviour
 
     private Dictionary<Vector3Int, int> occupiedCells = new Dictionary<Vector3Int, int>();
 
-    private Vector2 offset = Vector2.zero;
+    private Vector3 offset = Vector3.zero;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -45,6 +45,8 @@ public class GridPlacement : MonoBehaviour
         previewRenderer = previewObject.GetComponent<Buildable>().ObjectRenderer;
         previewObject.layer = 2;
         previewRenderer.gameObject.layer = 2;
+        UpdateOffset();
+        Debug.Log(offset);
         Color previewColor = previewRenderer.material.color;
         previewRenderer.material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.1f);
     }
@@ -54,7 +56,7 @@ public class GridPlacement : MonoBehaviour
     {
         // Find the position of the mouse on the grid, show the preview there
         Vector3 mousePos = MouseToWorldSpace();
-        Vector3Int cellPos = grid.WorldToCell(mousePos);
+        Vector3Int cellPos = grid.WorldToCell(Quaternion.Euler(0, rotation, 0) * (mousePos - offset));
 
         // If the cell is occupied
         if (IsCellTaken(cellPos))
@@ -141,6 +143,6 @@ public class GridPlacement : MonoBehaviour
 
     void UpdateOffset()
     {
-
+        offset = buildable.PivotOffset;
     }
 }
