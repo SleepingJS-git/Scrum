@@ -8,7 +8,7 @@ public class Weapon : MonoBehaviour
     public Transform firingPoint;
     [Header("Weapon Stats - Don't Touch")]
     public string weaponName;
-    public string weaponID;
+    public ulong weaponID;
     public FiringType firingType;
     public WeaponType weaponType;
     public int damage;
@@ -16,7 +16,7 @@ public class Weapon : MonoBehaviour
     public int currentBullets;
     public int maxBullets;
     public int bulletsPerShot;
-    public int bulletsInMag;
+    public int reserveBullets;
     public float reloadSpeed;
     public float bulletSpread;
     public GameObject trailObj;
@@ -24,7 +24,7 @@ public class Weapon : MonoBehaviour
     protected float _lastShootTime;
     public bool IsReady { get { return _lastShootTime + fireRate < Time.time; } }
     public bool NeedsReload { get { return currentBullets == 0; }}
-    public bool HasNoAmmo { get { return currentBullets == 0 && bulletsInMag == 0;}}
+    public bool HasNoAmmo { get { return currentBullets == 0 && reserveBullets == 0;}}
     private OnHitData _onHitData;
     private RuntimeWeapon _runtimeWeapon;
     /// <summary>
@@ -43,7 +43,7 @@ public class Weapon : MonoBehaviour
 
         // Runtime values
         currentBullets = weapon.currentBulletCount;
-        bulletsInMag = weapon.bulletsInMag;
+        reserveBullets = weapon.reserveBullets;
 
         // Weapon info
         weaponName = data.weaponName;
@@ -70,7 +70,7 @@ public class Weapon : MonoBehaviour
     public RuntimeWeapon SaveRuntimeData()
     {
         _runtimeWeapon.currentBulletCount = currentBullets;
-        _runtimeWeapon.bulletsInMag = bulletsInMag;
+        _runtimeWeapon.reserveBullets = reserveBullets;
         return _runtimeWeapon;
     }
 

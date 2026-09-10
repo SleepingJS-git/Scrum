@@ -4,7 +4,7 @@ public abstract class WeaponData : ScriptableObject
 {
     [Header("Weapon Info")]
     public string weaponName;
-    public string weaponID;
+    public ulong weaponID;
     public FiringType firingType;
     public WeaponType WeaponType;
     [Header("Weapon Stats")]

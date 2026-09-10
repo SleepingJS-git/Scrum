@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
@@ -8,10 +9,9 @@ public class PlayerCombat : MonoBehaviour
 {
     public Weapon currentWeapon;
     public Transform weaponHolder;
-    private event Action OnPrimaryFire; 
-    private event Action OnSecondaryFire; 
+    private event Action OnPrimaryFire;
+    private event Action OnSecondaryFire;
     private bool _canFire;
-    private bool _isOwner;
     private Transform _cam;
     private Player _main;
     private PlayerHud _hud;
@@ -21,17 +21,12 @@ public class PlayerCombat : MonoBehaviour
     /// </summary>
     /// <param name="owner"></param>
     /// <param name="cam"></param>
-    public void Init(bool owner, Transform cam, PlayerHud h)
+    public void Init(Transform cam, PlayerHud h)
     {
-        _isOwner = owner;
-
-        if (_isOwner)
-        {
-            _cam = cam;
-            _canFire = true;
-            _main = GetComponent<Player>();
-            _hud = h;
-        }
+        _cam = cam;
+        _canFire = true;
+        _main = GetComponent<Player>();
+        _hud = h;
 
     }
 
@@ -66,7 +61,7 @@ public class PlayerCombat : MonoBehaviour
         if (currentWeapon.IsReady)
         {
             currentWeapon.Fire(_cam.position, _cam.forward);
-            _hud.ammo.text = $"{currentWeapon.currentBullets} / {currentWeapon.bulletsInMag}";
+            _hud.ammo.text = $"{currentWeapon.currentBullets} / {currentWeapon.reserveBullets}";
         }
     }
 
@@ -76,13 +71,15 @@ public class PlayerCombat : MonoBehaviour
     /// <param name="weapon"></param>
     public void EquipWeapon(RuntimeWeapon weapon)
     {
+        if (!_main.IsOwner) return;
         DropWeapon();
+        Debug.Log("Weapon: " + weapon);
 
         // Create the new gun
         currentWeapon = Instantiate(weapon.data.weaponTemplate, weaponHolder);
         // The weapon is empty, so fill the weapon with its stats.
         currentWeapon.Init(weapon, _main);
-        
+
         // If the weapon is hitscan, give it the normal gun firing behavior
         if (currentWeapon.weaponType == WeaponType.Hitscan)
         {
@@ -90,16 +87,24 @@ public class PlayerCombat : MonoBehaviour
         }
 
         // Set up Hud stuff
+        Debug.Log("_hud.weaponName" + _hud.weaponName);
+        Debug.Log("currentWeapon.weaponName" + currentWeapon.weaponName);
         _hud.weaponName.text = currentWeapon.weaponName;
-        _hud.ammo.text = $"{currentWeapon.currentBullets} / {currentWeapon.bulletsInMag}";
+        _hud.ammo.text = $"{currentWeapon.currentBullets} / {currentWeapon.reserveBullets}";
     }
 
     public void DropWeapon()
     {
         // If no weapon, then what are u dropping?
         if (!currentWeapon) return;
-        WeaponDrop drop = Instantiate(weaponDropTemplate, _cam.position, UnityEngine.Random.rotation);
-        drop.CreateWeapon(currentWeapon.SaveRuntimeData(), _cam);
+        
+        _main.DropServerRpc(
+            currentWeapon.weaponID,
+            currentWeapon.currentBullets,
+            currentWeapon.reserveBullets,
+            _cam.position,
+            _cam.rotation
+        );
 
         // Reset Hud Stuff
         _hud.weaponName.text = "";

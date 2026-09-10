@@ -16,7 +16,7 @@ public class Player : Entity
     // I know this is messy. This is a test. Eventually I want to have a singleton manager have a variable
     // so the player can reference it themselves.
     [SerializeField] private PlayerHud playerHudPrefab;
-    private PlayerHud _hud;
+    [SerializeField] private PlayerHud _hud;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -42,6 +42,8 @@ public class Player : Entity
             ToggleFirstPerson(true);
 
             _hud = Instantiate(playerHudPrefab);
+
+
         }
 
         // Check if the computer running this script is the client.
@@ -49,10 +51,8 @@ public class Player : Entity
         input.Init(IsOwner);
         move.Init();
         look.Init(IsOwner);
-        combat.Init(IsOwner, look.cam.transform, _hud);
-        interaction.Init(IsOwner, look.cam.transform, _hud);
-
-
+        combat.Init(look.cam.transform, _hud);
+        interaction.Init(look.cam.transform, _hud);
     }
 
     void Update()
@@ -83,5 +83,26 @@ public class Player : Entity
     {
         Cursor.visible = !toFPS;
         Cursor.lockState = toFPS ? CursorLockMode.Locked: CursorLockMode.Confined;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void DropServerRpc(
+        ulong weaponID,
+        int currentBullets,
+        int reserveBullets,
+        Vector3 position,
+        Quaternion rotation)
+    {
+        Debug.Log($"DropServerRpc - IsServer: {IsServer}");
+        WeaponDrop drop = Instantiate(
+            combat.weaponDropTemplate,
+            position,
+            rotation
+        );
+
+        drop.Init(weaponID, true);
+        drop.CreateWeapon(currentBullets, reserveBullets, rotation);
+
+        drop.NetworkObject.Spawn();
     }
 }

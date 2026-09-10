@@ -10,13 +10,17 @@ public abstract class Entity : NetworkBehaviour
 {
     [SerializeField] private int maxHealth;
     [SerializeField] private UnityEvent onDeathEffects;
-    private event Action OnDeath; 
+    private event Action OnDeath;
     private OnHitData lastHitData;
-    public NetworkVariable<int> health = new();
+    public NetworkVariable<int> health = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     public NetworkVariable<bool> isAlive = new(
         true,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
+        NetworkVariableWritePermission.Server
     );
 
     /// <summary>
@@ -40,7 +44,7 @@ public abstract class Entity : NetworkBehaviour
 
         OnHitServerRpc(onHitData.damage);
     }
-    
+
     /// <summary>
     /// Subscribe events for OnDeath
     /// </summary>
@@ -53,13 +57,15 @@ public abstract class Entity : NetworkBehaviour
     /// Registers the hit onto the server.
     /// </summary>
     /// <param name="damage"></param>
-    [ServerRpc]
+    [Rpc(SendTo.Server)]
     private void OnHitServerRpc(int damage)
     {
         health.Value -= damage;
 
         if (health.Value <= 0)
         {
+            isAlive.Value = false;
+            
             OnDeath?.Invoke();
 
             OnDeathEffectsClientRpc();
