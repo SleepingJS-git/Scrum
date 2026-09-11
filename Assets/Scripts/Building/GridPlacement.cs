@@ -39,24 +39,35 @@ public class GridPlacement : MonoBehaviour
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
 
-        objectToPlace = buildable.gameObject;
-        // Create the preview object and make it transparent
-        previewObject = Instantiate(objectToPlace);
-        previewRenderer = previewObject.GetComponent<Buildable>().ObjectRenderer;
-        previewObject.layer = 2;
-        previewRenderer.gameObject.layer = 2;
-        UpdateOffset();
-        Debug.Log(offset);
-        Color previewColor = previewRenderer.material.color;
-        previewRenderer.material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.1f);
+        UpdateBuildable();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (rotateRightAction.WasPressedThisFrame())
+        {
+            rotation += 90;
+            if (rotation >= 360)
+            {
+                rotation = 0;
+            }
+
+
+        }
+        if (rotateLeftAction.WasPressedThisFrame())
+        {
+            if (rotation <= 0)
+            {
+                rotation = 360;
+            }
+            rotation -= 90;
+        }
+        previewObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+
         // Find the position of the mouse on the grid, show the preview there
         Vector3 mousePos = MouseToWorldSpace();
-        Vector3Int cellPos = grid.WorldToCell(Quaternion.Euler(0, rotation, 0) * (mousePos - offset));
+        Vector3Int cellPos = grid.WorldToCell(mousePos);
 
         // If the cell is occupied
         if (IsCellTaken(cellPos))
@@ -73,25 +84,9 @@ public class GridPlacement : MonoBehaviour
         }
 
         // Set the preview object's position to the center of the grid cell
-        previewObject.transform.position = grid.GetCellCenterWorld(cellPos);
+        previewObject.transform.position = grid.CellToWorld(cellPos);
+        previewObject.transform.position += Quaternion.Euler(0, rotation, 0) * offset;
 
-        if (rotateRightAction.WasPressedThisFrame())
-        {
-            rotation += 90;
-            if (rotation >= 360)
-            {
-                rotation = 0;
-            }
-        }
-        if (rotateLeftAction.WasPressedThisFrame())
-        {
-            if (rotation <= 0)
-            {
-                rotation = 360;
-            }
-            rotation -= 90;
-        }
-        previewObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
         // If left-clicked, create the object at the location of the preview
         if (placeAction.WasPressedThisFrame())
         {
@@ -144,5 +139,19 @@ public class GridPlacement : MonoBehaviour
     void UpdateOffset()
     {
         offset = buildable.PivotOffset;
+    }
+
+    private void UpdateBuildable()
+    {
+        objectToPlace = buildable.gameObject;
+        // Create the preview object and make it transparent
+        previewObject = Instantiate(objectToPlace);
+        previewRenderer = previewObject.GetComponent<Buildable>().ObjectRenderer;
+        previewObject.layer = 2;
+        previewRenderer.gameObject.layer = 2;
+        UpdateOffset();
+        Debug.Log(offset);
+        Color previewColor = previewRenderer.material.color;
+        previewRenderer.material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.1f);
     }
 }
