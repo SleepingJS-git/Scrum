@@ -4,6 +4,8 @@ using UnityEngine;
 public class WeaponDatabase : MonoBehaviour
 {
     public static WeaponDatabase Instance;
+    public static WeaponDrop TemplateDrop => Instance.weaponDropTemplate;   // Template WeaponDrop
+    [SerializeField] private WeaponDrop weaponDropTemplate;
     [SerializeField] private WeaponData[] weaponDatas;
     private Dictionary<ulong, WeaponData> data;
     void Awake()

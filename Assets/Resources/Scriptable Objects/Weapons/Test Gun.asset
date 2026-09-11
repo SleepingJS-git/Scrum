@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Test Gun
   m_EditorClassIdentifier: 
   weaponName: Test Gun
-  weaponID: Pistol_000
+  weaponID: 0
   firingType: 0
   WeaponType: 0
   damage: 15
@@ -23,8 +23,8 @@ MonoBehaviour:
   magCount: 2
   reloadSpeed: 1.5
   bulletSpread: 0.01
-  weaponTemplate: {fileID: 1531586593044186660, guid: 3c50185d73fd84d46854c3e8fd4da8ef, type: 3}
+  weaponInHand: {fileID: 393730789072996145, guid: 3c50185d73fd84d46854c3e8fd4da8ef, type: 3}
   weaponModel: {fileID: 6304313504817503738, guid: 037ab4970451b3f4ba3e1f5acea50924, type: 3}
   shootingEffect: {fileID: 0}
   trailObj: {fileID: 0}
-  residue: {fileID: 2466890847199373625, guid: 2cfcfcd2ebc663f49a9ed727850f1eff, type: 3}
+  bulletImpact: {fileID: 2466890847199373625, guid: 2cfcfcd2ebc663f49a9ed727850f1eff, type: 3}

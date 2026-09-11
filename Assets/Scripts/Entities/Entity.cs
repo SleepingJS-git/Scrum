@@ -35,6 +35,7 @@ public abstract class Entity : NetworkBehaviour
     }
 
     /// <summary>
+    /// [Called by Server] (This method is still being ran on the server)
     /// When the entity is hit, subtract health, then check if it is dead.
     /// </summary>
     /// <param name="damage"></param>
@@ -42,25 +43,7 @@ public abstract class Entity : NetworkBehaviour
     {
         lastHitData = onHitData;
 
-        OnHitServerRpc(onHitData.damage);
-    }
-
-    /// <summary>
-    /// Subscribe events for OnDeath
-    /// </summary>
-    public virtual void AddDeathEvent(Action action)
-    {
-        OnDeath += action;
-    }
-
-    /// <summary>
-    /// Registers the hit onto the server.
-    /// </summary>
-    /// <param name="damage"></param>
-    [Rpc(SendTo.Server)]
-    private void OnHitServerRpc(int damage)
-    {
-        health.Value -= damage;
+        health.Value -= onHitData.damage;
 
         if (health.Value <= 0)
         {
@@ -70,6 +53,16 @@ public abstract class Entity : NetworkBehaviour
 
             OnDeathEffectsClientRpc();
         }
+
+        Debug.Log($"{gameObject.name} was damaged by {onHitData.attacker.name} ({onHitData.damage} - {onHitData.damageType})");
+    }
+
+    /// <summary>
+    /// Subscribe events for OnDeath
+    /// </summary>
+    public virtual void AddDeathEvent(Action action)
+    {
+        OnDeath += action;
     }
 
     /// <summary>

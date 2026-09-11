@@ -160,6 +160,37 @@ Transform:
   - {fileID: 4323726472208915963}
   m_Father: {fileID: 6362116157266495296}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3661420569657013841
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3210444574872397049}
+  m_Layer: 9
+  m_Name: 3D Model Hand
+  m_TagString: Untagged
+  m_Icon: {fileID: -5397416234189338067, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3210444574872397049
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3661420569657013841}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.2223, y: 0.30200005, z: 0.251}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2186028548986188083}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4361272758924133125
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,6 +306,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3210444574872397049}
   - {fileID: 3464227619121619250}
   m_Father: {fileID: 6362116157266495296}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -443,7 +475,7 @@ Transform:
   m_GameObject: {fileID: 6605199360369126838}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.2223, y: -0.198, z: 0.251}
+  m_LocalPosition: {x: 0.2223, y: -0.19799995, z: 0.251}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -468,6 +500,7 @@ GameObject:
   - component: {fileID: 5570463379167910784}
   - component: {fileID: 5042190757247243880}
   - component: {fileID: 5329963382740541591}
+  - component: {fileID: 6808710359717867974}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -838,9 +871,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ae17601a287e7d499b76e3a3f82f6a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWeapon: {fileID: 0}
+  weaponHandler: {fileID: 6808710359717867974}
+  weaponInHand: {fileID: 0}
+  weaponHolder3D: {fileID: 3210444574872397049}
   weaponHolder: {fileID: 6241798226129361827}
-  weaponDropTemplate: {fileID: 5600722298518792889, guid: 41ddd7b311ad69c45a84f250e8f311af, type: 3}
 --- !u!114 &5329963382740541591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -856,3 +890,37 @@ MonoBehaviour:
   reach: 3
   _selected: {fileID: 0}
   _hud: {fileID: 0}
+--- !u!114 &6808710359717867974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7342539564703258927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd5934bf1b655ce49992f4efcef6e9fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  currentBullets:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  reserveBullets:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  fireRate:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  weaponID:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  firingPoint: {fileID: 0}
