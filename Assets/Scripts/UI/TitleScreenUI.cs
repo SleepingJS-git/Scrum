@@ -6,7 +6,8 @@ public enum MenuScreen
     Main,
     HostLobby,
     JoinLobby,
-    LobbyRoom
+    LobbyRoom,
+    LoadingLobby
 }
 
 public class TitleScreen : MonoBehaviour
@@ -15,6 +16,7 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] private GameObject hostLobbyScreen;
     [SerializeField] private GameObject joinLobbyScreen;
     [SerializeField] private GameObject lobbyRoomScreen;
+    [SerializeField] private GameObject loadingLobbyScreen;
 
     public void ShowScreen(MenuScreen screen)
     {
@@ -22,6 +24,7 @@ public class TitleScreen : MonoBehaviour
         hostLobbyScreen.SetActive(screen == MenuScreen.HostLobby);
         joinLobbyScreen.SetActive(screen == MenuScreen.JoinLobby);
         lobbyRoomScreen.SetActive(screen == MenuScreen.LobbyRoom);
+        loadingLobbyScreen.SetActive(screen == MenuScreen.LoadingLobby);
     }
 
     public void ShowMain()
@@ -42,6 +45,11 @@ public class TitleScreen : MonoBehaviour
     public void ShowLobbyRoom()
     {
         ShowScreen(MenuScreen.LobbyRoom);
+    }
+
+    public void ShowLoadingLobby()
+    {
+        ShowScreen(MenuScreen.LoadingLobby);
     }
 
     //Basic test for changing scenes with start game button
