@@ -26,7 +26,7 @@ public class Buildable : MonoBehaviour
         {
             SetDimensions();
             Debug.Log(dimensions);
-            return new Vector3(dimensions[0] / 2f, 0.5f, dimensions[2] / 2f);
+            return new Vector3(dimensions[0] / 2f, dimensions[1] / 2f, dimensions[2] / 2f);
         }
     }
     public int TotalGridSpaces

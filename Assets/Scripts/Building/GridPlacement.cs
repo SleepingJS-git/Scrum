@@ -53,7 +53,6 @@ public class GridPlacement : MonoBehaviour
                 rotation = 0;
             }
 
-
         }
         if (rotateLeftAction.WasPressedThisFrame())
         {
@@ -85,13 +84,14 @@ public class GridPlacement : MonoBehaviour
 
         // Set the preview object's position to the center of the grid cell
         previewObject.transform.position = grid.CellToWorld(cellPos);
-        previewObject.transform.position += Quaternion.Euler(0, rotation, 0) * offset;
+
+        previewObject.transform.position += (Quaternion.Euler(0, rotation, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
 
         // If left-clicked, create the object at the location of the preview
         if (placeAction.WasPressedThisFrame())
         {
             Instantiate(objectToPlace, previewObject.transform.position, Quaternion.Euler(0, rotation, 0));
-            OccupyCell(cellPos, 0);
+            SetCellsToOccupied(buildable, cellPos, 0);
         }
     }
 
@@ -123,6 +123,8 @@ public class GridPlacement : MonoBehaviour
         return occupiedCells.ContainsKey(position);
     }
 
+
+
     /// <summary>
     /// Sets a cell to occupied
     /// </summary>
@@ -133,6 +135,14 @@ public class GridPlacement : MonoBehaviour
         if (!IsCellTaken(position))
         {
             occupiedCells.Add(position, objectID);
+        }
+    }
+
+    void SetCellsToOccupied(Buildable buildable, Vector3Int originPos, int objectID)
+    {
+        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+        {
+            OccupyCell(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]), 0);
         }
     }
 
