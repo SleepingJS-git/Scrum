@@ -54,7 +54,7 @@ public class TitleScreen : MonoBehaviour
     }
 
     //Start game from lobby
-    [SerializeField] string sceneName = "MainMenuToGameTest";
+    [SerializeField] string sceneName = "SceneConnectionTest";
     public void StartGame()
     {
         if (NetworkManager.Singleton == null)

@@ -893,7 +893,7 @@ MonoBehaviour:
   joinLobbyScreen: {fileID: 4091402550240428817}
   lobbyRoomScreen: {fileID: 3908027026332443637}
   loadingLobbyScreen: {fileID: 4832379774419121350}
-  sceneName: MainMenuToGameTest
+  sceneName: SceneConnectionTest
 --- !u!1 &2060734993203220483
 GameObject:
   m_ObjectHideFlags: 0
