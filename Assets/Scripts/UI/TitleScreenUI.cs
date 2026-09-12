@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
 
 public enum MenuScreen
 {
@@ -52,11 +53,27 @@ public class TitleScreen : MonoBehaviour
         ShowScreen(MenuScreen.LoadingLobby);
     }
 
-    //Basic test for changing scenes with start game button
-    [SerializeField] string sceneName = "LevelGrayboxing";
+    //Start game from lobby
+    [SerializeField] string sceneName = "MainMenuToGameTest";
     public void StartGame()
     {
-        SceneManager.LoadScene(sceneName);
+        if (NetworkManager.Singleton == null)
+        {
+            Debug.LogError("No NetworkManager found!");
+            return;
+        }
+
+        // Only the server/host should initiate the scene change
+        if (!NetworkManager.Singleton.IsServer)
+        {
+            Debug.LogWarning("Only the host can start the game.");
+            return;
+        }
+
+        NetworkManager.Singleton.SceneManager.LoadScene(
+            sceneName,
+            LoadSceneMode.Single
+        );
     }
 
     private void Start()
