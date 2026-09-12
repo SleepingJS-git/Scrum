@@ -7,14 +7,11 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private Interactable _selected;
     [SerializeField] private PlayerHud _hud;
     private Player _main;
-    public void Init(bool isOwner, Transform cam, PlayerHud h)
+    public void Init(Transform cam, PlayerHud h)
     {
-        if (isOwner)
-        {
-            _cam = cam;
-            _hud = h;
-            _main = GetComponent<Player>();
-        }
+        _cam = cam;
+        _hud = h;
+        _main = GetComponent<Player>();
     }
     public void OnInteract()
     {
