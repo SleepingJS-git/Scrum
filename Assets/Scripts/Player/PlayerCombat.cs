@@ -1,5 +1,6 @@
 using System;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -7,30 +8,33 @@ using UnityEngine;
 /// </summary>
 public class PlayerCombat : MonoBehaviour
 {
-    public Weapon currentWeapon;
-    public Transform weaponHolder;
-    private event Action OnPrimaryFire;
+    public Weapon weaponHandler;        // The script that handles the weapon behavior and networking
+    public GameObject weaponInHand;     // The game object in the player's fps hand or 3d hand
+    public Transform weaponHolder3D;    // The transform used to spawn the 3d model for the other player's pov
+    public Transform weaponHolder;      // The transform used to spawn the 3d model in the player's fps pov
+    private event Action OnPrimaryFire; // An action event that is used when the player is holding the shoot input
     private event Action OnSecondaryFire;
-    private bool _canFire;
-    private Transform _cam;
-    private Player _main;
-    private PlayerHud _hud;
-    public WeaponDrop weaponDropTemplate; // This will be moved to a singleton manager.
+    private bool _canFire;              // Can the player fire their gun?
+    private Player _main;               // Reference to main just cuz
+    private PlayerHud _hud;             // Reference to the player hud because of ammo and weapon text
+    private WeaponType _weaponType;     // Determines the weapon type when the player fires the gun
+    private Transform _cam;             // Camera reference for aiming
     /// <summary>
+    /// [Called by Client]
     /// Initialize Player Combat. If the client is the owner, then save camera transform for shooting and enable firing
     /// </summary>
-    /// <param name="owner"></param>
-    /// <param name="cam"></param>
-    public void Init(Transform cam, PlayerHud h)
+    /// <param name="isOwner"></param>
+    /// <param name="h"></param>
+    public void Init(bool isOwner, PlayerHud h)
     {
-        _cam = cam;
-        _canFire = true;
+        _canFire = isOwner;
         _main = GetComponent<Player>();
         _hud = h;
-
+        _cam = _main.PlayerCam;
     }
 
     /// <summary>
+    /// [Called by Client]
     /// This handles the left click or right trigger input.
     /// </summary>
     /// <param name="isFiring"></param>
@@ -41,81 +45,110 @@ public class PlayerCombat : MonoBehaviour
             OnPrimaryFire?.Invoke();
         }
     }
-    /// <summary>
-    /// When the weapon is ready to fire (via. fire rate), fire the weapon
-    /// </summary>
-    public void FireWeapon()
-    {
-        if (currentWeapon.HasNoAmmo)
-        {
-            // Logic for no bullets in general
-            return;
-        }
-
-        if (currentWeapon.NeedsReload)
-        {
-            DropWeapon();
-            return;
-        }
-
-        if (currentWeapon.IsReady)
-        {
-            currentWeapon.Fire(_cam.position, _cam.forward);
-            _hud.ammo.text = $"{currentWeapon.currentBullets} / {currentWeapon.reserveBullets}";
-        }
-    }
 
     /// <summary>
-    /// Creates the weapon given the WeaponData. Then it sets the action for primary firing.
+    /// [Called by Client] 
+    /// Drop the weapon the player is currently holding.
     /// </summary>
-    /// <param name="weapon"></param>
-    public void EquipWeapon(RuntimeWeapon weapon)
-    {
-        if (!_main.IsOwner) return;
-        DropWeapon();
-        Debug.Log("Weapon: " + weapon);
-
-        // Create the new gun
-        currentWeapon = Instantiate(weapon.data.weaponTemplate, weaponHolder);
-        // The weapon is empty, so fill the weapon with its stats.
-        currentWeapon.Init(weapon, _main);
-
-        // If the weapon is hitscan, give it the normal gun firing behavior
-        if (currentWeapon.weaponType == WeaponType.Hitscan)
-        {
-            OnPrimaryFire = FireWeapon;
-        }
-
-        // Set up Hud stuff
-        Debug.Log("_hud.weaponName" + _hud.weaponName);
-        Debug.Log("currentWeapon.weaponName" + currentWeapon.weaponName);
-        _hud.weaponName.text = currentWeapon.weaponName;
-        _hud.ammo.text = $"{currentWeapon.currentBullets} / {currentWeapon.reserveBullets}";
-    }
-
     public void DropWeapon()
     {
         // If no weapon, then what are u dropping?
-        if (!currentWeapon) return;
+        if (!weaponInHand) return;
         
-        _main.DropServerRpc(
-            currentWeapon.weaponID,
-            currentWeapon.currentBullets,
-            currentWeapon.reserveBullets,
-            _cam.position,
-            _cam.rotation
-        );
+        // The weapon handler has a server request method.
+        // Must request the server to create an empty WeaponDrop
+        weaponHandler.DropServerRpc();
 
         // Reset Hud Stuff
-        _hud.weaponName.text = "";
-        _hud.ammo.text = "";
+        UpdateWeaponInfo();
 
         // Clear Primary Fire Action
         OnPrimaryFire = null;
         OnSecondaryFire = null;
 
-        Destroy(currentWeapon.gameObject);
+        Destroy(weaponInHand);
     }
 
+    /// <summary>
+    /// [Called by ClientRpc]
+    /// The owner's client will equip a weapon overlay for their screen only
+    /// </summary>
+    /// <param name="weapon"></param>
+    public void EquipWeapon(WeaponData data, int c, int r)
+    {
+        if (!_main.IsOwner) return;
+        DropWeapon();
 
+        // Create the new gun
+        weaponInHand = Instantiate(data.weaponInHand, weaponHolder);
+
+        // Give the weapon handler the firing point
+        // This client's firing point is on the weapon overlay
+        // Other client's firing point is on the 3d body
+        weaponHandler.firingPoint = weaponInHand.transform.Find("Firing Point");
+        
+        _weaponType = data.WeaponType;
+
+        // If the weapon is hitscan, give it the normal gun firing behavior
+        if (_weaponType == WeaponType.Hitscan)
+        {
+            OnPrimaryFire = FireWeapon;
+        }
+
+        // Set up Hud stuff
+        UpdateWeaponInfo(data.weaponName, $"{c} / {r}");
+    }
+
+    /// <summary>
+    /// [Called by ClientRpc]
+    /// Other clients will call their version of this player to equip a weapon on the
+    /// 3D model body
+    /// </summary>
+    /// <param name="weapon"></param>
+    public void EquipWeapon3D(WeaponData data)
+    {
+        Debug.Log("Equip3D was called");
+        weaponInHand = Instantiate(data.weaponModel, weaponHolder3D);
+        weaponHandler.firingPoint = weaponInHand.transform.Find("Firing Point");
+    }
+
+    /// <summary>
+    /// Client-side weapon detection.
+    /// </summary>
+    private void FireWeapon()
+    {
+        if (weaponHandler.HasNoAmmo)
+        {
+            DropWeapon();
+
+            // Logic for no bullets in general
+            return;
+        }
+        if (weaponHandler.NeedsReload)
+        {
+            DropWeapon();
+            return;
+        }
+
+        if (weaponHandler.IsReady)
+        {
+            // Have the weapon handler handle the weapon behavior
+            weaponHandler.Shoot(
+                _weaponType,
+                _cam.position,
+                _cam.forward
+            );
+        }
+    }
+
+    /// <summary>
+    /// Update the hud text for the weapon name and ammo
+    /// </summary>
+    /// <param name="nameInfo"></param>
+    /// <param name="ammoInfo"></param>
+    public void UpdateWeaponInfo(string nameInfo = "", string ammoInfo = "")
+    {
+        _hud.weaponName.text = nameInfo;
+        _hud.ammo.text = ammoInfo;
+    }
 }

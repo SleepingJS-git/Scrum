@@ -17,7 +17,7 @@ public class Player : Entity
     // so the player can reference it themselves.
     [SerializeField] private PlayerHud playerHudPrefab;
     [SerializeField] private PlayerHud _hud;
-
+    public Transform PlayerCam => look.cam.transform;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -44,6 +44,7 @@ public class Player : Entity
 
             _hud = Instantiate(playerHudPrefab);
 
+            // Request the server to spawn player at specific spawn point
             SpawnServerRpc();
         }
 
@@ -52,7 +53,7 @@ public class Player : Entity
         input.Init(IsOwner);
         move.Init();
         look.Init(IsOwner);
-        combat.Init(look.cam.transform, _hud);
+        combat.Init(IsOwner, _hud);
         interaction.Init(look.cam.transform, _hud);
     }
 
@@ -86,40 +87,31 @@ public class Player : Entity
         Cursor.lockState = toFPS ? CursorLockMode.Locked: CursorLockMode.Confined;
     }
 
-    [Rpc(SendTo.Server)]
-    public void DropServerRpc(
-        ulong weaponID,
-        int currentBullets,
-        int reserveBullets,
-        Vector3 position,
-        Quaternion rotation)
-    {
-        Debug.Log($"DropServerRpc - IsServer: {IsServer}");
-        WeaponDrop drop = Instantiate(
-            combat.weaponDropTemplate,
-            position,
-            rotation
-        );
 
-        drop.Init(weaponID, true);
-        drop.CreateWeapon(currentBullets, reserveBullets, rotation);
-
-        drop.NetworkObject.Spawn();
-    }
-
+    /// <summary>
+    /// Server uses the sender client's id to figure out which
+    /// spawn point is to be used.
+    /// </summary>
+    /// <param name="rpcParams"></param>
     [Rpc(SendTo.Server)]
     public void SpawnServerRpc(RpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
         Vector3 pos = PlayerSpawner.GetSpawnPoint(clientId).transform.position;
-        pos.y+= 1f;
-        SpawnClientRpc(pos, clientId);
+        pos.y+= 1f;     // up 1 unit so they dont clip through the floor
+        
+        // Send request back to client to make changes
+        SpawnClientRpc(pos);
     }
 
+    /// <summary>
+    /// The client is told to move a position by the server.
+    /// </summary>
+    /// <param name="pos"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    private void SpawnClientRpc(Vector3 pos, ulong clientId)
+    private void SpawnClientRpc(Vector3 pos)
     {
-        if (NetworkManager.Singleton.LocalClientId != clientId)
+        if (!IsOwner)
             return;
 
         transform.position = pos;
