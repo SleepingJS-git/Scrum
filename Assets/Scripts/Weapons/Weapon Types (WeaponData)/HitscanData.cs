@@ -4,5 +4,5 @@ using UnityEngine;
 public class HitscanData : WeaponData
 {
     public GameObject trailObj;     // This is a placeholder
-    public GameObject residue;      // Object that gets left over when it lands
+    public GameObject bulletImpact;      // Object that gets left over when it lands
 }

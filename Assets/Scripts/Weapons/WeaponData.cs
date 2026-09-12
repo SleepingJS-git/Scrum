@@ -4,7 +4,7 @@ public abstract class WeaponData : ScriptableObject
 {
     [Header("Weapon Info")]
     public string weaponName;
-    public string weaponID;
+    public ulong weaponID;
     public FiringType firingType;
     public WeaponType WeaponType;
     [Header("Weapon Stats")]
@@ -17,7 +17,7 @@ public abstract class WeaponData : ScriptableObject
     [Range(0f, 1f), Tooltip("0 means precise - 1 shit ain't landing bruh")] 
     public float bulletSpread;
     [Header("FPS Weapon")]
-    public Weapon weaponTemplate;
+    public GameObject weaponInHand;
     [Header("Weapon Objects")]
     public GameObject weaponModel;
     public GameObject shootingEffect;
