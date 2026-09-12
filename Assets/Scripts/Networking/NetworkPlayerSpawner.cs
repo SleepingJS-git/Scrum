@@ -8,6 +8,8 @@ public class NetworkPlayerSpawner : NetworkBehaviour
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform[] spawnPoints;
 
+
+    //Make sure the host is the only one giving player spawns
     public override void OnNetworkSpawn()
     {
         if (!IsServer)
@@ -16,6 +18,7 @@ public class NetworkPlayerSpawner : NetworkBehaviour
         NetworkManager.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
     }
 
+    //spawn players once NGO has loaded
     private void OnLoadEventCompleted(
         string sceneName,
         LoadSceneMode loadSceneMode,
@@ -29,10 +32,11 @@ public class NetworkPlayerSpawner : NetworkBehaviour
 
         foreach (ulong clientId in clientsCompleted)
         {
-            // Prevent accidentally giving somebody two PlayerObjects
+            //Prevent accidentally giving somebody two PlayerObjects
             if (NetworkManager.ConnectedClients[clientId].PlayerObject != null)
                 continue;
 
+            //players will spawn on top of each other if there aren't enough spawn points
             Transform spawnPoint = spawnPoints[
                 spawnIndex % spawnPoints.Length
             ];

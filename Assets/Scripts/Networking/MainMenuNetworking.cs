@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Services.Core;
 using Unity.Services.Authentication;
 using Unity.Services.Multiplayer;
+using System;
 
 public class MainMenuNetworking : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class MainMenuNetworking : MonoBehaviour
     [SerializeField] private Color otherPlayerColor = Color.white;
     [SerializeField] private TitleScreen titleScreenController;
     [SerializeField] private TMP_Text lobbyHeader;
+    [SerializeField] private TMP_Text connectionErrorText;
 
 
     //the session that this player is either hosting or joined to
@@ -32,6 +34,8 @@ public class MainMenuNetworking : MonoBehaviour
     //creates a lobby w/ code upon clicking host lobby button
     public async void HostLobby()
     {
+        connectionErrorText.text = "";
+
         var options = new SessionOptions
         {
             MaxPlayers = 4
@@ -39,8 +43,27 @@ public class MainMenuNetworking : MonoBehaviour
         .WithRelayNetwork()
         .WithPlayerName(VisibilityPropertyOptions.Member);
 
-        currentSession =
-            await MultiplayerService.Instance.CreateSessionAsync(options);
+        try
+        {
+            currentSession =
+                await MultiplayerService.Instance.CreateSessionAsync(options);
+        }
+        catch (SessionException e)
+        {
+            Debug.LogError($"failed to create lobby: {e.Error}");
+            connectionErrorText.text = "Failed to create lobby. Please try again.";
+
+            titleScreenController.ShowHostLobby();
+            return;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"failed to create lobby: {e}");
+            connectionErrorText.text = "Something went wrong. Please try again.";
+
+            titleScreenController.ShowHostLobby();
+            return;
+        }
 
         hostCodeText.text = currentSession.Code;
 
@@ -55,13 +78,53 @@ public class MainMenuNetworking : MonoBehaviour
     //joins a lobby if code is correct
     public async void JoinLobby()
     {
+        connectionErrorText.text = "";
+
         string code = joinCodeInput.text.Trim().ToUpper();
+
+        //Nothing entered
+        if (string.IsNullOrEmpty(code))
+        {
+            connectionErrorText.text = "Please enter a lobby code.";
+            titleScreenController.ShowJoinLobby();
+            return;
+        }
 
         var joinOptions = new JoinSessionOptions()
             .WithPlayerName(VisibilityPropertyOptions.Member);
 
-        currentSession =
-            await MultiplayerService.Instance.JoinSessionByCodeAsync(code, joinOptions);
+        try
+        {
+            currentSession =
+                await MultiplayerService.Instance.JoinSessionByCodeAsync(
+                    code,
+                    joinOptions
+                );
+        }
+        //Incorrect lobby code entered
+        catch (SessionException e)
+        {
+            Debug.LogError($"failed to join lobby: {e.Error}");
+
+
+            connectionErrorText.text =
+                "Couldn't join lobby. Check the code and try again.";
+
+            titleScreenController.ShowJoinLobby();
+
+            return;
+        }
+        //Unexpected error
+        catch (Exception e)
+        {
+            Debug.LogError($"failed to join lobby lobby: {e}");
+            connectionErrorText.text =
+                "Something went wrong. Please try again.";
+
+            titleScreenController.ShowJoinLobby();
+
+            return;
+        }
 
         Debug.Log("joined lobby");
 
