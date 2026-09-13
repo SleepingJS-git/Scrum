@@ -31,6 +31,8 @@ public class GridPlacement : MonoBehaviour
 
     private Vector3 offset = Vector3.zero;
 
+    private Color defaultColor;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -82,6 +84,15 @@ public class GridPlacement : MonoBehaviour
             }
         }
 
+        if (IsAnyCellTaken(cellPos, buildable))
+        {
+            previewRenderer.material.color = new Color(2f, defaultColor.g, defaultColor.b, 0.1f);
+        }
+        else
+        {
+            previewRenderer.material.color = defaultColor;
+        }
+
         // Set the preview object's position to the center of the grid cell
         previewObject.transform.position = grid.CellToWorld(cellPos);
 
@@ -90,8 +101,11 @@ public class GridPlacement : MonoBehaviour
         // If left-clicked, create the object at the location of the preview
         if (placeAction.WasPressedThisFrame())
         {
-            Instantiate(objectToPlace, previewObject.transform.position, Quaternion.Euler(0, rotation, 0));
-            SetCellsToOccupied(buildable, cellPos, 0);
+            if (!IsAnyCellTaken(cellPos, buildable))
+            {
+                Instantiate(objectToPlace, previewObject.transform.position, Quaternion.Euler(0, rotation, 0));
+                SetCellsToOccupied(buildable, cellPos, 0);
+            }
         }
     }
 
@@ -123,7 +137,17 @@ public class GridPlacement : MonoBehaviour
         return occupiedCells.ContainsKey(position);
     }
 
-
+    bool IsAnyCellTaken(Vector3Int originPosition, Buildable buildable)
+    {
+        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+        {
+            if (IsCellTaken(originPosition + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i])))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /// <summary>
     /// Sets a cell to occupied
@@ -161,7 +185,8 @@ public class GridPlacement : MonoBehaviour
         previewRenderer.gameObject.layer = 2;
         UpdateOffset();
         Debug.Log(offset);
-        Color previewColor = previewRenderer.material.color;
-        previewRenderer.material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.1f);
+        defaultColor = previewRenderer.material.color;
+        previewRenderer.material.color = new Color(defaultColor.r, defaultColor.g, defaultColor.b, 0.1f);
+        defaultColor = previewRenderer.material.color;
     }
 }
