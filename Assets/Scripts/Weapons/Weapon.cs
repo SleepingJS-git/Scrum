@@ -156,6 +156,7 @@ public class Weapon : NetworkBehaviour
 
         EffectsClientRpc(
             hit.point,
+            dir,
             currentBullets.Value,
             reserveBullets.Value,
             rpcParams.Receive.SenderClientId
@@ -170,13 +171,14 @@ public class Weapon : NetworkBehaviour
     /// <param name="reserveBullets"></param>
     /// <param name="clientId"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    public void EffectsClientRpc(Vector3 hitPoint, int currentBullets, int reserveBullets, ulong clientId)
+    public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId)
     {
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
 
         // Create the bullet trail
         BulletTrail(
             data as HitscanData,
+            dir,
             firingPoint.position,
             hitPoint
         );
@@ -203,9 +205,9 @@ public class Weapon : NetworkBehaviour
     /// </summary>
     /// <param name="startPos"></param>
     /// <param name="endPos"></param>
-    public void BulletTrail(HitscanData data, Vector3 startPos, Vector3 endPos)
+    public void BulletTrail(HitscanData data, Vector3 dir, Vector3 startPos, Vector3 endPos)
     {
-        Instantiate(data.bulletImpact, endPos, Quaternion.identity);
+        Instantiate(data.bulletImpact, endPos, Quaternion.LookRotation(dir));
     }
 
 
