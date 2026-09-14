@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -127,15 +128,16 @@ public class Weapon : NetworkBehaviour
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
         Vector3 dir = SpreadRandomizer(aimDir, data.bulletSpread);
         Vector3 adjustedHeadPos = headPos + (dir * 0.75f);
+        Vector3 hitPoint = adjustedHeadPos + (dir * 25f);
         // Send a raycast from the head to the new dirction within 100 units on only specific layers, and ignoring triggers
         if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, 100f, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {
+            hitPoint = hit.point;
             // If the raycast hit a player, damage the entity. For right now it just
             // damages the entity.
             if (hit.collider.CompareTag("Player"))
             {
                 Entity e = hit.collider.GetComponent<Entity>();
-
                 // Check if the entity is alive
                 if (e && e.isAlive.Value)
                 {
@@ -150,13 +152,14 @@ public class Weapon : NetworkBehaviour
                 }
             }
         }
+        
 
         currentBullets.Value--;
         lastShootTime = Time.time;
 
         EffectsClientRpc(
-            hit.point,
-            dir,
+            hitPoint,
+            aimDir,
             currentBullets.Value,
             reserveBullets.Value,
             rpcParams.Receive.SenderClientId
@@ -178,9 +181,9 @@ public class Weapon : NetworkBehaviour
         // Create the bullet trail
         BulletTrail(
             data as HitscanData,
-            dir,
+            hitPoint,
             firingPoint.position,
-            hitPoint
+            dir
         );
 
         // If the current client wasn't the client that requested the serverrpc, return
@@ -205,9 +208,28 @@ public class Weapon : NetworkBehaviour
     /// </summary>
     /// <param name="startPos"></param>
     /// <param name="endPos"></param>
-    public void BulletTrail(HitscanData data, Vector3 dir, Vector3 startPos, Vector3 endPos)
+    public void BulletTrail(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
     {
-        Instantiate(data.bulletImpact, endPos, Quaternion.LookRotation(dir));
+        StartCoroutine(BulletTrailRoutine(data, hitPoint, startPos, dir));
+        
+    }
+
+    private IEnumerator BulletTrailRoutine(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
+    {
+        float time = 0f;
+        TrailRenderer trail = Instantiate(data.trail, startPos, Quaternion.identity);
+
+        while (time < 1f)
+        {
+            trail.transform.position = Vector3.Lerp(startPos, hitPoint, time);
+            time += Time.deltaTime / trail.time;
+
+            yield return null;
+        }
+
+        trail.transform.position = hitPoint;
+        Destroy(trail.gameObject, trail.time);
+        Instantiate(data.bulletImpact, hitPoint, Quaternion.LookRotation(dir));
     }
 
 
