@@ -19,6 +19,7 @@ public class WeaponDatabase : MonoBehaviour
 
     public static WeaponData GetWeapon(ulong id)
     {
+        Debug.Log($"ID: {id} - {Instance.data[id].weaponName}");
         return Instance.data[id];
     }
 }
