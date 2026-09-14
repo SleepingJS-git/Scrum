@@ -236,8 +236,8 @@ public class Weapon : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void DropServerRpc(RpcParams rpcParams = default)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out NetworkClient client))
+        ulong clientID = rpcParams.Receive.SenderClientId;
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
         {
             Transform cam = client.PlayerObject.GetComponent<Player>().look.cam.transform;
 
@@ -246,11 +246,28 @@ public class Weapon : NetworkBehaviour
                 cam.position,
                 cam.rotation
             );
-            
+
             drop.Init(weaponID.Value, true);
             drop.CreateWeapon(currentBullets.Value, reserveBullets.Value, cam.rotation);
 
             drop.NetworkObject.Spawn();
         }
+
+        DropClientRpc(clientID);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void DropClientRpc(ulong clientID)
+    {
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
+        {
+            if (NetworkManager.Singleton.LocalClient != client)
+            {
+                PlayerCombat combat = client.PlayerObject.GetComponent<PlayerCombat>();
+
+                Destroy(combat.weaponInHand);
+            }
+        }
+        
     }
 }
