@@ -1383,7 +1383,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  data: {fileID: 11400000, guid: af31be7b8d98a9d4eae899c120916e7f, type: 2}
+  data: {fileID: 11400000, guid: 35202d1156d8de04688282757a53847a, type: 2}
   holder: {fileID: 265509287}
   weaponDropTemplate: {fileID: 5600722298518792889, guid: 41ddd7b311ad69c45a84f250e8f311af, type: 3}
   spawnTime: 3
@@ -1582,6 +1582,7 @@ MonoBehaviour:
   weaponDropTemplate: {fileID: 5600722298518792889, guid: 41ddd7b311ad69c45a84f250e8f311af, type: 3}
   weaponDatas:
   - {fileID: 11400000, guid: af31be7b8d98a9d4eae899c120916e7f, type: 2}
+  - {fileID: 11400000, guid: 35202d1156d8de04688282757a53847a, type: 2}
 --- !u!4 &1775961855
 Transform:
   m_ObjectHideFlags: 0

@@ -11,6 +11,7 @@ public class WeaponSpawner : NetworkBehaviour
     private WeaponDrop drop;
     public void SpawnWeapon()
     {
+        Debug.Log($"Spawning Weapon: ID: {data.weaponID} - {data.weaponName}");
         drop = Instantiate(
             weaponDropTemplate,
             holder.position,

@@ -45,6 +45,7 @@ public class WeaponDrop : NetworkBehaviour
     /// <param name="dropped"></param>
     public void Init(ulong id, bool dropped)
     {
+        Debug.Log("WeaponDropper initialized with Weapon ID: " + id);
         _weaponID = id;
         _isDropped = dropped;
     }
@@ -55,14 +56,18 @@ public class WeaponDrop : NetworkBehaviour
     /// </summary>
     public override void OnNetworkSpawn()
     {
-        Instantiate(WeaponDatabase.GetWeapon(weaponID.Value).weaponModel, transform);
 
         if (!_isDropped) Destroy(rb);
 
-        if (!IsServer) return;
+        if (IsServer)
+        {
+            Debug.Log("WeaponDropper NetworkSpawned with with Weapon ID: " + _weaponID);
             weaponID.Value = _weaponID;
             currentBullets.Value = _currentBullets;
             reserveBullets.Value = _reserveBullets;
+        }
+        
+        Instantiate(WeaponDatabase.GetWeapon(weaponID.Value).weaponModel, transform);
     }
     /// <summary>
     /// [Called By Server] (WeaponSpawner)

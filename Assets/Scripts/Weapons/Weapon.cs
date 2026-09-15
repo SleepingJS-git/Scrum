@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -127,15 +128,16 @@ public class Weapon : NetworkBehaviour
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
         Vector3 dir = SpreadRandomizer(aimDir, data.bulletSpread);
         Vector3 adjustedHeadPos = headPos + (dir * 0.75f);
+        Vector3 hitPoint = adjustedHeadPos + (dir * 25f);
         // Send a raycast from the head to the new dirction within 100 units on only specific layers, and ignoring triggers
         if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, 100f, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {
+            hitPoint = hit.point;
             // If the raycast hit a player, damage the entity. For right now it just
             // damages the entity.
             if (hit.collider.CompareTag("Player"))
             {
                 Entity e = hit.collider.GetComponent<Entity>();
-
                 // Check if the entity is alive
                 if (e && e.isAlive.Value)
                 {
@@ -150,12 +152,14 @@ public class Weapon : NetworkBehaviour
                 }
             }
         }
+        
 
         currentBullets.Value--;
         lastShootTime = Time.time;
 
         EffectsClientRpc(
-            hit.point,
+            hitPoint,
+            aimDir,
             currentBullets.Value,
             reserveBullets.Value,
             rpcParams.Receive.SenderClientId
@@ -170,15 +174,16 @@ public class Weapon : NetworkBehaviour
     /// <param name="reserveBullets"></param>
     /// <param name="clientId"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    public void EffectsClientRpc(Vector3 hitPoint, int currentBullets, int reserveBullets, ulong clientId)
+    public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId)
     {
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
 
         // Create the bullet trail
         BulletTrail(
             data as HitscanData,
+            hitPoint,
             firingPoint.position,
-            hitPoint
+            dir
         );
 
         // If the current client wasn't the client that requested the serverrpc, return
@@ -203,9 +208,28 @@ public class Weapon : NetworkBehaviour
     /// </summary>
     /// <param name="startPos"></param>
     /// <param name="endPos"></param>
-    public void BulletTrail(HitscanData data, Vector3 startPos, Vector3 endPos)
+    public void BulletTrail(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
     {
-        Instantiate(data.bulletImpact, endPos, Quaternion.identity);
+        StartCoroutine(BulletTrailRoutine(data, hitPoint, startPos, dir));
+        
+    }
+
+    private IEnumerator BulletTrailRoutine(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
+    {
+        float time = 0f;
+        TrailRenderer trail = Instantiate(data.trail, startPos, Quaternion.identity);
+
+        while (time < 1f)
+        {
+            trail.transform.position = Vector3.Lerp(startPos, hitPoint, time);
+            time += Time.deltaTime / trail.time;
+
+            yield return null;
+        }
+
+        trail.transform.position = hitPoint;
+        Destroy(trail.gameObject, trail.time);
+        Instantiate(data.bulletImpact, hitPoint, Quaternion.LookRotation(dir));
     }
 
 
@@ -236,8 +260,8 @@ public class Weapon : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void DropServerRpc(RpcParams rpcParams = default)
     {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out NetworkClient client))
+        ulong clientID = rpcParams.Receive.SenderClientId;
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
         {
             Transform cam = client.PlayerObject.GetComponent<Player>().look.cam.transform;
 
@@ -246,11 +270,28 @@ public class Weapon : NetworkBehaviour
                 cam.position,
                 cam.rotation
             );
-            
+
             drop.Init(weaponID.Value, true);
             drop.CreateWeapon(currentBullets.Value, reserveBullets.Value, cam.rotation);
 
             drop.NetworkObject.Spawn();
         }
+
+        DropClientRpc(clientID);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void DropClientRpc(ulong clientID)
+    {
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
+        {
+            if (NetworkManager.Singleton.LocalClient != client)
+            {
+                PlayerCombat combat = client.PlayerObject.GetComponent<PlayerCombat>();
+
+                Destroy(combat.weaponInHand);
+            }
+        }
+        
     }
 }
