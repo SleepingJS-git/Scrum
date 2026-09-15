@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6061921388592637040}
   - component: {fileID: 1026980750256354395}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Vertical Rectangle
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -61,7 +61,7 @@ GameObject:
   - component: {fileID: 4845088025301118300}
   - component: {fileID: 8411411020907571012}
   - component: {fileID: 2538017715485849628}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -126,4 +126,12 @@ public class PlayerInputHandler : MonoBehaviour
             _main.combat.DropWeapon();
         }
     }
+
+    public void ToBuildTest(CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            GameManager.Instance.ChangeToBuilding();
+        }
+    }
 }

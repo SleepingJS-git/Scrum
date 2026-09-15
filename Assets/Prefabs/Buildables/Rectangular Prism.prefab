@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 148310473848951001}
   - component: {fileID: 4980473174890129493}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rectangular Prism
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -59,7 +59,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6008263790168101686}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 2064494614475487745}
   - component: {fileID: 1784413269651930501}
   - component: {fileID: 3918599421305575702}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

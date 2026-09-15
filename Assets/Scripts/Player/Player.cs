@@ -88,6 +88,7 @@ public class Player : Entity
     {
         Cursor.visible = !toFPS;
         Cursor.lockState = toFPS ? CursorLockMode.Locked: CursorLockMode.Confined;
+        look.cam.gameObject.SetActive(toFPS);
     }
 
 
