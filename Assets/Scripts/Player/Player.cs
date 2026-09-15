@@ -12,6 +12,7 @@ public class Player : Entity
     [HideInInspector] public PlayerMovement move;
     [HideInInspector] public PlayerLook look;
     [HideInInspector] public PlayerInteraction interaction;
+    [HideInInspector] public PlayerBody body;
 
     // I know this is messy. This is a test. Eventually I want to have a singleton manager have a variable
     // so the player can reference it themselves.
@@ -36,6 +37,7 @@ public class Player : Entity
         move = GetComponent<PlayerMovement>();
         look = GetComponent<PlayerLook>();
         interaction = GetComponent<PlayerInteraction>();
+        body = GetComponent<PlayerBody>();
 
         if (IsOwner)
         {
@@ -51,7 +53,8 @@ public class Player : Entity
         // Check if the computer running this script is the client.
         // If it is then IsOwner = true.
         input.Init(IsOwner);
-        move.Init();
+        body.Init(IsOwner);
+        move.Init(IsOwner);
         look.Init(IsOwner);
         combat.Init(IsOwner, _hud);
         interaction.Init(look.cam.transform, _hud);

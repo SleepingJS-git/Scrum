@@ -10,7 +10,6 @@ public class PlayerCombat : MonoBehaviour
 {
     public Weapon weaponHandler;        // The script that handles the weapon behavior and networking
     public GameObject weaponInHand;     // The game object in the player's fps hand or 3d hand
-    public Transform weaponHolder3D;    // The transform used to spawn the 3d model for the other player's pov
     public Transform weaponHolder;      // The transform used to spawn the 3d model in the player's fps pov
     private event Action OnPrimaryFire; // An action event that is used when the player is holding the shoot input
     private event Action OnSecondaryFire;
@@ -108,7 +107,7 @@ public class PlayerCombat : MonoBehaviour
     public void EquipWeapon3D(WeaponData data)
     {
         Debug.Log("Equip3D was called");
-        weaponInHand = Instantiate(data.weaponModel, weaponHolder3D);
+        weaponInHand = Instantiate(data.weaponModel, _main.body.rightHand);
         weaponHandler.firingPoint = weaponInHand.transform.Find("Firing Point");
     }
 
