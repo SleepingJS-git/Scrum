@@ -6,6 +6,7 @@ public class GridPlacement : MonoBehaviour
 {
     // The prefab being placed and its script
     [SerializeField]
+    Buildable startingBuildable;
     Buildable buildable;
     GameObject objectToPlace;
 
@@ -48,6 +49,7 @@ public class GridPlacement : MonoBehaviour
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
 
+        buildable = startingBuildable;
         // Update the info of the buildable object
         UpdateBuildable();
     }
@@ -223,5 +225,11 @@ public class GridPlacement : MonoBehaviour
         defaultColor = previewRenderer.material.color;
         previewRenderer.material.color = new Color(defaultColor.r, defaultColor.g, defaultColor.b, 0.1f);
         defaultColor = previewRenderer.material.color;
+    }
+
+    public void SetBuildable(Buildable newBuildable)
+    {
+        buildable = newBuildable;
+        UpdateBuildable();
     }
 }
