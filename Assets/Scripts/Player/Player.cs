@@ -16,7 +16,8 @@ public class Player : Entity
     // I know this is messy. This is a test. Eventually I want to have a singleton manager have a variable
     // so the player can reference it themselves.
     [SerializeField] private PlayerHud playerHudPrefab;
-    private PlayerHud _hud;
+    [SerializeField] private PlayerHud _hud;
+    public Transform PlayerCam => look.cam.transform;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -42,6 +43,9 @@ public class Player : Entity
             ToggleFirstPerson(true);
 
             _hud = Instantiate(playerHudPrefab);
+
+            // Request the server to spawn player at specific spawn point
+            SpawnServerRpc();
         }
 
         // Check if the computer running this script is the client.
@@ -49,10 +53,8 @@ public class Player : Entity
         input.Init(IsOwner);
         move.Init();
         look.Init(IsOwner);
-        combat.Init(IsOwner, look.cam.transform, _hud);
-        interaction.Init(IsOwner, look.cam.transform, _hud);
-
-
+        combat.Init(IsOwner, _hud);
+        interaction.Init(look.cam.transform, _hud);
     }
 
     void Update()
@@ -83,5 +85,35 @@ public class Player : Entity
     {
         Cursor.visible = !toFPS;
         Cursor.lockState = toFPS ? CursorLockMode.Locked: CursorLockMode.Confined;
+    }
+
+
+    /// <summary>
+    /// Server uses the sender client's id to figure out which
+    /// spawn point is to be used.
+    /// </summary>
+    /// <param name="rpcParams"></param>
+    [Rpc(SendTo.Server)]
+    public void SpawnServerRpc(RpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        Vector3 pos = PlayerSpawner.GetSpawnPoint(clientId).transform.position;
+        pos.y+= 1f;     // up 1 unit so they dont clip through the floor
+        
+        // Send request back to client to make changes
+        SpawnClientRpc(pos);
+    }
+
+    /// <summary>
+    /// The client is told to move a position by the server.
+    /// </summary>
+    /// <param name="pos"></param>
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SpawnClientRpc(Vector3 pos)
+    {
+        if (!IsOwner)
+            return;
+
+        transform.position = pos;
     }
 }

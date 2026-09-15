@@ -10,13 +10,17 @@ public abstract class Entity : NetworkBehaviour
 {
     [SerializeField] private int maxHealth;
     [SerializeField] private UnityEvent onDeathEffects;
-    private event Action OnDeath; 
+    private event Action OnDeath;
     private OnHitData lastHitData;
-    public NetworkVariable<int> health = new();
+    public NetworkVariable<int> health = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     public NetworkVariable<bool> isAlive = new(
         true,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
+        NetworkVariableWritePermission.Server
     );
 
     /// <summary>
@@ -31,6 +35,7 @@ public abstract class Entity : NetworkBehaviour
     }
 
     /// <summary>
+    /// [Called by Server] (This method is still being ran on the server)
     /// When the entity is hit, subtract health, then check if it is dead.
     /// </summary>
     /// <param name="damage"></param>
@@ -38,32 +43,26 @@ public abstract class Entity : NetworkBehaviour
     {
         lastHitData = onHitData;
 
-        OnHitServerRpc(onHitData.damage);
+        health.Value -= onHitData.damage;
+
+        if (health.Value <= 0)
+        {
+            isAlive.Value = false;
+            
+            OnDeath?.Invoke();
+
+            OnDeathEffectsClientRpc();
+        }
+
+        Debug.Log($"{gameObject.name} was damaged by {onHitData.attacker.name} ({onHitData.damage} - {onHitData.damageType})");
     }
-    
+
     /// <summary>
     /// Subscribe events for OnDeath
     /// </summary>
     public virtual void AddDeathEvent(Action action)
     {
         OnDeath += action;
-    }
-
-    /// <summary>
-    /// Registers the hit onto the server.
-    /// </summary>
-    /// <param name="damage"></param>
-    [ServerRpc]
-    private void OnHitServerRpc(int damage)
-    {
-        health.Value -= damage;
-
-        if (health.Value <= 0)
-        {
-            OnDeath?.Invoke();
-
-            OnDeathEffectsClientRpc();
-        }
     }
 
     /// <summary>
