@@ -98,9 +98,6 @@
         },
         {
             "m_Id": "78714ee533704d03951704c8c56b89e4"
-        },
-        {
-            "m_Id": "8678404832294e949541df8dc5a33f4a"
         }
     ],
     "m_GroupDatas": [],
@@ -986,10 +983,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 1602.0,
-            "y": 572.6666870117188,
-            "width": 137.333251953125,
-            "height": 36.0
+            "x": 1597.9998779296875,
+            "y": 636.0,
+            "width": 136.0,
+            "height": 33.99993896484375
         }
     },
     "m_Slots": [
@@ -1387,21 +1384,6 @@
 {
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
-    "m_ObjectId": "41270f5a205c4c8483660ed10a94c947",
-    "m_Id": 0,
-    "m_DisplayName": "Out",
-    "m_SlotType": 1,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Out",
-    "m_StageCapability": 3,
-    "m_Value": 0.0,
-    "m_DefaultValue": 0.0,
-    "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "44d5766ee0c74e858d6ad8b270b2b99b",
     "m_Id": 6,
     "m_DisplayName": "B",
@@ -1670,44 +1652,6 @@
         "y": 0.0,
         "z": 0.0,
         "w": 0.0
-    }
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.SliderNode",
-    "m_ObjectId": "8678404832294e949541df8dc5a33f4a",
-    "m_Group": {
-        "m_Id": ""
-    },
-    "m_Name": "Slider",
-    "m_DrawState": {
-        "m_Expanded": true,
-        "m_Position": {
-            "serializedVersion": "2",
-            "x": 1986.666748046875,
-            "y": 830.6666870117188,
-            "width": 121.999755859375,
-            "height": 36.0
-        }
-    },
-    "m_Slots": [
-        {
-            "m_Id": "41270f5a205c4c8483660ed10a94c947"
-        }
-    ],
-    "synonyms": [],
-    "m_Precision": 0,
-    "m_PreviewExpanded": true,
-    "m_DismissedVersion": 0,
-    "m_PreviewMode": 0,
-    "m_CustomColors": {
-        "m_SerializableColors": []
-    },
-    "m_Value": {
-        "x": 1.0,
-        "y": 0.0,
-        "z": 1.0
     }
 }
 
