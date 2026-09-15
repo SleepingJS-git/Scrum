@@ -6,6 +6,7 @@ public class GridPlacement : MonoBehaviour
 {
     // The prefab being placed
     [SerializeField]
+    Buildable buildable;
     GameObject objectToPlace;
 
     // Track the preview for the placeable object
@@ -19,22 +20,52 @@ public class GridPlacement : MonoBehaviour
     [SerializeField]
     Camera buildCam;
 
+    float rotation = 0;
+
+    private PlayerInput playerInput;
+    private InputAction placeAction;
+    private InputAction rotateLeftAction;
+    private InputAction rotateRightAction;
+
     private Dictionary<Vector3Int, int> occupiedCells = new Dictionary<Vector3Int, int>();
+
+    private Vector3 offset = Vector3.zero;
+
+    private Color defaultColor;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // Create the preview object and make it transparent
-        previewObject = Instantiate(objectToPlace);
-        previewObject.layer = 2;
-        previewRenderer = previewObject.GetComponent<Renderer>();
-        Color previewColor = previewRenderer.material.color;
-        previewRenderer.material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.1f);
+        playerInput = GetComponent<PlayerInput>();
+        placeAction = playerInput.actions.FindAction("Place");
+        rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
+        rotateRightAction = playerInput.actions.FindAction("Rotate Right");
+
+        UpdateBuildable();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (rotateRightAction.WasPressedThisFrame())
+        {
+            rotation += 90;
+            if (rotation >= 360)
+            {
+                rotation = 0;
+            }
+
+        }
+        if (rotateLeftAction.WasPressedThisFrame())
+        {
+            if (rotation <= 0)
+            {
+                rotation = 360;
+            }
+            rotation -= 90;
+        }
+        previewObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+
         // Find the position of the mouse on the grid, show the preview there
         Vector3 mousePos = MouseToWorldSpace();
         Vector3Int cellPos = grid.WorldToCell(mousePos);
@@ -53,14 +84,28 @@ public class GridPlacement : MonoBehaviour
             }
         }
 
+        if (IsAnyCellTaken(cellPos, buildable))
+        {
+            previewRenderer.material.color = new Color(2f, defaultColor.g, defaultColor.b, 0.1f);
+        }
+        else
+        {
+            previewRenderer.material.color = defaultColor;
+        }
+
         // Set the preview object's position to the center of the grid cell
-        previewObject.transform.position = grid.GetCellCenterWorld(cellPos);
+        previewObject.transform.position = grid.CellToWorld(cellPos);
+
+        previewObject.transform.position += (Quaternion.Euler(0, rotation, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
 
         // If left-clicked, create the object at the location of the preview
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (placeAction.WasPressedThisFrame())
         {
-            Instantiate(objectToPlace, previewObject.transform.position, Quaternion.identity);
-            OccupyCell(cellPos, 0);
+            if (!IsAnyCellTaken(cellPos, buildable))
+            {
+                Instantiate(objectToPlace, previewObject.transform.position, Quaternion.Euler(0, rotation, 0));
+                SetCellsToOccupied(buildable, cellPos, 0);
+            }
         }
     }
 
@@ -92,6 +137,18 @@ public class GridPlacement : MonoBehaviour
         return occupiedCells.ContainsKey(position);
     }
 
+    bool IsAnyCellTaken(Vector3Int originPosition, Buildable buildable)
+    {
+        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+        {
+            if (IsCellTaken(originPosition + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i])))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// <summary>
     /// Sets a cell to occupied
     /// </summary>
@@ -103,5 +160,33 @@ public class GridPlacement : MonoBehaviour
         {
             occupiedCells.Add(position, objectID);
         }
+    }
+
+    void SetCellsToOccupied(Buildable buildable, Vector3Int originPos, int objectID)
+    {
+        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+        {
+            OccupyCell(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]), 0);
+        }
+    }
+
+    void UpdateOffset()
+    {
+        offset = buildable.PivotOffset;
+    }
+
+    private void UpdateBuildable()
+    {
+        objectToPlace = buildable.gameObject;
+        // Create the preview object and make it transparent
+        previewObject = Instantiate(objectToPlace);
+        previewRenderer = previewObject.GetComponent<Buildable>().ObjectRenderer;
+        previewObject.layer = 2;
+        previewRenderer.gameObject.layer = 2;
+        UpdateOffset();
+        Debug.Log(offset);
+        defaultColor = previewRenderer.material.color;
+        previewRenderer.material.color = new Color(defaultColor.r, defaultColor.g, defaultColor.b, 0.1f);
+        defaultColor = previewRenderer.material.color;
     }
 }

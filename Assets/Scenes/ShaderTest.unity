@@ -183,6 +183,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: c336c8049931a0a4caeb577f5e3671ba, type: 2}
+  - {fileID: 2100000, guid: 24c730cf7e830e74998482b3fedb1490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -288,9 +289,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 2bd334b00744a8945a8cf8182b8f2641, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 2bd334b00744a8945a8cf8182b8f2641, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: c336c8049931a0a4caeb577f5e3671ba, type: 2}
+    - target: {fileID: -7511558181221131132, guid: 2bd334b00744a8945a8cf8182b8f2641, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 24c730cf7e830e74998482b3fedb1490, type: 2}
     - target: {fileID: 919132149155446097, guid: 2bd334b00744a8945a8cf8182b8f2641, type: 3}
       propertyPath: m_Name
       value: kmurphy_nail_gun_lp
@@ -882,7 +891,7 @@ Transform:
   m_GameObject: {fileID: 1085505242}
   serializedVersion: 2
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: -0.9, z: -2.7}
+  m_LocalPosition: {x: -4.28, y: 2.17, z: 5.95}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

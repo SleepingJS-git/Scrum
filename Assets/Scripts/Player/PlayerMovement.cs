@@ -13,12 +13,16 @@ public class PlayerMovement : MonoBehaviour
     public float gravityScale;      // Gravity
     public float upwardGravMult;    // How fast the player jumps
     private bool isMoving;
-    private Vector3 velocity;                // Actual Velocity    
+    private Vector3 velocity;       // Actual Velocity    
+    private Vector3 moveDir;        // Movement Direction
     private CharacterController cc; 
-    public void Init()
+    private PlayerBody body;
+    public void Init(bool isOwner)
     {
         cc = GetComponent<CharacterController>();
         isMoving = false;
+
+        if (isOwner) body = GetComponent<PlayerBody>();
     }
 
     public void Jump()
@@ -32,12 +36,10 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="moveInput"></param>
     public void Move(Vector3 moveInput)
     {
-        bool wasGrounded = cc.isGrounded;
-
         isMoving = moveInput.sqrMagnitude > 0.0001f;
 
         // The actual direction relative to the way the player is facing
-        Vector3 moveDir = transform.right * moveInput.x + transform.forward * moveInput.z;
+        moveDir = transform.right * moveInput.x + transform.forward * moveInput.z;
         moveDir.Normalize();
         
         // Cache the current speed
@@ -66,5 +68,32 @@ public class PlayerMovement : MonoBehaviour
             else velocity.y -= gravityScale * Time.deltaTime;
         }
         cc.Move(velocity * Time.deltaTime);
+        
+        UpdateAnimation();
     }
+
+    /// <summary>
+    /// The client controls the animations
+    /// </summary>
+    void UpdateAnimation()
+    {
+        body.Play("IsMoving", isMoving);
+
+        if (!isMoving)
+        {
+            body.Play("Forward", 0f);
+            body.Play("Strafe", 0f);
+            return;
+        }
+
+        Vector3 forward = transform.forward;
+        Vector3 right = transform.right;
+
+        float forwardAmount = Vector3.Dot(moveDir.normalized, forward);
+        float strafeAmount = Vector3.Dot(moveDir.normalized, right);
+
+        body.Play("Forward", forwardAmount);
+        body.Play("Strafe", strafeAmount);
+    }
+
 }
