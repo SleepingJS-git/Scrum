@@ -134,6 +134,24 @@ public class MainMenuNetworking : MonoBehaviour
         titleScreenController.ShowLobbyRoom();
     }
 
+    public async void LeaveLobby()
+    {
+        connectionErrorText.text = "";
+
+        try
+        {
+            await currentSession.LeaveAsync();
+        }
+        catch (SessionException e) {
+
+            Debug.LogError($"failed to leave lobby: {e}");
+            connectionErrorText.text = "Error leaving lobby. Please try again.";
+        }
+
+        Debug.Log("left lobby");
+
+    }
+
     //Use this method to refresh lobby data for UI
     private void RefreshPlayerList()
     {
