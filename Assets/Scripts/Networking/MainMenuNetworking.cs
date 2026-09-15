@@ -128,6 +128,8 @@ public class MainMenuNetworking : MonoBehaviour
 
         Debug.Log("joined lobby");
 
+        hostCodeText.text = currentSession.Code;
+
         RegisterSessionEvents();
         RefreshPlayerList();
 
