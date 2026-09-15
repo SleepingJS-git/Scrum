@@ -252,6 +252,7 @@ GameObject:
   - component: {fileID: 503030856}
   - component: {fileID: 503030855}
   - component: {fileID: 503030858}
+  - component: {fileID: 503030859}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -377,6 +378,19 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &503030859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 503030854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fe501459498c4d4eaf74d71f661b227, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridBuilding: {fileID: 755794273}
 --- !u!1 &607848982
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,7 +559,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10a9a2af5b55584eb630f9dda63eb02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildable: {fileID: 1026980750256354395, guid: 483ad2bb252e59c4e8c6e46a14b0dad4, type: 3}
+  startingBuildable: {fileID: 1026980750256354395, guid: 483ad2bb252e59c4e8c6e46a14b0dad4, type: 3}
   grid: {fileID: 607848983}
   buildCam: {fileID: 503030856}
 --- !u!4 &755794274
