@@ -41,8 +41,8 @@ Material:
     m_Floats:
     - _BUILTIN_QueueControl: -1
     - _BUILTIN_QueueOffset: 0
-    - _ColorThreshold: 0.4
-    - _NormalThreshold: 0.8
+    - _ColorThreshold: 2
+    - _NormalThreshold: 0.5
     - _OVERLAY: 1
     - _OutlineSize: 1.05
     - _OverlayT: 0
