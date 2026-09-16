@@ -93,6 +93,7 @@ public class BuildCamera : MonoBehaviour
 
         transform.position = Vector3.Lerp(transform.position, targetPosition, lerpDampening * Time.deltaTime);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lerpDampening);
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0f);
 
         // Set the distance of the camera based on the zoom
         float currentDistance = Mathf.Lerp(cameraTransform.localPosition.z,-zoomDistance, Time.deltaTime * lerpDampening);
