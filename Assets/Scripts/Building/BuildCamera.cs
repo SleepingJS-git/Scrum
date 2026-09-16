@@ -38,8 +38,12 @@ public class BuildCamera : MonoBehaviour
     private float currentX = 0f;
     private float currentY = 0f;
 
-    private Vector3 targetCamPosition;
+    private Vector3 targetPosition;
     private Quaternion targetRotation;
+    [SerializeField]
+    private Transform cameraTransform;
+
+    float lerpDampening = 5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -50,7 +54,11 @@ public class BuildCamera : MonoBehaviour
         orbit = playerInput.actions.FindAction("Orbit");
         zoom = playerInput.actions.FindAction("Zoom");
         drag = playerInput.actions.FindAction("Drag");
-        targetCamPosition = transform.position;
+
+        currentX = transform.eulerAngles.y;
+        currentY = transform.eulerAngles.x;
+
+        targetPosition = Vector3.zero;
     }
 
     // Update is called once per frame
@@ -67,33 +75,28 @@ public class BuildCamera : MonoBehaviour
         {
             PanCamera(panVector);
         }
-        if (drag.IsPressed() && ! orbit.IsPressed())
+        if (drag.IsPressed())
         {
             DragPan();
         }
-
-        // If scrolling zoom
-        if (scrollValue != 0)
-        {
-            zoomDistance = Mathf.Clamp(zoomDistance - scrollValue, minZoom, maxZoom);
-        }
-
-        // Get the target point to orbit around
-        orbitTargetPoint = GetOrbitTarget();
-
 
         // If orbiting, call orbit function
         if (orbit.IsPressed())
         {
             OrbitCamera();
         }
+        // If scrolling zoom
+        if (scrollValue != 0)
+        {
+            zoomDistance = Mathf.Clamp(zoomDistance - scrollValue, minZoom, maxZoom);
+        }
 
-        transform.position = Vector3.Lerp(transform.position, targetCamPosition, 2f * Time.deltaTime);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 2f);
+        transform.position = Vector3.Lerp(transform.position, targetPosition, lerpDampening * Time.deltaTime);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lerpDampening);
 
         // Set the distance of the camera based on the zoom
-        //float currentDistance = Mathf.Lerp(-transform.localPosition.z, zoomDistance, Time.deltaTime * 2f);
-        //transform.position -= new Vector3(0, 0, currentDistance);
+        float currentDistance = Mathf.Lerp(cameraTransform.localPosition.z,-zoomDistance, Time.deltaTime * lerpDampening);
+        cameraTransform.localPosition = new Vector3(0, 0, currentDistance);
     }
 
 
@@ -104,14 +107,17 @@ public class BuildCamera : MonoBehaviour
     void PanCamera(Vector3 moveDir)
     {
         Vector3 rotatedMoveDir = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * moveDir;
-        targetCamPosition += rotatedMoveDir * panSpeed * Time.deltaTime;
+        targetPosition += rotatedMoveDir * panSpeed * Time.deltaTime;
     }
 
+    /// <summary>
+    /// When the middle mouse button is dragged, drag the camera accordingly
+    /// </summary>
     void DragPan()
     {
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
         Vector3 mouseDeltaTo3D = new Vector3(mouseDelta.x, 0, mouseDelta.y);
-        targetCamPosition -= Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity);
+        targetPosition -= Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity);
     }
 
     /// <summary>
@@ -124,45 +130,5 @@ public class BuildCamera : MonoBehaviour
         currentY = Mathf.Clamp(currentY - mouseDelta.y, minPitch, maxPitch);
 
         targetRotation = Quaternion.Euler(currentY, currentX, 0);
-
-        // Find the mouse movement
-        //Vector2 mouseDelta = Mouse.current.delta.ReadValue() * orbitSensitivity;
-        //float newXRotation = transform.eulerAngles.x - mouseDelta.y;
-
-        //// If the movement would rotate the camera outside of its constraints do not do the movement
-        //if (newXRotation < minPitch || newXRotation > maxPitch)
-        //{
-        //    mouseDelta = new Vector2(mouseDelta.x, 0);
-        //}
-
-        
-        //// Rotate around the orbit target
-        //transform.RotateAround(orbitTargetPoint, Vector3.up, mouseDelta.x);
-        //transform.RotateAround(orbitTargetPoint, transform.right, -mouseDelta.y);
-
-        //targetCamPosition = transform.position;
-    }
-
-    /// <summary>
-    /// Get the point to orbit around
-    /// </summary>
-    /// <returns>Vector 3 orbit point</returns>
-    Vector3 GetOrbitTarget()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(new Ray(transform.position, transform.forward), out hit, maxRayDist))
-        {
-            return hit.point;
-        }
-        return transform.position + (transform.forward * zoomDistance);
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.green;
-        Gizmos.DrawSphere(targetCamPosition, 0.5f);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(orbitTargetPoint, 0.5f);
     }
 }
