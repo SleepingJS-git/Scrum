@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b6dcc438df27584e85f5307a7ba86f0, type: 3}
+  m_Name: 1 Nail Gun
+  m_EditorClassIdentifier: 
+  weaponName: Nail Gun
+  weaponID: 1
+  firingType: 0
+  WeaponType: 0
+  damage: 2
+  fireRate: 0.045
+  bulletCount: 100
+  bulletsPerShot: 1
+  magCount: 2
+  reloadSpeed: 1.5
+  bulletSpread: 0.1
+  weaponInHand: {fileID: 5086761811338402136, guid: ce6932454fc0c7d43bd8d965cd821d98, type: 3}
+  weaponModel: {fileID: 4600354628101149596, guid: 27c495b6cd48df449b9b0bf71dac4489, type: 3}
+  shootingEffect: {fileID: 0}
+  trail: {fileID: 2059742913133304835, guid: 23e894f2da81ee8499685b78125ad8c8, type: 3}
+  bulletImpact: {fileID: 4623250405035984504, guid: 5eb77df42ed0a7e47999dcc3c35d4e8a, type: 3}

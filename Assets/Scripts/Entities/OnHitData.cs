@@ -13,6 +13,7 @@ public class OnHitData
     public float radius;
     public float explosionForce;
     public float upwardsModifier;
+    public DamageType damageType;
 }
 
 public enum DamageType

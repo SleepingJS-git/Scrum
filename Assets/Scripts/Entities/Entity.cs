@@ -8,15 +8,20 @@ using UnityEngine.Events;
 /// </summary>
 public abstract class Entity : NetworkBehaviour
 {
-    [SerializeField] private int maxHealth;
+    [SerializeField] protected int maxHealth;
     [SerializeField] private UnityEvent onDeathEffects;
-    private event Action OnDeath; 
+    [SerializeField] private UnityEvent onDeathLocalClient;
+    private event Action OnDeath;
     private OnHitData lastHitData;
-    public NetworkVariable<int> health = new();
+    public NetworkVariable<int> health = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     public NetworkVariable<bool> isAlive = new(
         true,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
+        NetworkVariableWritePermission.Server
     );
 
     /// <summary>
@@ -31,6 +36,7 @@ public abstract class Entity : NetworkBehaviour
     }
 
     /// <summary>
+    /// [Called by Server] (This method is still being ran on the server)
     /// When the entity is hit, subtract health, then check if it is dead.
     /// </summary>
     /// <param name="damage"></param>
@@ -38,11 +44,23 @@ public abstract class Entity : NetworkBehaviour
     {
         lastHitData = onHitData;
 
-        OnHitServerRpc(onHitData.damage);
+        health.Value -= onHitData.damage;
+
+        if (health.Value <= 0)
+        {
+            health.Value = 0;
+            isAlive.Value = false;
+            
+            OnDeath?.Invoke();
+
+            OnDeathEffectsClientRpc(OwnerClientId);
+        }
+
+        Debug.Log($"{gameObject.name} was damaged by {onHitData.attacker.name} ({onHitData.damage} - {onHitData.damageType})");
     }
-    
+
     /// <summary>
-    /// Subscribe events for OnDeath
+    /// [Invoked by ServerRpc] Subscribe events for OnDeath from client
     /// </summary>
     public virtual void AddDeathEvent(Action action)
     {
@@ -50,28 +68,14 @@ public abstract class Entity : NetworkBehaviour
     }
 
     /// <summary>
-    /// Registers the hit onto the server.
-    /// </summary>
-    /// <param name="damage"></param>
-    [ServerRpc]
-    private void OnHitServerRpc(int damage)
-    {
-        health.Value -= damage;
-
-        if (health.Value <= 0)
-        {
-            OnDeath?.Invoke();
-
-            OnDeathEffectsClientRpc();
-        }
-    }
-
-    /// <summary>
     /// This plays death effects that will display differently on all clients.
     /// </summary>
-    [ClientRpc]
-    private void OnDeathEffectsClientRpc()
+    [Rpc(SendTo.ClientsAndHost)]
+    private void OnDeathEffectsClientRpc(ulong clientId)
     {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+            onDeathLocalClient?.Invoke();
+
         onDeathEffects?.Invoke();
     }
 
