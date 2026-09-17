@@ -40,6 +40,15 @@ public class GridPlacement : MonoBehaviour
     // The default color of the placed object
     private Color defaultColor;
 
+    // The maximum number of building placements/placement tracking
+    public int maxPlacements;
+    public int currentPlacements;
+
+    // UI used to determine whether we're hovering the buildable selection bar
+    [SerializeField] private BuildingUI buildingUI;
+    [SerializeField] private BarHoverCheck barCheck;
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -49,7 +58,7 @@ public class GridPlacement : MonoBehaviour
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
 
-        buildable = startingBuildable;
+        buildable = null;
         // Update the info of the buildable object
         UpdateBuildable();
     }
@@ -57,6 +66,19 @@ public class GridPlacement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Check that conditions allow for previewing the buildable
+        if (!CanPreviewBuildable())
+        {
+            if (previewObject != null)
+            {
+                previewObject.SetActive(false);
+            }
+
+            return;
+        }
+
+        previewObject.SetActive(true);
+
         // If the right rotate action is pressed, increase the rotation angle
         if (rotateRightAction.WasPressedThisFrame())
         {
@@ -79,6 +101,7 @@ public class GridPlacement : MonoBehaviour
             }
             rotation -= 90;
         }
+
 
         // Set the rotation to the current rotation value
         previewObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
@@ -124,6 +147,7 @@ public class GridPlacement : MonoBehaviour
             {
                 Instantiate(objectToPlace, previewObject.transform.position, Quaternion.Euler(0, rotation, 0));
                 SetCellsToOccupied(buildable, cellPos, 0);
+                currentPlacements++;
             }
         }
     }
@@ -231,5 +255,22 @@ public class GridPlacement : MonoBehaviour
     {
         buildable = newBuildable;
         UpdateBuildable();
+    }
+
+    private bool CanPreviewBuildable()
+    {
+        // Nothing has been selected yet
+        if (buildable == null)
+            return false;
+
+        // Player has used all their placements
+        if (currentPlacements >= maxPlacements)
+            return false;
+
+        // Don't place/preview while interacting with the build UI
+        if (barCheck.IsHoveringBuildableBar)
+            return false;
+
+        return true;
     }
 }
