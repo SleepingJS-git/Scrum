@@ -69,6 +69,6 @@ MonoBehaviour:
   fetchColorBuffer: 1
   requirements: 6
   passMaterial: {fileID: 2100000, guid: 24c730cf7e830e74998482b3fedb1490, type: 2}
-  passIndex: 1
+  passIndex: 0
   bindDepthStencilAttachment: 0
   m_Version: 1
