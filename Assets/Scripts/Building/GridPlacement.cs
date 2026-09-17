@@ -238,6 +238,7 @@ public class GridPlacement : MonoBehaviour
     /// </summary>
     private void UpdateBuildable()
     {
+        if (!buildable) return;
         objectToPlace = buildable.gameObject;
         // Create the preview object and make it transparent
         previewObject = Instantiate(objectToPlace);

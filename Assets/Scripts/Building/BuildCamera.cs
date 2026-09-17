@@ -15,12 +15,12 @@ public class BuildCamera : MonoBehaviour
     private InputAction drag;
 
     // Speed for the camera pan
-    private float panSpeed = 20f;
-    private float dragSensitivity = 0.25f;
+    [SerializeField] private float panSpeed = 20f;
+    [SerializeField] private float dragSensitivity = 0.25f;
 
     // Point for the camera to orbit around
     private Vector3 orbitTargetPoint;
-    private float orbitSensitivity = 0.5f;
+    [SerializeField] private float orbitSensitivity = 0.5f;
 
     // Maximum distance for raycast
     private float maxRayDist = 100f;
@@ -29,7 +29,7 @@ public class BuildCamera : MonoBehaviour
     private float zoomDistance = 10f;
     private float minZoom = 2f;
     private float maxZoom = 20f;
-    private float zoomSensitivity = 0.5f;
+    [SerializeField] private float zoomSensitivity = 0.5f;
 
     // Pitch constraints
     private float minPitch = 10f;
