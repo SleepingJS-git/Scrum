@@ -1,3 +1,4 @@
+using Unity.Netcode.Components;
 using UnityEngine;
 
 public class PlayerBody : MonoBehaviour
@@ -7,7 +8,28 @@ public class PlayerBody : MonoBehaviour
     public Renderer bodyRenderer;
     public void Init(bool IsOwner)
     {
-        bodyRenderer.gameObject.SetActive(!IsOwner);
+        bodyRenderer.enabled = !IsOwner;
+    }
+
+    /// <summary>
+    /// [Called by ClientRpc] (onDeathEffects)
+    /// </summary>
+    public void Ragdoll()
+    {  
+        // Turn on the renderer so that the instantiated body has its renderer on
+        bodyRenderer.enabled = true;
+
+        animator.enabled = false;
+
+        // Turn off the renderer to hide the dead player's actual renderer
+        // bodyRenderer.gameObject.SetActive(false);
+
+        foreach(Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
+        {
+            rb.useGravity = true;
+            rb.isKinematic = false;
+            rb.linearVelocity = Vector3.zero;
+        }
     }
     public void Play(string para, bool val)
     {

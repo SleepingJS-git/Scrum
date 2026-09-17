@@ -48,6 +48,8 @@ public class Player : Entity
 
             // Request the server to spawn player at specific spawn point
             SpawnServerRpc();
+
+            _hud.health.text = health.Value.ToString();
         }
 
         // Check if the computer running this script is the client.
@@ -64,6 +66,8 @@ public class Player : Entity
     {
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
+
+        if (!isAlive.Value) return;
         
         move.Move(input.MoveInput);
         combat.PrimaryInput(input.PrimaryInput);
@@ -74,7 +78,17 @@ public class Player : Entity
     {
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
+
+        if (!isAlive.Value) return;
+
         look.Look(input.LookInput());
+    }
+
+    
+    public void ToggleDeathHud(bool isDead)
+    {
+        if (!IsOwner) return;
+        _hud.youAreDeadObj.SetActive(isDead);
     }
 
     /// <summary>
@@ -89,6 +103,29 @@ public class Player : Entity
         Cursor.visible = !toFPS;
         Cursor.lockState = toFPS ? CursorLockMode.Locked: CursorLockMode.Confined;
         look.cam.gameObject.SetActive(toFPS);
+    }
+
+    /// <summary>
+    /// [Called by Server] (This method is still being ran on the server)
+    /// When the entity is hit, subtract health, then check if it is dead.
+    /// </summary>
+    /// <param name="damage"></param>
+    public override void OnHit(OnHitData onHitData)
+    {
+        base.OnHit(onHitData);
+
+        UpdateHealthClientRpc(OwnerClientId);
+    }
+
+    /// <summary>
+    /// [Called by Server]
+    /// Updates the client who got damaged.
+    /// </summary>
+    [Rpc(SendTo.ClientsAndHost)]
+    public void UpdateHealthClientRpc(ulong clientId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+            _hud.health.text = health.Value.ToString();
     }
 
 

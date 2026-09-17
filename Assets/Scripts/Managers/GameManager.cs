@@ -15,6 +15,8 @@ public class GameManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
+        // Test, eventually there needs to be code to check if all
+        // players spawned in.
         ChangeGamePhaseServerRpc(gamePhase);
     }
 
@@ -38,12 +40,10 @@ public class GameManager : NetworkBehaviour
         switch (gamePhase)
         {
             case GamePhase.Combat:
-                gridPlacement.gameObject.SetActive(false);
                 CamControlClientRpc(true);
             break;
 
             case GamePhase.Building:
-                gridPlacement.gameObject.SetActive(true);
                 CamControlClientRpc(false);
             break;
         }
@@ -52,7 +52,7 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     private void CamControlClientRpc(bool toFps)
     {
-        if (!IsOwner) return;
+        gridPlacement.gameObject.SetActive(!toFps);
 
         Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
 
