@@ -45,7 +45,6 @@ public class WeaponDrop : NetworkBehaviour
     /// <param name="dropped"></param>
     public void Init(ulong id, bool dropped)
     {
-        Debug.Log("WeaponDropper initialized with Weapon ID: " + id);
         _weaponID = id;
         _isDropped = dropped;
     }
@@ -61,7 +60,6 @@ public class WeaponDrop : NetworkBehaviour
 
         if (IsServer)
         {
-            Debug.Log("WeaponDropper NetworkSpawned with with Weapon ID: " + _weaponID);
             weaponID.Value = _weaponID;
             currentBullets.Value = _currentBullets;
             reserveBullets.Value = _reserveBullets;
@@ -120,6 +118,9 @@ public class WeaponDrop : NetworkBehaviour
         {
             Weapon weapon = client.PlayerObject.GetComponent<Weapon>();
 
+            if (weapon.hasWeapon)
+                weapon.DropWeapon();
+
             // Update the player's weaponhandler with the networkvalues.
             weapon.Init(WeaponDatabase.GetWeapon(weaponID.Value), currentBullets.Value, reserveBullets.Value);
             
@@ -150,6 +151,7 @@ public class WeaponDrop : NetworkBehaviour
             // then give their player object the fps weapon overlay
             if (NetworkManager.Singleton.LocalClientId == clientId)
             {
+                combat.EmptyWeapon();
                 combat.EquipWeapon(data, currentBullets.Value, reserveBullets.Value);
             }
 

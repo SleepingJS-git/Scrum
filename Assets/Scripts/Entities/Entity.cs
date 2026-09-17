@@ -8,8 +8,9 @@ using UnityEngine.Events;
 /// </summary>
 public abstract class Entity : NetworkBehaviour
 {
-    [SerializeField] private int maxHealth;
+    [SerializeField] protected int maxHealth;
     [SerializeField] private UnityEvent onDeathEffects;
+    [SerializeField] private UnityEvent onDeathLocalClient;
     private event Action OnDeath;
     private OnHitData lastHitData;
     public NetworkVariable<int> health = new(
@@ -47,18 +48,19 @@ public abstract class Entity : NetworkBehaviour
 
         if (health.Value <= 0)
         {
+            health.Value = 0;
             isAlive.Value = false;
             
             OnDeath?.Invoke();
 
-            OnDeathEffectsClientRpc();
+            OnDeathEffectsClientRpc(OwnerClientId);
         }
 
         Debug.Log($"{gameObject.name} was damaged by {onHitData.attacker.name} ({onHitData.damage} - {onHitData.damageType})");
     }
 
     /// <summary>
-    /// Subscribe events for OnDeath
+    /// [Invoked by ServerRpc] Subscribe events for OnDeath from client
     /// </summary>
     public virtual void AddDeathEvent(Action action)
     {
@@ -68,9 +70,12 @@ public abstract class Entity : NetworkBehaviour
     /// <summary>
     /// This plays death effects that will display differently on all clients.
     /// </summary>
-    [ClientRpc]
-    private void OnDeathEffectsClientRpc()
+    [Rpc(SendTo.ClientsAndHost)]
+    private void OnDeathEffectsClientRpc(ulong clientId)
     {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+            onDeathLocalClient?.Invoke();
+
         onDeathEffects?.Invoke();
     }
 

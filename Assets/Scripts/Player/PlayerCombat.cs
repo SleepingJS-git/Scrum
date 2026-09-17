@@ -30,6 +30,11 @@ public class PlayerCombat : MonoBehaviour
         _main = GetComponent<Player>();
         _hud = h;
         _cam = _main.PlayerCam;
+        
+        if (_main.IsServer)
+        {
+            _main.AddDeathEvent(weaponHandler.DropWeapon);
+        }
     }
 
     /// <summary>
@@ -49,17 +54,15 @@ public class PlayerCombat : MonoBehaviour
     /// [Called by Client] 
     /// Drop the weapon the player is currently holding.
     /// </summary>
-    public void DropWeapon()
+    public void EmptyWeapon()
     {
         // If no weapon, then what are u dropping?
         if (!weaponInHand) return;
         
-        // The weapon handler has a server request method.
-        // Must request the server to create an empty WeaponDrop
-        weaponHandler.DropServerRpc();
-
-        // Reset Hud Stuff
-        UpdateWeaponInfo();
+        _main.body.Play("HasWeapon", false);
+        // Reset Hud Stuff for the client owner only
+        if (_main.IsOwner)
+            UpdateWeaponInfo();
 
         // Clear Primary Fire Action
         OnPrimaryFire = null;
@@ -75,9 +78,6 @@ public class PlayerCombat : MonoBehaviour
     /// <param name="weapon"></param>
     public void EquipWeapon(WeaponData data, int c, int r)
     {
-        if (!_main.IsOwner) return;
-        DropWeapon();
-
         // Create the new gun
         weaponInHand = Instantiate(data.weaponInHand, weaponHolder);
 
@@ -87,6 +87,8 @@ public class PlayerCombat : MonoBehaviour
         weaponHandler.firingPoint = weaponInHand.transform.Find("Firing Point");
         
         _weaponType = data.WeaponType;
+
+        _main.body.Play("HasWeapon", true);
 
         // If the weapon is hitscan, give it the normal gun firing behavior
         if (_weaponType == WeaponType.Hitscan)
@@ -118,14 +120,16 @@ public class PlayerCombat : MonoBehaviour
     {
         if (weaponHandler.HasNoAmmo)
         {
-            DropWeapon();
+            weaponHandler.DropWeapon();
+            EmptyWeapon();
 
             // Logic for no bullets in general
             return;
         }
         if (weaponHandler.NeedsReload)
         {
-            DropWeapon();
+            weaponHandler.DropWeapon();
+            EmptyWeapon();
             return;
         }
 
@@ -150,4 +154,5 @@ public class PlayerCombat : MonoBehaviour
         _hud.weaponName.text = nameInfo;
         _hud.ammo.text = ammoInfo;
     }
+
 }

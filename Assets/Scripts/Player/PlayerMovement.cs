@@ -36,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="moveInput"></param>
     public void Move(Vector3 moveInput)
     {
+        if (!cc.enabled) return;
         isMoving = moveInput.sqrMagnitude > 0.0001f;
 
         // The actual direction relative to the way the player is facing
@@ -94,6 +95,14 @@ public class PlayerMovement : MonoBehaviour
 
         body.Play("Forward", forwardAmount);
         body.Play("Strafe", strafeAmount);
+    }
+
+    public void OnDeathCollider(bool isDead)
+    {
+        cc.enabled = !isDead;
+        // if (isDead)
+        //     cc.excludeLayers += Layer.Player;
+        // else cc.excludeLayers -= Layer.Player;
     }
 
 }

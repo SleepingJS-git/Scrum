@@ -54,6 +54,7 @@ public class Weapon : NetworkBehaviour
     public bool NeedsReload { get { return currentBullets.Value <= 0; } }
     public bool HasNoAmmo { get { return currentBullets.Value == 0 && reserveBullets.Value == 0; } }
     private float lastShootTime;
+    public bool hasWeapon;
     public override void OnNetworkSpawn()
     {
 
@@ -73,6 +74,7 @@ public class Weapon : NetworkBehaviour
         weaponID.Value = data.weaponID;
         currentBullets.Value = c;
         reserveBullets.Value = r;
+        hasWeapon = true;
     }
 
     /// <summary>
@@ -152,7 +154,7 @@ public class Weapon : NetworkBehaviour
                 }
             }
         }
-        
+
 
         currentBullets.Value--;
         lastShootTime = Time.time;
@@ -211,7 +213,7 @@ public class Weapon : NetworkBehaviour
     public void BulletTrail(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
     {
         StartCoroutine(BulletTrailRoutine(data, hitPoint, startPos, dir));
-        
+
     }
 
     private IEnumerator BulletTrailRoutine(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
@@ -250,6 +252,11 @@ public class Weapon : NetworkBehaviour
         return dir.normalized;
     }
 
+    public void DropWeapon()
+    {
+        DropServerRpc();
+    }
+
     /// <summary>
     /// [Called from Client]
     /// The server creates a WeaponDrop that all players can see and pick up.
@@ -258,9 +265,9 @@ public class Weapon : NetworkBehaviour
     /// </summary>
     /// <param name="rpcParams"></param>
     [Rpc(SendTo.Server)]
-    public void DropServerRpc(RpcParams rpcParams = default)
+    private void DropServerRpc()
     {
-        ulong clientID = rpcParams.Receive.SenderClientId;
+        ulong clientID = OwnerClientId;
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
         {
             Transform cam = client.PlayerObject.GetComponent<Player>().look.cam.transform;
@@ -275,23 +282,25 @@ public class Weapon : NetworkBehaviour
             drop.CreateWeapon(currentBullets.Value, reserveBullets.Value, cam.rotation);
 
             drop.NetworkObject.Spawn();
+
+            hasWeapon = false;
         }
 
-        DropClientRpc(clientID);
+        DropClientRpc();
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    public void DropClientRpc(ulong clientID)
+    public void DropClientRpc()
     {
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
-        {
-            if (NetworkManager.Singleton.LocalClient != client)
-            {
-                PlayerCombat combat = client.PlayerObject.GetComponent<PlayerCombat>();
+        PlayerCombat combat = GetComponent<PlayerCombat>();
 
-                Destroy(combat.weaponInHand);
-            }
+        if (IsOwner)
+        {
+            combat.EmptyWeapon();
         }
-        
+        else
+        {
+            Destroy(combat.weaponInHand);
+        }
     }
 }
