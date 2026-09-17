@@ -16,7 +16,7 @@ public class BuildCamera : MonoBehaviour
 
     // Speed for the camera pan
     private float panSpeed = 20f;
-    private float dragSensitivity = 20f;
+    private float dragSensitivity = 0.25f;
 
     // Point for the camera to orbit around
     private Vector3 orbitTargetPoint;
@@ -118,7 +118,7 @@ public class BuildCamera : MonoBehaviour
     {
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
         Vector3 mouseDeltaTo3D = new Vector3(mouseDelta.x, 0, mouseDelta.y);
-        targetPosition -= Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity);
+        targetPosition -= Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity * panSpeed);
     }
 
     /// <summary>
