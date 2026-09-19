@@ -23,6 +23,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MVP Testing.unity
     guid: 2808a64f2b3ce5844afaf17d04f3b4d2
+  - enabled: 1
+    path: Assets/Scenes/GridBuilding.unity
+    guid: a7df09fd3e1f1654586c5b6f4eea943a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
