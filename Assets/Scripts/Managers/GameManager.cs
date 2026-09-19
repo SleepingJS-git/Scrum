@@ -4,8 +4,9 @@ using UnityEngine;
 public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance;
-    public GridPlacement gridPlacement;
+    public BuildingUI buildingUI;
     [SerializeField] private GamePhase gamePhase;
+    public static GamePhase GamePhase => Instance.gamePhase;
     void Awake()
     {
         Instance = this;
@@ -13,11 +14,9 @@ public class GameManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (!IsServer) return;
-
         // Test, eventually there needs to be code to check if all
         // players spawned in.
-        ChangeGamePhaseServerRpc(gamePhase);
+        // ChangeGamePhaseServerRpc(gamePhase);
     }
 
     void Update()
@@ -40,19 +39,20 @@ public class GameManager : NetworkBehaviour
         switch (gamePhase)
         {
             case GamePhase.Combat:
-                CamControlClientRpc(true);
+                CamControlClientRpc(true, (int) gamePhase);
             break;
 
             case GamePhase.Building:
-                CamControlClientRpc(false);
+                CamControlClientRpc(false, (int) gamePhase);
             break;
         }
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void CamControlClientRpc(bool toFps)
+    private void CamControlClientRpc(bool toFps, int gamePhaseInt)
     {
-        gridPlacement.gameObject.SetActive(!toFps);
+        gamePhase = (GamePhase) gamePhaseInt;
+        buildingUI.gameObject.SetActive(!toFps);
 
         Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
 

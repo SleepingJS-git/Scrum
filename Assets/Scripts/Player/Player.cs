@@ -17,7 +17,9 @@ public class Player : Entity
     // I know this is messy. This is a test. Eventually I want to have a singleton manager have a variable
     // so the player can reference it themselves.
     [SerializeField] private PlayerHud playerHudPrefab;
-    [SerializeField] private PlayerHud _hud;
+    [SerializeField] private BuildCamera buildCamPrefab;
+    private PlayerHud _hud;
+    private BuildCamera _buildCam;
     public Transform PlayerCam => look.cam.transform;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
@@ -41,15 +43,14 @@ public class Player : Entity
 
         if (IsOwner)
         {
-            // For Debug rn, toggle first person immediately
-            ToggleFirstPerson(true);
-
             _hud = Instantiate(playerHudPrefab);
 
             // Request the server to spawn player at specific spawn point
             SpawnServerRpc();
 
             _hud.health.text = health.Value.ToString();
+
+            SpawnBuilderServerRpc();
         }
 
         // Check if the computer running this script is the client.
@@ -68,7 +69,8 @@ public class Player : Entity
         if (!IsOwner) return;
 
         if (!isAlive.Value) return;
-        
+
+        if (GameManager.GamePhase == GamePhase.Building) return;
         move.Move(input.MoveInput);
         combat.PrimaryInput(input.PrimaryInput);
         interaction.Interaction();
@@ -81,10 +83,11 @@ public class Player : Entity
 
         if (!isAlive.Value) return;
 
+        if (GameManager.GamePhase == GamePhase.Building) return;
         look.Look(input.LookInput());
     }
 
-    
+
     public void ToggleDeathHud(bool isDead)
     {
         if (!IsOwner) return;
@@ -97,12 +100,13 @@ public class Player : Entity
     /// False = the player loses control of FP Movement
     /// Controls will be overwrited outside of this script.
     /// </summary>
-    /// <param name="toFPS"></param>
-    public void ToggleFirstPerson(bool toFPS)
+    /// <param name="toFps"></param>
+    public void ToggleFirstPerson(bool toFps)
     {
-        Cursor.visible = !toFPS;
-        Cursor.lockState = toFPS ? CursorLockMode.Locked: CursorLockMode.Confined;
-        look.cam.gameObject.SetActive(toFPS);
+        Cursor.visible = !toFps;
+        Cursor.lockState = toFps ? CursorLockMode.Locked : CursorLockMode.Confined;
+        _buildCam.gameObject.SetActive(!toFps);
+        look.cam.gameObject.SetActive(toFps);
     }
 
     /// <summary>
@@ -139,8 +143,8 @@ public class Player : Entity
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
         Vector3 pos = PlayerSpawner.GetSpawnPoint(clientId).transform.position;
-        pos.y+= 1f;     // up 1 unit so they dont clip through the floor
-        
+        pos.y += 1f;     // up 1 unit so they dont clip through the floor
+
         // Send request back to client to make changes
         SpawnClientRpc(pos);
     }
@@ -156,5 +160,25 @@ public class Player : Entity
             return;
 
         transform.position = pos;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SpawnBuilderServerRpc(RpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        BuildCamera buildCam = Instantiate(buildCamPrefab);
+        buildCam.NetworkObject.SpawnWithOwnership(clientId);
+
+        SetBuilderClientRpc(buildCam.NetworkObjectId);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetBuilderClientRpc(ulong networkObjectId)
+    {
+        if (!IsOwner) return;
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+        {
+            _buildCam = networkObject.GetComponent<BuildCamera>();
+        }
     }
 }

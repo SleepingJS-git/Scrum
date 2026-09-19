@@ -651,14 +651,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2508019869
+  GlobalObjectIdHash: 1887593818
   InScenePlacedSourceGlobalObjectIdHash: 2508019869
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 0
+  m_InScenePlaced: 1
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -797,7 +797,7 @@ MonoBehaviour:
   interaction: {fileID: 0}
   body: {fileID: 0}
   playerHudPrefab: {fileID: 3345661794966301860, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
-  _hud: {fileID: 0}
+  buildCamPrefab: {fileID: 1513123767215250648, guid: 214932880ed5356449811c972f34cd5e, type: 3}
 --- !u!114 &5283261713411698337
 MonoBehaviour:
   m_ObjectHideFlags: 0
