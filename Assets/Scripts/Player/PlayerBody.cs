@@ -15,7 +15,7 @@ public class PlayerBody : MonoBehaviour
     /// [Called by ClientRpc] (onDeathEffects)
     /// </summary>
     public void Ragdoll()
-    {  
+    {
         // Turn on the renderer so that the instantiated body has its renderer on
         bodyRenderer.enabled = true;
 
@@ -24,12 +24,25 @@ public class PlayerBody : MonoBehaviour
         // Turn off the renderer to hide the dead player's actual renderer
         // bodyRenderer.gameObject.SetActive(false);
 
-        foreach(Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
+        foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
         {
             rb.useGravity = true;
             rb.isKinematic = false;
             rb.linearVelocity = Vector3.zero;
         }
+    }
+
+    public void UnRagdoll(bool showRenderer)
+    {
+        bodyRenderer.enabled = showRenderer;
+
+        foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
+        {
+            rb.useGravity = false;
+            rb.isKinematic = true;
+        }
+
+        animator.enabled = true;
     }
     public void Play(string para, bool val)
     {

@@ -80,6 +80,8 @@ public class GridPlacement : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        if (GameManager.GamePhase == GamePhase.Loading) return;
+
         // Controls
 
         // If the right rotate action is pressed, increase the rotation angle
@@ -174,7 +176,7 @@ public class GridPlacement : NetworkBehaviour
         if (isAnyCellTaken)
             previewRenderer.material.color = new Color(2f, defaultColor.g, defaultColor.b, 0.1f);
         else
-            previewRenderer.material.color = defaultColor;
+            previewRenderer.material.color = new Color(defaultColor.r, 2f, defaultColor.b, 0.1f);
     }
 
     [Rpc(SendTo.Server)]

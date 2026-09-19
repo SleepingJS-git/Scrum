@@ -5,8 +5,7 @@ using UnityEngine.InputSystem;
 public class BuildCamera : NetworkBehaviour
 {
     // Grid building script
-    [SerializeField]
-    private GridPlacement gridBuilding;
+    public GridPlacement gridBuilding;
 
     // Player input and actions
     private PlayerInput playerInput;

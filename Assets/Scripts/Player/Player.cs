@@ -19,7 +19,7 @@ public class Player : Entity
     [SerializeField] private PlayerHud playerHudPrefab;
     [SerializeField] private BuildCamera buildCamPrefab;
     private PlayerHud _hud;
-    private BuildCamera _buildCam;
+    public BuildCamera buildCam;
     public Transform PlayerCam => look.cam.transform;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
@@ -51,6 +51,8 @@ public class Player : Entity
             _hud.health.text = health.Value.ToString();
 
             SpawnBuilderServerRpc();
+
+            Invoke(nameof(LoadedIn), .25f);
         }
 
         // Check if the computer running this script is the client.
@@ -61,6 +63,18 @@ public class Player : Entity
         look.Init(IsOwner);
         combat.Init(IsOwner, _hud);
         interaction.Init(look.cam.transform, _hud);
+
+        if (IsServer)
+        {
+            AddDeathEvent(PlayerDeath);
+        }
+    }
+
+    void LoadedIn()
+    {
+
+        GameManager.Instance.buildingUI.gameObject.SetActive(false);
+        GameManager.Instance.PlayerLoadedServerRpc();
     }
 
     void Update()
@@ -70,7 +84,7 @@ public class Player : Entity
 
         if (!isAlive.Value) return;
 
-        if (GameManager.GamePhase == GamePhase.Building) return;
+        if (GameManager.GamePhase != GamePhase.Combat) return;
         move.Move(input.MoveInput);
         combat.PrimaryInput(input.PrimaryInput);
         interaction.Interaction();
@@ -83,10 +97,27 @@ public class Player : Entity
 
         if (!isAlive.Value) return;
 
-        if (GameManager.GamePhase == GamePhase.Building) return;
+        if (GameManager.GamePhase != GamePhase.Combat) return;
         look.Look(input.LookInput());
     }
+    
+    private void PlayerDeath()
+    {
+        Debug.Log("Player Death was called");
+        PlayerDeatherServerRpc();
+    }
+    [Rpc(SendTo.Server)]
+    private void PlayerDeatherServerRpc(RpcParams rpcParams = default)
+    {
+        ulong clientID = rpcParams.Receive.SenderClientId;
+        GameManager.Instance.PlayerDeath(clientID);
+        
+    }
 
+    public void PlayerIsReset()
+    {
+        GameManager.Instance.PlayerResetServerRpc();
+    }
 
     public void ToggleDeathHud(bool isDead)
     {
@@ -105,7 +136,7 @@ public class Player : Entity
     {
         Cursor.visible = !toFps;
         Cursor.lockState = toFps ? CursorLockMode.Locked : CursorLockMode.Confined;
-        _buildCam.gameObject.SetActive(!toFps);
+        buildCam.gameObject.SetActive(!toFps);
         look.cam.gameObject.SetActive(toFps);
     }
 
@@ -154,7 +185,7 @@ public class Player : Entity
     /// </summary>
     /// <param name="pos"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    private void SpawnClientRpc(Vector3 pos)
+    public void SpawnClientRpc(Vector3 pos)
     {
         if (!IsOwner)
             return;
@@ -178,7 +209,7 @@ public class Player : Entity
         if (!IsOwner) return;
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
         {
-            _buildCam = networkObject.GetComponent<BuildCamera>();
+            buildCam = networkObject.GetComponent<BuildCamera>();
         }
     }
 }
