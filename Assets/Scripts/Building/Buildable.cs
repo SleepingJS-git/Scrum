@@ -1,8 +1,9 @@
 using NUnit.Framework;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Buildable : MonoBehaviour
+public class Buildable : NetworkBehaviour
 {
     [SerializeField]
     private Vector3Int[] occupiedCells;
@@ -11,7 +12,7 @@ public class Buildable : MonoBehaviour
     private GameObject mesh;
 
     private Vector3Int dimensions;
-
+    public ulong Id;
     public Vector3Int[] OccupiedCells
     {
         get { return occupiedCells; }
@@ -38,7 +39,7 @@ public class Buildable : MonoBehaviour
         get { return mesh.GetComponent<Renderer>(); }
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public override void OnNetworkSpawn()
     {
         SetDimensions();
     }

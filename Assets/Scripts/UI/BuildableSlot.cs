@@ -12,16 +12,16 @@ public class BuildSelectionSlot : MonoBehaviour
     [SerializeField] private Color normalColor = Color.gray;
     [SerializeField] private Color selectedColor = Color.white;
 
-    public GameObject BuildPrefab { get; private set; }
+    public ulong BuildPrefabID { get; private set; }
 
     private Action<BuildSelectionSlot> onClicked;
 
-    public void Setup(GameObject prefab, Action<BuildSelectionSlot> clickAction)
+    public void Setup(ulong prefabID, Action<BuildSelectionSlot> clickAction)
     {
-        BuildPrefab = prefab;
+        BuildPrefabID = prefabID;
         onClicked = clickAction;
 
-        nameText.text = prefab.name;
+        nameText.text = BuildableDatabase.GetBuildable(prefabID).name;
 
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(Clicked);
