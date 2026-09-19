@@ -46,7 +46,7 @@ public class Player : Entity
             _hud = Instantiate(playerHudPrefab);
 
             // Request the server to spawn player at specific spawn point
-            SpawnServerRpc();
+            // SpawnServerRpc();
 
             _hud.health.text = health.Value.ToString();
 
@@ -173,9 +173,7 @@ public class Player : Entity
     public void SpawnServerRpc(RpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
-        Vector3 pos = PlayerSpawner.GetSpawnPoint(clientId).transform.position;
-        pos.y += 1f;     // up 1 unit so they dont clip through the floor
-
+        Vector3 pos = PlayerSpawner.GetRandomSpawnPoint().transform.position;
         // Send request back to client to make changes
         SpawnClientRpc(pos);
     }

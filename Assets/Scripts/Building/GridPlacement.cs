@@ -75,6 +75,17 @@ public class GridPlacement : NetworkBehaviour
         // UpdateBuildable();
     }
 
+    public void ResetCounter()
+    {
+        ResetCounterServerRpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ResetCounterServerRpc()
+    {
+        currentPlacements.Value = 0;
+    }
+
     // Update is called once per frame
     void Update()
     {

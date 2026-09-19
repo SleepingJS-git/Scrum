@@ -161,7 +161,6 @@ public class GameManager : NetworkBehaviour
             Player player = client.PlayerObject.GetComponent<Player>();
             player.health.Value = 100;
             player.isAlive.Value = true;
-            player.buildCam.gridBuilding.currentPlacements.Value = 0;
         }
 
         EndCombatClientRpc();
@@ -184,6 +183,7 @@ public class GameManager : NetworkBehaviour
                 player.body.UnRagdoll(false);
                 player.body.Play("IsMoving", false);
                 player.SpawnServerRpc();
+                player.buildCam.gridBuilding.ResetCounter();
                 player.PlayerIsReset();
             }
             else
