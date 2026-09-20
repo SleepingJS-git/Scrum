@@ -5,11 +5,9 @@ using TMPro;
 
 public class BuildingUI : MonoBehaviour
 {
-    [Header("Available Buildables")]
-    [SerializeField] private GameObject[] buildablePrefabs;
-
     [Header("UI Slots")]
     [SerializeField] private BuildSelectionSlot[] slots;
+    [SerializeField] private BarHoverCheck barHoverCheck;
 
     public GameObject SelectedPrefab { get; private set; }
 
@@ -24,15 +22,23 @@ public class BuildingUI : MonoBehaviour
         GenerateRandomChoices();
     }
 
+    public void SetGridPlacement(GridPlacement gp)
+    {
+        gridPlacement = gp;
+        gridPlacement.barCheck = barHoverCheck;
+    }
+
     // always check for change in current placements for the text obj (public field in gridplacement)
     private void Update()
     {
-        placementInfo.text = String.Format($"{gridPlacement.currentPlacements}/{gridPlacement.maxPlacements}");
+        if (!gridPlacement) return;
+        placementInfo.text = String.Format($"{gridPlacement.currentPlacements.Value}/{gridPlacement.maxPlacements}");
     }
 
     private void GenerateRandomChoices()
     {
-        List<GameObject> available = new List<GameObject>(buildablePrefabs);
+        
+        List<ulong> available = new List<ulong>(BuildableDatabase.AvailablePrefabIds);
 
         for (int i = 0; i < slots.Length; i++)
         {
@@ -42,11 +48,11 @@ public class BuildingUI : MonoBehaviour
             int randomIndex = UnityEngine.Random.Range(0, available.Count);
 
             //don't have duplicate buildables at certain slots
-            GameObject chosenPrefab = available[randomIndex];
+            ulong chosenPrefabId = available[randomIndex];
             available.RemoveAt(randomIndex);
 
             // adds the select slot method and prefab generated to each buildable button in the bar
-            slots[i].Setup(chosenPrefab, SelectSlot);
+            slots[i].Setup(chosenPrefabId, SelectSlot);
         }
     }
 
@@ -58,9 +64,6 @@ public class BuildingUI : MonoBehaviour
             slot.SetHighlighted(slot == selectedSlot);
         }
 
-        Buildable selectedBuildable =
-            selectedSlot.BuildPrefab.GetComponent<Buildable>();
-
-        gridPlacement.SetBuildable(selectedBuildable);
+        gridPlacement.SetBuildable(selectedSlot.BuildPrefabID);
     }
 }

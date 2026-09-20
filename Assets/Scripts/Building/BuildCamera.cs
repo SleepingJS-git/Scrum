@@ -1,11 +1,11 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class BuildCamera : MonoBehaviour
+public class BuildCamera : NetworkBehaviour
 {
     // Grid building script
-    [SerializeField]
-    private GridPlacement gridBuilding;
+    public GridPlacement gridBuilding;
 
     // Player input and actions
     private PlayerInput playerInput;
@@ -15,12 +15,12 @@ public class BuildCamera : MonoBehaviour
     private InputAction drag;
 
     // Speed for the camera pan
-    private float panSpeed = 20f;
-    private float dragSensitivity = 0.25f;
+    [SerializeField] private float panSpeed = 20f;
+    [SerializeField] private float dragSensitivity = 0.25f;
 
     // Point for the camera to orbit around
     private Vector3 orbitTargetPoint;
-    private float orbitSensitivity = 0.5f;
+    [SerializeField] private float orbitSensitivity = 0.5f;
 
     // Maximum distance for raycast
     private float maxRayDist = 100f;
@@ -29,7 +29,7 @@ public class BuildCamera : MonoBehaviour
     private float zoomDistance = 10f;
     private float minZoom = 2f;
     private float maxZoom = 20f;
-    private float zoomSensitivity = 0.5f;
+    [SerializeField] private float zoomSensitivity = 0.5f;
 
     // Pitch constraints
     private float minPitch = 10f;
@@ -46,10 +46,14 @@ public class BuildCamera : MonoBehaviour
     float lerpDampening = 5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        //Set up inputs 
         playerInput = gridBuilding.GetComponent<PlayerInput>();
+
+        playerInput.enabled = IsOwner;
+        if (!IsOwner) return;
+
+        //Set up inputs 
         pan = playerInput.actions.FindAction("Pan");
         orbit = playerInput.actions.FindAction("Orbit");
         zoom = playerInput.actions.FindAction("Zoom");
@@ -64,6 +68,7 @@ public class BuildCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!IsOwner) return;
         // Find the direction to pan
         Vector3 panVector = pan.ReadValue<Vector3>().normalized;
 
