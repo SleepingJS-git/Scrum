@@ -13,4 +13,10 @@ public class PlayerSpawner : MonoBehaviour
     {
         return Instance.spawnPoints[index];
     }
+
+    public static Transform GetRandomSpawnPoint()
+    {
+        int count = Instance.spawnPoints.Length;
+        return Instance.spawnPoints[Random.Range(0, count)];
+    }
 }

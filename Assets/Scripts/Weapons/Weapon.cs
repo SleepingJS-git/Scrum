@@ -231,7 +231,9 @@ public class Weapon : NetworkBehaviour
 
         trail.transform.position = hitPoint;
         Destroy(trail.gameObject, trail.time);
-        Instantiate(data.bulletImpact, hitPoint, Quaternion.LookRotation(dir));
+        GameObject bulletImpact = Instantiate(data.bulletImpact, hitPoint, Quaternion.LookRotation(dir));
+
+        Destroy(bulletImpact, .5f);
     }
 
 

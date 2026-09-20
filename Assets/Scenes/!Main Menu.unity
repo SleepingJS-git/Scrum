@@ -611,13 +611,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1693834266301829610, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: sceneName
+      value: MVP Testing
+      objectReference: {fileID: 0}
     - target: {fileID: 8850395918584302805, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
       propertyPath: m_Name
       value: MainMenuUI
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 907513744397586381, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}

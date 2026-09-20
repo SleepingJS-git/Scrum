@@ -1,11 +1,11 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class BuildCamera : MonoBehaviour
+public class BuildCamera : NetworkBehaviour
 {
     // Grid building script
-    [SerializeField]
-    private GridPlacement gridBuilding;
+    public GridPlacement gridBuilding;
 
     // Player input and actions
     private PlayerInput playerInput;
@@ -46,10 +46,14 @@ public class BuildCamera : MonoBehaviour
     float lerpDampening = 5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        //Set up inputs 
         playerInput = gridBuilding.GetComponent<PlayerInput>();
+
+        playerInput.enabled = IsOwner;
+        if (!IsOwner) return;
+
+        //Set up inputs 
         pan = playerInput.actions.FindAction("Pan");
         orbit = playerInput.actions.FindAction("Orbit");
         zoom = playerInput.actions.FindAction("Zoom");
@@ -64,6 +68,7 @@ public class BuildCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!IsOwner) return;
         // Find the direction to pan
         Vector3 panVector = pan.ReadValue<Vector3>().normalized;
 
