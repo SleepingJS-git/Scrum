@@ -830,7 +830,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8a2b252f191bd84ab8687cdc0361328, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  on: 0
   grid: {fileID: 607848983}
+  gridColor: {r: 0, g: 0, b: 0, a: 0}
   length: 10
   width: 10
   height: 10

@@ -6,10 +6,12 @@ public class ConnectUI : MonoBehaviour
 {
     [SerializeField] private Button hostButton;
     [SerializeField] private Button clientButton;
+    [SerializeField] private Button readyButton;
     void Start()
     {
         hostButton.onClick.AddListener(HostButtonOnClick);
         clientButton.onClick.AddListener(ClientButtonOnClick);
+        readyButton.onClick.AddListener(PlayerIsReady);
     }
 
     /// <summary>
@@ -26,5 +28,17 @@ public class ConnectUI : MonoBehaviour
     private void ClientButtonOnClick()
     {
         NetworkManager.Singleton.StartClient();
+    }
+
+    private void PlayerIsReady()
+    {
+        GameManager.Instance.PlayerReadyServerRpc();
+
+        readyButton.gameObject.SetActive(false);
+    }
+
+    public void ResetReadyButton()
+    {
+        readyButton.gameObject.SetActive(true);
     }
 }

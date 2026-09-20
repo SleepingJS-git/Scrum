@@ -17,7 +17,9 @@ public class Player : Entity
     // I know this is messy. This is a test. Eventually I want to have a singleton manager have a variable
     // so the player can reference it themselves.
     [SerializeField] private PlayerHud playerHudPrefab;
-    [SerializeField] private PlayerHud _hud;
+    [SerializeField] private BuildCamera buildCamPrefab;
+    private PlayerHud _hud;
+    public BuildCamera buildCam;
     public Transform PlayerCam => look.cam.transform;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
@@ -41,15 +43,16 @@ public class Player : Entity
 
         if (IsOwner)
         {
-            // For Debug rn, toggle first person immediately
-            ToggleFirstPerson(true);
-
             _hud = Instantiate(playerHudPrefab);
 
             // Request the server to spawn player at specific spawn point
-            SpawnServerRpc();
+            // SpawnServerRpc();
 
             _hud.health.text = health.Value.ToString();
+
+            SpawnBuilderServerRpc();
+
+            Invoke(nameof(LoadedIn), .25f);
         }
 
         // Check if the computer running this script is the client.
@@ -60,6 +63,18 @@ public class Player : Entity
         look.Init(IsOwner);
         combat.Init(IsOwner, _hud);
         interaction.Init(look.cam.transform, _hud);
+
+        if (IsServer)
+        {
+            AddDeathEvent(PlayerDeath);
+        }
+    }
+
+    void LoadedIn()
+    {
+
+        GameManager.Instance.buildingUI.gameObject.SetActive(false);
+        GameManager.Instance.PlayerLoadedServerRpc();
     }
 
     void Update()
@@ -68,7 +83,8 @@ public class Player : Entity
         if (!IsOwner) return;
 
         if (!isAlive.Value) return;
-        
+
+        if (GameManager.GamePhase != GamePhase.Combat) return;
         move.Move(input.MoveInput);
         combat.PrimaryInput(input.PrimaryInput);
         interaction.Interaction();
@@ -81,10 +97,28 @@ public class Player : Entity
 
         if (!isAlive.Value) return;
 
+        if (GameManager.GamePhase != GamePhase.Combat) return;
         look.Look(input.LookInput());
     }
-
     
+    private void PlayerDeath()
+    {
+        Debug.Log("Player Death was called");
+        PlayerDeatherServerRpc();
+    }
+    [Rpc(SendTo.Server)]
+    private void PlayerDeatherServerRpc(RpcParams rpcParams = default)
+    {
+        ulong clientID = rpcParams.Receive.SenderClientId;
+        GameManager.Instance.PlayerDeath(clientID);
+        
+    }
+
+    public void PlayerIsReset()
+    {
+        GameManager.Instance.PlayerResetServerRpc();
+    }
+
     public void ToggleDeathHud(bool isDead)
     {
         if (!IsOwner) return;
@@ -97,12 +131,13 @@ public class Player : Entity
     /// False = the player loses control of FP Movement
     /// Controls will be overwrited outside of this script.
     /// </summary>
-    /// <param name="toFPS"></param>
-    public void ToggleFirstPerson(bool toFPS)
+    /// <param name="toFps"></param>
+    public void ToggleFirstPerson(bool toFps)
     {
-        Cursor.visible = !toFPS;
-        Cursor.lockState = toFPS ? CursorLockMode.Locked: CursorLockMode.Confined;
-        look.cam.gameObject.SetActive(toFPS);
+        Cursor.visible = !toFps;
+        Cursor.lockState = toFps ? CursorLockMode.Locked : CursorLockMode.Confined;
+        buildCam.gameObject.SetActive(!toFps);
+        look.cam.gameObject.SetActive(toFps);
     }
 
     /// <summary>
@@ -138,9 +173,7 @@ public class Player : Entity
     public void SpawnServerRpc(RpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
-        Vector3 pos = PlayerSpawner.GetSpawnPoint(clientId).transform.position;
-        pos.y+= 1f;     // up 1 unit so they dont clip through the floor
-        
+        Vector3 pos = PlayerSpawner.GetRandomSpawnPoint().transform.position;
         // Send request back to client to make changes
         SpawnClientRpc(pos);
     }
@@ -150,11 +183,31 @@ public class Player : Entity
     /// </summary>
     /// <param name="pos"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    private void SpawnClientRpc(Vector3 pos)
+    public void SpawnClientRpc(Vector3 pos)
     {
         if (!IsOwner)
             return;
 
         transform.position = pos;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SpawnBuilderServerRpc(RpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        BuildCamera buildCam = Instantiate(buildCamPrefab);
+        buildCam.NetworkObject.SpawnWithOwnership(clientId);
+
+        SetBuilderClientRpc(buildCam.NetworkObjectId);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetBuilderClientRpc(ulong networkObjectId)
+    {
+        if (!IsOwner) return;
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+        {
+            buildCam = networkObject.GetComponent<BuildCamera>();
+        }
     }
 }

@@ -5,8 +5,7 @@ using UnityEngine.InputSystem;
 public class BuildCamera : NetworkBehaviour
 {
     // Grid building script
-    [SerializeField]
-    private GridPlacement gridBuilding;
+    public GridPlacement gridBuilding;
 
     // Player input and actions
     private PlayerInput playerInput;
@@ -49,10 +48,12 @@ public class BuildCamera : NetworkBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
-        Debug.Log("IsOwner?: " + IsOwner);
-        if (!IsOwner) return;
-        //Set up inputs 
         playerInput = gridBuilding.GetComponent<PlayerInput>();
+
+        playerInput.enabled = IsOwner;
+        if (!IsOwner) return;
+
+        //Set up inputs 
         pan = playerInput.actions.FindAction("Pan");
         orbit = playerInput.actions.FindAction("Orbit");
         zoom = playerInput.actions.FindAction("Zoom");
