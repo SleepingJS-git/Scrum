@@ -91,7 +91,10 @@ public class GridPlacement : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        if (GameManager.GamePhase == GamePhase.Loading) return;
+        if (GameManager.Instance != null) 
+        {
+            if (GameManager.GamePhase == GamePhase.Loading) return;
+        }
 
         // Controls
 
@@ -194,6 +197,7 @@ public class GridPlacement : NetworkBehaviour
     private void PlaceBuildableServerRpc(Vector3Int cellPos, float rotation)
     {
         if (!buildable) return;
+        if (!CanPreviewBuildable()) return;
         if (!IsAnyCellTaken(cellPos, buildable))
         {
             // Send Server Request to create object
@@ -348,9 +352,9 @@ public class GridPlacement : NetworkBehaviour
             return false;
 
         // Why tho?
-        // // Don't place/preview while interacting with the build UI
-        // if (barCheck.IsHoveringBuildableBar)
-        //     return false;
+        // Don't place/preview while interacting with the build UI
+        //if (barCheck.IsHoveringBuildableBar)
+             //return false;
 
         return true;
     }
