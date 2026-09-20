@@ -26,5 +26,6 @@ MonoBehaviour:
   weaponInHand: {fileID: 393730789072996145, guid: 3c50185d73fd84d46854c3e8fd4da8ef, type: 3}
   weaponModel: {fileID: 6304313504817503738, guid: 037ab4970451b3f4ba3e1f5acea50924, type: 3}
   shootingEffect: {fileID: 0}
+  fireSound: {fileID: 8300000, guid: 3c8dda048bc3ff8498864d0a31d95c55, type: 3}
   trail: {fileID: 6054875183091041710, guid: ddef6a7c1338919478524e3ab4ff32e0, type: 3}
   bulletImpact: {fileID: 2466890847199373625, guid: 2cfcfcd2ebc663f49a9ed727850f1eff, type: 3}

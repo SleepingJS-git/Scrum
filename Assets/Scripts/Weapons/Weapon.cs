@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Audio;
 
 /// <summary>
 /// A component attached to the PlayerObject and is used to handle the weapon behaviors
@@ -53,6 +54,8 @@ public class Weapon : NetworkBehaviour
     public bool IsReady { get { return Time.time >= lastShootTime + fireRate.Value; } }
     public bool NeedsReload { get { return currentBullets.Value <= 0; } }
     public bool HasNoAmmo { get { return currentBullets.Value == 0 && reserveBullets.Value == 0; } }
+    //Allows the weapon to play audio (recieves this source from the Player prefab)
+    [SerializeField] private AudioSource weaponAudioSource;
     private float lastShootTime;
     public bool hasWeapon;
     public override void OnNetworkSpawn()
@@ -179,6 +182,14 @@ public class Weapon : NetworkBehaviour
     public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId)
     {
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
+
+        float randomPitch = UnityEngine.Random.Range(0.985f, 1.015f);
+        float randomVolume = UnityEngine.Random.Range(0.85f, 0.9f);
+        weaponAudioSource.pitch = randomPitch;
+        weaponAudioSource.volume = randomVolume;
+        bool isLocalShooter = NetworkManager.Singleton.LocalClientId == clientId;
+        weaponAudioSource.spatialBlend = isLocalShooter ? 0f : 1f;
+        weaponAudioSource.PlayOneShot(data.fireSound);
 
         // Create the bullet trail
         BulletTrail(

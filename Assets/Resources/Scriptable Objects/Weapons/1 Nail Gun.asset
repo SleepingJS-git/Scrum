@@ -17,7 +17,7 @@ MonoBehaviour:
   firingType: 0
   WeaponType: 0
   damage: 4
-  fireRate: 0.025
+  fireRate: 0.076
   bulletCount: 100
   bulletsPerShot: 1
   magCount: 2
@@ -26,5 +26,6 @@ MonoBehaviour:
   weaponInHand: {fileID: 5086761811338402136, guid: ce6932454fc0c7d43bd8d965cd821d98, type: 3}
   weaponModel: {fileID: 4600354628101149596, guid: 27c495b6cd48df449b9b0bf71dac4489, type: 3}
   shootingEffect: {fileID: 0}
+  fireSound: {fileID: 8300000, guid: 3c8dda048bc3ff8498864d0a31d95c55, type: 3}
   trail: {fileID: 2059742913133304835, guid: 23e894f2da81ee8499685b78125ad8c8, type: 3}
   bulletImpact: {fileID: 4623250405035984504, guid: 5eb77df42ed0a7e47999dcc3c35d4e8a, type: 3}
