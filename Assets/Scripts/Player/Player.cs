@@ -46,9 +46,9 @@ public class Player : Entity
         {
             _hud = Instantiate(playerHudPrefab);
             _hud.health.text = health.Value.ToString();
-            
             if (GameManager.Instance != null)
             {
+                SpawnServerRpc();
                 SpawnBuilderServerRpc();
                 Invoke(nameof(LoadedIn), .25f);
             }
@@ -230,6 +230,8 @@ public class Player : Entity
     {
         combat.EmptyWeapon();
         ToggleDeathHud(false);
+        body.UnRagdoll(false);
+        body.Play("IsMoving", false);
         SpawnServerRpc();
         if (buildCam) buildCam.gridBuilding.ResetCounter();
         if (GameManager.Instance) PlayerIsReset();

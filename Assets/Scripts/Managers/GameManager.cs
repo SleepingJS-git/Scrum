@@ -186,10 +186,11 @@ public class GameManager : NetworkBehaviour
             }
             else
             {
+                player.body.UnRagdoll(true);
+                player.body.Play("IsMoving", false);
                 Destroy(player.combat.weaponInHand);
             }
-            player.body.UnRagdoll(true);
-            player.body.Play("IsMoving", false);
+            
             player.move.OnDeathCollider(false);
         }
     }

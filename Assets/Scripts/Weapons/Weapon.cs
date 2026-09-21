@@ -275,8 +275,7 @@ public class Weapon : NetworkBehaviour
 
     public void DropWeapon()
     {
-        if (hasWeapon)
-            DropServerRpc();
+        DropServerRpc();
     }
 
     /// <summary>
@@ -289,6 +288,7 @@ public class Weapon : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void DropServerRpc()
     {
+        if (!hasWeapon) return;
         ulong clientID = OwnerClientId;
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
         {
