@@ -10,7 +10,7 @@ public class PlayerBody : MonoBehaviour
     public void Init(bool IsOwner)
     {
         bodyRenderer.enabled = !IsOwner;
-
+        onHitData = new OnHitData();
     }
 
     /// <summary>
