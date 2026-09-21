@@ -134,6 +134,7 @@ public class Weapon : NetworkBehaviour
         Vector3 dir = SpreadRandomizer(aimDir, data.bulletSpread);
         Vector3 adjustedHeadPos = headPos + (dir * 0.75f);
         Vector3 hitPoint = adjustedHeadPos + (dir * 25f);
+        bool hitPlayer = false;
         // Send a raycast from the head to the new dirction within 100 units on only specific layers, and ignoring triggers
         if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, 100f, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {
@@ -146,6 +147,7 @@ public class Weapon : NetworkBehaviour
                 // Check if the entity is alive
                 if (e && e.isAlive.Value)
                 {
+                    hitPlayer = true;
                     e.OnHit(new OnHitData()
                     {
                         attacker = player,
@@ -167,7 +169,8 @@ public class Weapon : NetworkBehaviour
             aimDir,
             currentBullets.Value,
             reserveBullets.Value,
-            rpcParams.Receive.SenderClientId
+            rpcParams.Receive.SenderClientId,
+            hitPlayer
         );
     }
 
@@ -179,12 +182,12 @@ public class Weapon : NetworkBehaviour
     /// <param name="reserveBullets"></param>
     /// <param name="clientId"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId)
+    public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId, bool hitPlayer)
     {
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
 
         float randomPitch = UnityEngine.Random.Range(0.985f, 1.015f);
-        float randomVolume = UnityEngine.Random.Range(0.85f, 0.9f);
+        float randomVolume = UnityEngine.Random.Range(0.5f, 0.55f);
         weaponAudioSource.pitch = randomPitch;
         weaponAudioSource.volume = randomVolume;
         bool isLocalShooter = NetworkManager.Singleton.LocalClientId == clientId;
@@ -202,6 +205,11 @@ public class Weapon : NetworkBehaviour
         // If the current client wasn't the client that requested the serverrpc, return
         if (NetworkManager.Singleton.LocalClientId != clientId)
             return;
+
+        if (hitPlayer)
+        {
+            AudioManager.Instance.PlayHitmarker();
+        }
 
         // Update the hud for the client that shot the weapon
         Player player = GetPlayer(clientId);

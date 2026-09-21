@@ -16,8 +16,8 @@ MonoBehaviour:
   weaponID: 0
   firingType: 0
   WeaponType: 0
-  damage: 15
-  fireRate: 0.075
+  damage: 10
+  fireRate: 0.202
   bulletCount: 16
   bulletsPerShot: 1
   magCount: 2

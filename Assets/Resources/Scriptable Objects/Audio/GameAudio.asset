@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec396b567b3ac84e918f51033b550d2, type: 3}
+  m_Name: GameAudio
+  m_EditorClassIdentifier: 
+  hitmarkerSound: {fileID: 8300000, guid: 9b26bba0b7e4d35428873172c8e6e729, type: 3}
