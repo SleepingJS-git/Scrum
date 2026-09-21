@@ -29,8 +29,11 @@ public class PlayerInputHandler : MonoBehaviour
             _moveInput = Vector3.zero;
             _mouseLookInput = Vector2.zero;
             _main = GetComponent<Player>();
+
         }
 
+        if (enableInput)
+            Debug.Log("Input Enabled: " + enableInput);
 
     }
 
@@ -125,7 +128,6 @@ public class PlayerInputHandler : MonoBehaviour
         {
             if (!_main.combat.weaponInHand)
                 return;
-
             _main.combat.weaponHandler.DropWeapon();
             _main.combat.EmptyWeapon();
         }

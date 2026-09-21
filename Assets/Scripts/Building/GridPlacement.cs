@@ -51,20 +51,21 @@ public class GridPlacement : NetworkBehaviour
     // UI used to determine whether we're hovering the buildable selection bar
     [SerializeField] private BuildingUI buildingUI;
     [HideInInspector] public BarHoverCheck barCheck;
-    private bool _canPreviewBuildable;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
-        buildCam.gameObject.SetActive(IsOwner);
-        grid = GameObject.Find("Plane (Grid)").GetComponent<Grid>();
+        Debug.Log("GridPlacement.cs IsOwner?: " + IsOwner);
 
+        grid = GameObject.Find("Plane (Grid)").GetComponent<Grid>();
+        playerInput = GetComponent<PlayerInput>();
+        playerInput.enabled = IsOwner;
+        buildCam.enabled = IsOwner;
         if (!IsOwner) return;
         // Initialize all inputs
         GameObject buildingUIObj = GameObject.Find("BuildingUI");
         buildingUIObj.GetComponent<BuildingUI>().SetGridPlacement(this);
 
-        playerInput = GetComponent<PlayerInput>();
         placeAction = playerInput.actions.FindAction("Place");
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
@@ -74,10 +75,26 @@ public class GridPlacement : NetworkBehaviour
         // UpdateBuildable();
     }
 
+    public void ResetCounter()
+    {
+        ResetCounterServerRpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ResetCounterServerRpc()
+    {
+        currentPlacements.Value = 0;
+    }
+
     // Update is called once per frame
     void Update()
     {
         if (!IsOwner) return;
+
+        if (GameManager.Instance != null) 
+        {
+            if (GameManager.GamePhase == GamePhase.Loading) return;
+        }
 
         // Controls
 
@@ -173,12 +190,14 @@ public class GridPlacement : NetworkBehaviour
         if (isAnyCellTaken)
             previewRenderer.material.color = new Color(2f, defaultColor.g, defaultColor.b, 0.1f);
         else
-            previewRenderer.material.color = defaultColor;
+            previewRenderer.material.color = new Color(defaultColor.r, 2f, defaultColor.b, 0.1f);
     }
 
     [Rpc(SendTo.Server)]
     private void PlaceBuildableServerRpc(Vector3Int cellPos, float rotation)
     {
+        if (!buildable) return;
+        if (!CanPreviewBuildable()) return;
         if (!IsAnyCellTaken(cellPos, buildable))
         {
             // Send Server Request to create object
@@ -333,9 +352,9 @@ public class GridPlacement : NetworkBehaviour
             return false;
 
         // Why tho?
-        // // Don't place/preview while interacting with the build UI
-        // if (barCheck.IsHoveringBuildableBar)
-        //     return false;
+        // Don't place/preview while interacting with the build UI
+        //if (barCheck.IsHoveringBuildableBar)
+             //return false;
 
         return true;
     }
