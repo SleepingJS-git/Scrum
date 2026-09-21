@@ -21,6 +21,7 @@ public class Player : Entity
     private PlayerHud _hud;
     public BuildCamera buildCam;
     public Transform PlayerCam => look.cam.transform;
+    private bool _canMove;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 

@@ -125,7 +125,7 @@ MonoBehaviour:
   occupiedCells:
   - {x: 0, y: 0, z: 0}
   - {x: 1, y: 0, z: 0}
-  mesh: {fileID: 919132149155446097, guid: bf56d3ebb62edbe42a123d7d4832ffd5, type: 3}
+  mesh: {fileID: 1784413269651930501}
   Id: 4
 --- !u!1 &4483306695715025096
 GameObject:
