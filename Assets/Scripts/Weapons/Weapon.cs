@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Audio;
 
 /// <summary>
 /// A component attached to the PlayerObject and is used to handle the weapon behaviors
@@ -53,6 +54,8 @@ public class Weapon : NetworkBehaviour
     public bool IsReady { get { return Time.time >= lastShootTime + fireRate.Value; } }
     public bool NeedsReload { get { return currentBullets.Value <= 0; } }
     public bool HasNoAmmo { get { return currentBullets.Value == 0 && reserveBullets.Value == 0; } }
+    //Allows the weapon to play audio (recieves this source from the Player prefab)
+    [SerializeField] private AudioSource weaponAudioSource;
     private float lastShootTime;
     public bool hasWeapon;
     public override void OnNetworkSpawn()
@@ -131,6 +134,7 @@ public class Weapon : NetworkBehaviour
         Vector3 dir = SpreadRandomizer(aimDir, data.bulletSpread);
         Vector3 adjustedHeadPos = headPos + (dir * 0.75f);
         Vector3 hitPoint = adjustedHeadPos + (dir * 25f);
+        bool hitPlayer = false;
         // Send a raycast from the head to the new dirction within 100 units on only specific layers, and ignoring triggers
         if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, 100f, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {
@@ -143,6 +147,7 @@ public class Weapon : NetworkBehaviour
                 // Check if the entity is alive
                 if (e && e.isAlive.Value)
                 {
+                    hitPlayer = true;
                     e.OnHit(new OnHitData()
                     {
                         attacker = player,
@@ -164,7 +169,8 @@ public class Weapon : NetworkBehaviour
             aimDir,
             currentBullets.Value,
             reserveBullets.Value,
-            rpcParams.Receive.SenderClientId
+            rpcParams.Receive.SenderClientId,
+            hitPlayer
         );
     }
 
@@ -176,9 +182,17 @@ public class Weapon : NetworkBehaviour
     /// <param name="reserveBullets"></param>
     /// <param name="clientId"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId)
+    public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId, bool hitPlayer)
     {
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
+
+        float randomPitch = UnityEngine.Random.Range(0.985f, 1.015f);
+        float randomVolume = UnityEngine.Random.Range(0.5f, 0.55f);
+        weaponAudioSource.pitch = randomPitch;
+        weaponAudioSource.volume = randomVolume;
+        bool isLocalShooter = NetworkManager.Singleton.LocalClientId == clientId;
+        weaponAudioSource.spatialBlend = isLocalShooter ? 0f : 1f;
+        weaponAudioSource.PlayOneShot(data.fireSound);
 
         // Create the bullet trail
         BulletTrail(
@@ -191,6 +205,11 @@ public class Weapon : NetworkBehaviour
         // If the current client wasn't the client that requested the serverrpc, return
         if (NetworkManager.Singleton.LocalClientId != clientId)
             return;
+
+        if (hitPlayer)
+        {
+            AudioManager.Instance.PlayHitmarker();
+        }
 
         // Update the hud for the client that shot the weapon
         Player player = GetPlayer(clientId);
