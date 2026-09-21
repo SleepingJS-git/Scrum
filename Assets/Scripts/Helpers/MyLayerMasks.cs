@@ -14,7 +14,7 @@ public static class Layer
     public static int BulletSurfaces {
     get
         {
-            return Ground | Wall | Entity | Player | Buildable | Ragdoll;        
+            return Ground | Wall | Entity | Player | Buildable;        
         }
     }
 }

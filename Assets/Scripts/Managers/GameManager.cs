@@ -33,6 +33,12 @@ public class GameManager : NetworkBehaviour
 
     }
 
+    //Set player count, used in NetworkSpawner after spawning players in
+    public void SetPlayerCount(int count)
+    {
+        numOfPlayers = count;
+    }
+
     /// <summary>
     /// When the players get loaded, set the number of players that the manager will wait to load.
     /// Once every player is loaded, game will begin.
@@ -116,6 +122,7 @@ public class GameManager : NetworkBehaviour
                 }
                 break;
         }
+
     }
 
 
@@ -201,7 +208,11 @@ public class GameManager : NetworkBehaviour
     {
         gamePhase = (GamePhase)gamePhaseInt;
 
-        if (gamePhase == GamePhase.Building) connectUI.ResetReadyButton();
+        if (gamePhase == GamePhase.Building)
+        {
+            buildingUI.GenerateRandomChoices();
+            connectUI.ResetReadyButton();
+        }
         buildingUI.gameObject.SetActive(!toFps);
 
         Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();

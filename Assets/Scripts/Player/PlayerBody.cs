@@ -6,9 +6,11 @@ public class PlayerBody : MonoBehaviour
     public Animator animator;
     public Transform rightHand;
     public Renderer bodyRenderer;
+    public OnHitData onHitData;
     public void Init(bool IsOwner)
     {
         bodyRenderer.enabled = !IsOwner;
+        onHitData = new OnHitData();
     }
 
     /// <summary>
@@ -29,6 +31,11 @@ public class PlayerBody : MonoBehaviour
             rb.useGravity = true;
             rb.isKinematic = false;
             rb.linearVelocity = Vector3.zero;
+
+            rb.AddExplosionForce(
+                onHitData.damage * 10f, 
+                onHitData.sourceHit, 2f, .5f,
+                ForceMode.Impulse);
         }
     }
 

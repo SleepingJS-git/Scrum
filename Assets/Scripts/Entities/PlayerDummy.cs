@@ -19,7 +19,7 @@ public class PlayerDummy : Entity
     public override void OnHit(OnHitData onHitData)
     {
         base.OnHit(onHitData);
-
+        _body.onHitData = onHitData;
         // audioSource. play hurt noise
     }
     private void DummyDeath()

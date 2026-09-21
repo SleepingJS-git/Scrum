@@ -20,6 +20,8 @@ public class MainMenuNetworking : MonoBehaviour
     //the session that this player is either hosting or joined to
     private ISession currentSession;
 
+    public ISession CurrentSession { get { return currentSession; } }
+
     //initializes unity cloud services
     private async void Start()
     {
