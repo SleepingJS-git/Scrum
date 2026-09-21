@@ -53,6 +53,9 @@ public class NetworkPlayerSpawner : NetworkBehaviour
             spawnIndex++;
         }
 
+        //Figure out how many players we have
+        GameManager.Instance.SetPlayerCount(spawnIndex);
+
         NetworkManager.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
     }
 }
