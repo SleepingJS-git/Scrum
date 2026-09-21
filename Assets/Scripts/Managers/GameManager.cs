@@ -142,11 +142,15 @@ public class GameManager : NetworkBehaviour
 
             case GamePhase.Building:
                 _readyPlayers = 0;
+                _resetPlayers = 0;
+                _deadPlayers = 0;
                 CamControlClientRpc(false, (int)gamePhase);
                 break;
 
             case GamePhase.EndOfCombat:
+                _readyPlayers = 0;
                 _resetPlayers = 0;
+                _deadPlayers = 0;
                 Invoke(nameof(ReviveAllPlayers), 2f);
                 break;
         }
@@ -178,20 +182,14 @@ public class GameManager : NetworkBehaviour
 
             if (player.IsOwner)
             {
-                player.combat.EmptyWeapon();
-                player.ToggleDeathHud(false);
-                player.body.UnRagdoll(false);
-                player.body.Play("IsMoving", false);
-                player.SpawnServerRpc();
-                player.buildCam.gridBuilding.ResetCounter();
-                player.PlayerIsReset();
+                player.Revive();
             }
             else
             {
                 Destroy(player.combat.weaponInHand);
-                player.body.UnRagdoll(true);
             }
-
+            player.body.UnRagdoll(true);
+            player.body.Play("IsMoving", false);
             player.move.OnDeathCollider(false);
         }
     }
@@ -204,7 +202,7 @@ public class GameManager : NetworkBehaviour
         buildingUI.gameObject.SetActive(!toFps);
 
         Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
-
+        player.ToggleMove(toFps);
         player.ToggleFirstPerson(toFps);
     }
 

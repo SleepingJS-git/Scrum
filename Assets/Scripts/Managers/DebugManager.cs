@@ -13,6 +13,7 @@ public class DebugManager : MonoBehaviour
             case DebugType.Solo_Building:
                 NetworkManager.Singleton.StartHost();
             break;
+
         }
         
     }
