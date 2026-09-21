@@ -1,15 +1,16 @@
 using System;
+using System.Collections;
 using UnityEngine;
 [RequireComponent(typeof(Fracture))]
 public class BreakableStructure: Entity
 {
-    private Fracture fractue;
+    private Fracture fracture;
     private Action fractureApart;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        fractue = GetComponent<Fracture>();
-        fractureApart = new Action(() => fractue.CauseFracture());
+        fracture = GetComponent<Fracture>();
+        fractureApart = new Action(() => fracture.CauseFracture());
         AddDeathEvent(fractureApart);
     }
 
@@ -17,5 +18,25 @@ public class BreakableStructure: Entity
     void Update()
     {
         
+    }
+
+    public override void OnHit(OnHitData onHitData)
+    {
+        base.OnHit(onHitData);
+    }
+
+    private IEnumerator LoseHealth()
+    {
+        while (health.Value > 0)
+        {
+            health.Value--;
+            yield return new WaitForSeconds(1f);
+        }
+    }
+    
+    private IEnumerator Despawn()
+    {
+        yield return new WaitForSeconds(5f);
+        Destroy(gameObject);
     }
 }
