@@ -17,7 +17,7 @@ public class PlayerBody : MonoBehaviour
     public void Ragdoll()
     {
         // Turn on the renderer so that the instantiated body has its renderer on
-        bodyRenderer.enabled = true;
+        ShowBodyRenderer(true);
 
         animator.enabled = false;
 
@@ -32,9 +32,14 @@ public class PlayerBody : MonoBehaviour
         }
     }
 
-    public void UnRagdoll(bool showRenderer)
+    public void ShowBodyRenderer(bool showRenderer)
     {
         bodyRenderer.enabled = showRenderer;
+    }
+
+    public void UnRagdoll()
+    {
+        ShowBodyRenderer(true);
 
         foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
         {
@@ -43,6 +48,7 @@ public class PlayerBody : MonoBehaviour
         }
 
         animator.enabled = true;
+
     }
     public void Play(string para, bool val)
     {

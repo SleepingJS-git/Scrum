@@ -23,6 +23,7 @@ MonoBehaviour:
   magCount: 2
   reloadSpeed: 1.5
   bulletSpread: 0.01
+  spreadIncreasePerShot: 0.065
   weaponInHand: {fileID: 393730789072996145, guid: 3c50185d73fd84d46854c3e8fd4da8ef, type: 3}
   weaponModel: {fileID: 6304313504817503738, guid: 037ab4970451b3f4ba3e1f5acea50924, type: 3}
   shootingEffect: {fileID: 0}

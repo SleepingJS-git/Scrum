@@ -31,7 +31,7 @@ public class PlayerDummy : Entity
 
     private void Revive()
     {
-        _body.UnRagdoll(true);
+        _body.UnRagdoll();
         _body.Play("IsMoving", false);
         OnDeathCollider(false);
         health.Value = maxHealth;

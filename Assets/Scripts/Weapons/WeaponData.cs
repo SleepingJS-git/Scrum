@@ -16,6 +16,8 @@ public abstract class WeaponData : ScriptableObject
     public float reloadSpeed;
     [Range(0f, 1f), Tooltip("0 means precise - 1 shit ain't landing bruh")] 
     public float bulletSpread;
+    [Range(0.005f, 0.1f), Tooltip("Values closer to 0 should be weapons that shoot very fast and have large mags. Closer to 0.1 are for smaller mags")] 
+    public float spreadIncreasePerShot;
     [Header("FPS Weapon")]
     public GameObject weaponInHand;
     [Header("Weapon Objects")]

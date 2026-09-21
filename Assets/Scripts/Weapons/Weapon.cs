@@ -57,11 +57,21 @@ public class Weapon : NetworkBehaviour
     //Allows the weapon to play audio (recieves this source from the Player prefab)
     [SerializeField] private AudioSource weaponAudioSource;
     private float lastShootTime;
+
+    // Weapon Spread
+    private float currentSpread;
+    private float lastSpreadTime;
+    private float maxSpread;
+    private float spreadIncrease;
+    [SerializeField] private float spreadRecoveryTime = 0.15f;
+    [SerializeField] private float spreadRecoverySpeed = 5f;
     public bool hasWeapon;
     public override void OnNetworkSpawn()
     {
 
     }
+
+
 
     /// <summary>
     /// [Called by ServerRpc] (DropWeapon.Equip)
@@ -77,7 +87,29 @@ public class Weapon : NetworkBehaviour
         weaponID.Value = data.weaponID;
         currentBullets.Value = c;
         reserveBullets.Value = r;
+        maxSpread = data.bulletSpread;
+        spreadIncrease = data.spreadIncreasePerShot;
         hasWeapon = true;
+    }
+
+    private void Update()
+    {
+        if (!IsServer) return;
+        
+        if (currentSpread <= 0f)
+            return;
+
+        if (Time.time < lastSpreadTime + spreadRecoveryTime)
+            return;
+
+        currentSpread = Mathf.Lerp(
+            currentSpread,
+            0f,
+            spreadRecoverySpeed * Time.deltaTime
+        );
+
+        if (currentSpread < 0.001f)
+            currentSpread = 0f;
     }
 
     /// <summary>
@@ -131,7 +163,7 @@ public class Weapon : NetworkBehaviour
             return;
         // Get the weapon data from the sender client
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
-        Vector3 dir = SpreadRandomizer(aimDir, data.bulletSpread);
+        Vector3 dir = SpreadRandomizer(aimDir, currentSpread);
         Vector3 adjustedHeadPos = headPos + (dir * 0.75f);
         Vector3 hitPoint = adjustedHeadPos + (dir * 25f);
         bool hitPlayer = false;
@@ -163,7 +195,9 @@ public class Weapon : NetworkBehaviour
 
         currentBullets.Value--;
         lastShootTime = Time.time;
-
+        currentSpread += spreadIncrease;
+        currentSpread = Mathf.Min(currentSpread, maxSpread);
+        lastSpreadTime = Time.time;
         EffectsClientRpc(
             hitPoint,
             aimDir,

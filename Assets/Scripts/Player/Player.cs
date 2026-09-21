@@ -230,7 +230,7 @@ public class Player : Entity
     {
         combat.EmptyWeapon();
         ToggleDeathHud(false);
-        body.UnRagdoll(false);
+        body.UnRagdoll();
         body.Play("IsMoving", false);
         SpawnServerRpc();
         if (buildCam) buildCam.gridBuilding.ResetCounter();

@@ -165,6 +165,8 @@ public class GameManager : NetworkBehaviour
             Player player = client.PlayerObject.GetComponent<Player>();
             player.health.Value = 100;
             player.isAlive.Value = true;
+            player.combat.EmptyWeapon();
+            player.combat.weaponHandler.DropWeapon();
         }
 
         EndCombatClientRpc();
@@ -186,7 +188,7 @@ public class GameManager : NetworkBehaviour
             }
             else
             {
-                player.body.UnRagdoll(true);
+                player.body.UnRagdoll();
                 player.body.Play("IsMoving", false);
                 Destroy(player.combat.weaponInHand);
             }
@@ -205,6 +207,8 @@ public class GameManager : NetworkBehaviour
         Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
         player.ToggleMove(toFps);
         player.ToggleFirstPerson(toFps);
+        player.body.ShowBodyRenderer(!toFps);
+
     }
 
 }
