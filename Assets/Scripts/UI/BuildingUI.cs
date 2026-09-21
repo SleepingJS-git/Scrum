@@ -35,7 +35,7 @@ public class BuildingUI : MonoBehaviour
         placementInfo.text = String.Format($"{gridPlacement.currentPlacements.Value}/{gridPlacement.maxPlacements}");
     }
 
-    private void GenerateRandomChoices()
+    public void GenerateRandomChoices()
     {
         
         List<ulong> available = new List<ulong>(BuildableDatabase.AvailablePrefabIds);

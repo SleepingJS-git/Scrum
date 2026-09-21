@@ -201,7 +201,11 @@ public class GameManager : NetworkBehaviour
     {
         gamePhase = (GamePhase)gamePhaseInt;
 
-        if (gamePhase == GamePhase.Building) connectUI.ResetReadyButton();
+        if (gamePhase == GamePhase.Building)
+        {
+            buildingUI.GenerateRandomChoices();
+            connectUI.ResetReadyButton();
+        }
         buildingUI.gameObject.SetActive(!toFps);
 
         Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();

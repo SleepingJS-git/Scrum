@@ -164,13 +164,15 @@ public class Weapon : NetworkBehaviour
         // Get the weapon data from the sender client
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
         Vector3 dir = SpreadRandomizer(aimDir, currentSpread);
-        Vector3 adjustedHeadPos = headPos + (dir * 0.75f);
+        Vector3 adjustedHeadPos = headPos + (dir * .65f);
         Vector3 hitPoint = adjustedHeadPos + (dir * 25f);
         bool hitPlayer = false;
+        Debug.DrawLine(adjustedHeadPos, hitPoint, Color.red, 4f);
         // Send a raycast from the head to the new dirction within 100 units on only specific layers, and ignoring triggers
         if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, 100f, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {
             hitPoint = hit.point;
+            Debug.Log(hit.collider.name + "was hit!");
             // If the raycast hit a player, damage the entity. For right now it just
             // damages the entity.
             if (hit.collider.CompareTag("Player"))

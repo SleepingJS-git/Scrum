@@ -158,7 +158,7 @@ public class Player : Entity
     public override void OnHit(OnHitData onHitData)
     {
         base.OnHit(onHitData);
-
+        body.onHitData = onHitData;
         UpdateHealthClientRpc(OwnerClientId);
     }
 
