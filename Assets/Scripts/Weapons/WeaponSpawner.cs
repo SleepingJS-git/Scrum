@@ -9,6 +9,7 @@ public class WeaponSpawner : NetworkBehaviour
     public float spawnTime;
     private float _dt;
     private WeaponDrop drop;
+    private GameObject model;
     public void SpawnWeapon()
     {
         Debug.Log($"Spawning Weapon: ID: {data.weaponID} - {data.weaponName}");
@@ -20,6 +21,13 @@ public class WeaponSpawner : NetworkBehaviour
         drop.Init(data.weaponID, false);
         drop.CreateWeapon(data);
         drop.NetworkObject.Spawn();
+
+        model = Instantiate(data.weaponModel, holder);
+    }
+
+    private void DespawnModel()
+    {
+        if (model) Destroy(model);
     }
 
     void Update()
@@ -27,6 +35,7 @@ public class WeaponSpawner : NetworkBehaviour
         if (!IsServer) return;
 
         if (drop) return;
+        else DespawnModel();
 
         _dt -= Time.deltaTime;
         if (_dt > 0f) return;

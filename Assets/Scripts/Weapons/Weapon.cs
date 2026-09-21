@@ -275,7 +275,8 @@ public class Weapon : NetworkBehaviour
 
     public void DropWeapon()
     {
-        DropServerRpc();
+        if (hasWeapon)
+            DropServerRpc();
     }
 
     /// <summary>
