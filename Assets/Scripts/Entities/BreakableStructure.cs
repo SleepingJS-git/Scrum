@@ -10,7 +10,10 @@ public class BreakableStructure: Entity
     void Start()
     {
         fracture = GetComponent<Fracture>();
-        fractureApart = new Action(() => fracture.CauseFracture());
+        fractureApart = new Action(() => {
+            fracture.CauseFracture();
+            StartCoroutine(Despawn());
+            });
         AddDeathEvent(fractureApart);
     }
 
@@ -37,6 +40,7 @@ public class BreakableStructure: Entity
     private IEnumerator Despawn()
     {
         yield return new WaitForSeconds(5f);
+        Destroy(fracture.FragmentRoot);
         Destroy(gameObject);
     }
 }

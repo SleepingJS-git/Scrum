@@ -7,6 +7,8 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Rigidbody))]
 public class Fracture : MonoBehaviour
 {
+    public GameObject FragmentRoot => fragmentRoot;
+
     public TriggerOptions triggerOptions;
     public FractureOptions fractureOptions;
     public RefractureOptions refractureOptions;
@@ -155,6 +157,8 @@ public class Fracture : MonoBehaviour
 
                         // Deactivate the original object
                         this.gameObject.SetActive(false);
+                
+           
 
                         // Fire the completion callback
                         if ((this.currentRefractureCount == 0) ||
@@ -179,7 +183,10 @@ public class Fracture : MonoBehaviour
                 GameObject.Destroy(fragmentTemplate);
 
                 // Deactivate the original object
-                this.gameObject.SetActive(false);
+                //this.gameObject.SetActive(false);
+                GetComponent<Collider>().enabled = false;
+                GetComponent<MeshRenderer>().enabled = true;
+                GetComponent<Rigidbody>().isKinematic = true;
 
                 // Fire the completion callback
                 if ((this.currentRefractureCount == 0) ||
