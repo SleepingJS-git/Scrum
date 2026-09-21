@@ -55,16 +55,17 @@ public class WeaponDrop : NetworkBehaviour
     /// </summary>
     public override void OnNetworkSpawn()
     {
+
+        if (!_isDropped) Destroy(rb);
+
         if (IsServer)
         {
             weaponID.Value = _weaponID;
             currentBullets.Value = _currentBullets;
             reserveBullets.Value = _reserveBullets;
         }
-        if (!_isDropped)
-            Destroy(rb);
-        else
-            Instantiate(WeaponDatabase.GetWeapon(weaponID.Value).weaponModel, transform);
+        
+        Instantiate(WeaponDatabase.GetWeapon(weaponID.Value).weaponModel, transform);
     }
     /// <summary>
     /// [Called By Server] (WeaponSpawner)
@@ -117,7 +118,7 @@ public class WeaponDrop : NetworkBehaviour
         {
             Weapon weapon = client.PlayerObject.GetComponent<Weapon>();
 
-                weapon.DropWeapon();
+            weapon.DropWeapon();
 
             // Update the player's weaponhandler with the networkvalues.
             weapon.Init(WeaponDatabase.GetWeapon(weaponID.Value), currentBullets.Value, reserveBullets.Value);
