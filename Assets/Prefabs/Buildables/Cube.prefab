@@ -123,7 +123,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   occupiedCells:
   - {x: 0, y: 0, z: 0}
-  mesh: {fileID: 8452366948269361433}
+  mesh: {fileID: 919132149155446097, guid: 64b39cc5dc59faf4a81a6fdf8c49d6b0, type: 3}
   Id: 0
 --- !u!1 &8452366948269361433
 GameObject:

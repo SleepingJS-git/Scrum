@@ -125,7 +125,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 1}
   - {x: 0, y: 0, z: 2}
-  mesh: {fileID: 919132149155446097, guid: 67ccf5e8959ca3643b66f1987324e984, type: 3}
+  mesh: {fileID: 919132149155446097, guid: 1955d728e5b7ef74c8356511eca5d0cd, type: 3}
   Id: 3
 --- !u!1 &8613391008356243725
 GameObject:
