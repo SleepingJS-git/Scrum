@@ -136,4 +136,14 @@ public class BuildCamera : NetworkBehaviour
 
         targetRotation = Quaternion.Euler(currentY, currentX, 0);
     }
+
+    public string DebugInfo()
+    {
+        return 
+        $@"Build Cam Pos: {transform.position}
+        Zoom Distance: {minZoom} - ({zoomDistance}) - {maxZoom}
+        Current X: {currentX}
+        Current Y: {currentY}
+        ";
+    }
 }

@@ -4,7 +4,6 @@ using UnityEngine;
 public class DebugManager : MonoBehaviour
 {
     public DebugType debuggingType;
-    
     void Start()
     {
         switch (debuggingType)

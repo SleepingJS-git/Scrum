@@ -185,7 +185,7 @@ public class Fracture : MonoBehaviour
                 // Deactivate the original object
                 //this.gameObject.SetActive(false);
                 GetComponent<Collider>().enabled = false;
-                GetComponent<MeshRenderer>().enabled = true;
+                GetComponent<MeshRenderer>().enabled = false;
                 GetComponent<Rigidbody>().isKinematic = true;
 
                 // Fire the completion callback

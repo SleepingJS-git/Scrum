@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -14,9 +15,11 @@ public class GameManager : NetworkBehaviour
     private int _deadPlayers;
     private int _readyPlayers;
     private int _resetPlayers;
-    public static bool CanMove => 
-        Instance.gamePhase == GamePhase.Combat || 
-        Instance.gamePhase == GamePhase.EndOfCombat;
+    public NetworkVariable<FixedString512Bytes> debugInfo = new(
+        "",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     void Awake()
     {
         Instance = this;
@@ -220,6 +223,26 @@ public class GameManager : NetworkBehaviour
         player.ToggleFirstPerson(toFps);
         player.body.ShowBodyRenderer(!toFps);
 
+    }
+
+    public FixedString512Bytes DebugInfo()
+    {
+        DebugInfoServerRpc();
+        return debugInfo.Value;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void DebugInfoServerRpc()
+    {
+        debugInfo.Value = $@"
+
+        (Game Info)
+        Game Phase: {GamePhase}
+        Loaded Players: {_loadedPlayers} / {numOfPlayers}
+        Ready Players: {_readyPlayers} / {numOfPlayers}
+        Dead Players: {_deadPlayers} / {numOfPlayers}
+        Revived Players: {_resetPlayers} / {numOfPlayers}
+        ";
     }
 
 }
