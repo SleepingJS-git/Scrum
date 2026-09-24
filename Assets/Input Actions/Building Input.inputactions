@@ -68,6 +68,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Speed",
+                    "type": "Button",
+                    "id": "d8c35f22-2690-4bb9-8799-e69b7f698013",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -149,8 +158,30 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "left",
+                    "name": "Up",
                     "id": "cf9fd01d-7c7b-4590-81a0-7e484c4adb95",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pan",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Down",
+                    "id": "da01d871-fcca-4629-ba65-09bb8ae17339",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pan",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Left",
+                    "id": "5cc71631-c187-4371-96ba-dca587fc704b",
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
@@ -160,8 +191,8 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "right",
-                    "id": "da01d871-fcca-4629-ba65-09bb8ae17339",
+                    "name": "Right",
+                    "id": "edd749b7-d69f-49c6-a5ed-3dadee2d9917",
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
@@ -171,8 +202,8 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "forward",
-                    "id": "5cc71631-c187-4371-96ba-dca587fc704b",
+                    "name": "Forward",
+                    "id": "3183d005-90a4-4e67-9f80-e3ece439310d",
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
@@ -182,8 +213,8 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "backward",
-                    "id": "edd749b7-d69f-49c6-a5ed-3dadee2d9917",
+                    "name": "Backward",
+                    "id": "083ad464-6021-431d-8bb2-1008e9235549",
                     "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
@@ -222,6 +253,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Drag",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7a5e247d-3cfb-4efe-ab7d-662b2b442892",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Speed",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

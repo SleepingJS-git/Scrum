@@ -13,9 +13,11 @@ public class BuildCamera : NetworkBehaviour
     private InputAction orbit;
     private InputAction zoom;
     private InputAction drag;
+    private InputAction speed;
 
     // Speed for the camera pan
     [SerializeField] private float panSpeed = 20f;
+    [SerializeField] private float speedMultiplier = 2f;
     [SerializeField] private float dragSensitivity = 0.25f;
 
     // Point for the camera to orbit around
@@ -57,6 +59,7 @@ public class BuildCamera : NetworkBehaviour
         orbit = playerInput.actions.FindAction("Orbit");
         zoom = playerInput.actions.FindAction("Zoom");
         drag = playerInput.actions.FindAction("Drag");
+        speed = playerInput.actions.FindAction("Speed");
 
         currentX = transform.eulerAngles.y;
         currentY = transform.eulerAngles.x;
@@ -112,6 +115,10 @@ public class BuildCamera : NetworkBehaviour
     void PanCamera(Vector3 moveDir)
     {
         Vector3 rotatedMoveDir = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * moveDir;
+        if (speed.IsPressed())
+        {
+            rotatedMoveDir *= speedMultiplier;
+        }
         targetPosition += rotatedMoveDir * panSpeed * Time.deltaTime;
     }
 
