@@ -19,9 +19,6 @@ public class BuildCamera : NetworkBehaviour
     [SerializeField] private float panSpeed = 20f;
     [SerializeField] private float speedMultiplier = 2f;
     [SerializeField] private float dragSensitivity = 0.25f;
-
-    // Point for the camera to orbit around
-    private Vector3 orbitTargetPoint;
     [SerializeField] private float orbitSensitivity = 0.5f;
 
     // Maximum distance for raycast
@@ -46,9 +43,12 @@ public class BuildCamera : NetworkBehaviour
     private Transform cameraTransform;
     float lerpDampening = 5f;
 
+    private BoxCollider[] boundaries;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
+        boundaries = GameObject.Find("CameraBounds").GetComponents<BoxCollider>();
         playerInput = gridBuilding.GetComponent<PlayerInput>();
 
         playerInput.enabled = IsOwner;
@@ -119,7 +119,12 @@ public class BuildCamera : NetworkBehaviour
         {
             rotatedMoveDir *= speedMultiplier;
         }
-        targetPosition += rotatedMoveDir * panSpeed * Time.deltaTime;
+        Vector3 nextPos = targetPosition + (rotatedMoveDir * panSpeed * Time.deltaTime);
+        for (int i = 0; i < boundaries.Length; i++)
+        {
+            if (boundaries[i].bounds.Contains(nextPos)) { return; }
+        }
+        targetPosition = nextPos;
     }
 
     /// <summary>
@@ -129,7 +134,12 @@ public class BuildCamera : NetworkBehaviour
     {
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
         Vector3 mouseDeltaTo3D = new Vector3(mouseDelta.x, 0, mouseDelta.y);
-        targetPosition -= Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity * panSpeed);
+        Vector3 nextPos = targetPosition - Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity * panSpeed);
+        for (int i = 0; i < boundaries.Length; i++)
+        {
+            if (boundaries[i].bounds.Contains(nextPos)) { return; }
+        }
+        targetPosition = nextPos;
     }
 
     /// <summary>

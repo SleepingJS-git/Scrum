@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 3286516223794361587}
   serializedVersion: 2
   m_LocalRotation: {x: -0.38268343, y: -0, z: -0, w: 0.92387956}
-  m_LocalPosition: {x: -1.1753387, y: 1.5518832, z: -4.302845}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -784,6 +784,7 @@ GameObject:
   - component: {fileID: 1959582287503967700}
   - component: {fileID: 2517766801497332234}
   - component: {fileID: 1513123767215250648}
+  - component: {fileID: 6964051983356484775}
   m_Layer: 0
   m_Name: Builder
   m_TagString: Untagged
@@ -901,3 +902,24 @@ MonoBehaviour:
   orbitSensitivity: 0.25
   zoomSensitivity: 0.5
   cameraTransform: {fileID: 8756348547400608104}
+--- !u!135 &6964051983356484775
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5361072427719123322}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.25
+  m_Center: {x: 0, y: 0, z: 0}
