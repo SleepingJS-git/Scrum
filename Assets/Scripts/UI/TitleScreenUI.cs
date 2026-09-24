@@ -8,7 +8,8 @@ public enum MenuScreen
     HostLobby,
     JoinLobby,
     LobbyRoom,
-    LoadingLobby
+    LoadingLobby,
+    Tutorial
 }
 
 public class TitleScreen : MonoBehaviour
@@ -18,6 +19,7 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] private GameObject joinLobbyScreen;
     [SerializeField] private GameObject lobbyRoomScreen;
     [SerializeField] private GameObject loadingLobbyScreen;
+    [SerializeField] private GameObject tutorialScreen;
 
     public void ShowScreen(MenuScreen screen)
     {
@@ -26,6 +28,7 @@ public class TitleScreen : MonoBehaviour
         joinLobbyScreen.SetActive(screen == MenuScreen.JoinLobby);
         lobbyRoomScreen.SetActive(screen == MenuScreen.LobbyRoom);
         loadingLobbyScreen.SetActive(screen == MenuScreen.LoadingLobby);
+        tutorialScreen.SetActive(screen == MenuScreen.Tutorial);
     }
 
     public void ShowMain()
@@ -53,7 +56,12 @@ public class TitleScreen : MonoBehaviour
         ShowScreen(MenuScreen.LoadingLobby);
     }
 
-    //Start game from lobby
+    public void ShowTutorial()
+    {
+        ShowScreen(MenuScreen.Tutorial);
+    }
+
+    // Start game from lobby
     [SerializeField] string sceneName = "SceneConnectionTest";
     public void StartGame()
     {

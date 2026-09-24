@@ -164,7 +164,7 @@ public class GameManager : NetworkBehaviour
                 _readyPlayers = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
-                Invoke(nameof(ReviveAllPlayers), 2f);
+                Invoke(nameof(ReviveAllPlayers), 5f);
                 break;
         }
     }
