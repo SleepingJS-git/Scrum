@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -52,6 +53,11 @@ public class GridPlacement : NetworkBehaviour
     [SerializeField] private BuildingUI buildingUI;
     [HideInInspector] public BarHoverCheck barCheck;
 
+    public NetworkVariable<FixedString512Bytes> debugInfo = new(
+        "",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
@@ -357,6 +363,25 @@ public class GridPlacement : NetworkBehaviour
              //return false;
 
         return true;
+    }
+
+    public FixedString512Bytes DebugInfo()
+    {
+        DebugInfoServerRpc();
+        return debugInfo.Value;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void DebugInfoServerRpc()
+    {
+        string buildableName = "None";
+        if (buildable) buildableName = $"{buildable.name} ({buildable.Id})";
+        debugInfo.Value =  $@"(Grid Placement)
+        Current Buildable: {buildableName}
+        Current Placements: {currentPlacements.Value} / {maxPlacements}
+        Preview Object: {previewObject}
+        CanPreviewBuildable: {CanPreviewBuildable()}
+        ";
     }
 }
 

@@ -1,5 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
+using Unity.Services.Multiplayer;
 using UnityEngine;
 
 public class GameManager : NetworkBehaviour
@@ -14,9 +17,11 @@ public class GameManager : NetworkBehaviour
     private int _deadPlayers;
     private int _readyPlayers;
     private int _resetPlayers;
-    public static bool CanMove => 
-        Instance.gamePhase == GamePhase.Combat || 
-        Instance.gamePhase == GamePhase.EndOfCombat;
+    public NetworkVariable<FixedString512Bytes> debugInfo = new(
+        "",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     void Awake()
     {
         Instance = this;
@@ -31,6 +36,12 @@ public class GameManager : NetworkBehaviour
         ChangeGamePhaseServerRpc(GamePhase.Loading);
 
 
+    }
+
+    //Set player count, used in NetworkSpawner after spawning players in
+    public void SetPlayerCount(int count)
+    {
+        numOfPlayers = count;
     }
 
     /// <summary>
@@ -62,6 +73,7 @@ public class GameManager : NetworkBehaviour
 
             Debug.Log("Dead Players: " + _deadPlayers);
         }
+
     }
 
     [Rpc(SendTo.Server)]
@@ -116,6 +128,7 @@ public class GameManager : NetworkBehaviour
                 }
                 break;
         }
+
     }
 
 
@@ -142,11 +155,15 @@ public class GameManager : NetworkBehaviour
 
             case GamePhase.Building:
                 _readyPlayers = 0;
+                _resetPlayers = 0;
+                _deadPlayers = 0;
                 CamControlClientRpc(false, (int)gamePhase);
                 break;
 
             case GamePhase.EndOfCombat:
+                _readyPlayers = 0;
                 _resetPlayers = 0;
+                _deadPlayers = 0;
                 Invoke(nameof(ReviveAllPlayers), 2f);
                 break;
         }
@@ -161,6 +178,8 @@ public class GameManager : NetworkBehaviour
             Player player = client.PlayerObject.GetComponent<Player>();
             player.health.Value = 100;
             player.isAlive.Value = true;
+            player.combat.EmptyWeapon();
+            player.combat.weaponHandler.DropWeapon();
         }
 
         EndCombatClientRpc();
@@ -178,20 +197,15 @@ public class GameManager : NetworkBehaviour
 
             if (player.IsOwner)
             {
-                player.combat.EmptyWeapon();
-                player.ToggleDeathHud(false);
-                player.body.UnRagdoll(false);
-                player.body.Play("IsMoving", false);
-                player.SpawnServerRpc();
-                player.buildCam.gridBuilding.ResetCounter();
-                player.PlayerIsReset();
+                player.Revive();
             }
             else
             {
+                player.body.UnRagdoll();
+                player.body.Play("IsMoving", false);
                 Destroy(player.combat.weaponInHand);
-                player.body.UnRagdoll(true);
             }
-
+            
             player.move.OnDeathCollider(false);
         }
     }
@@ -200,12 +214,38 @@ public class GameManager : NetworkBehaviour
     {
         gamePhase = (GamePhase)gamePhaseInt;
 
-        if (gamePhase == GamePhase.Building) connectUI.ResetReadyButton();
+        if (gamePhase == GamePhase.Building)
+        {
+            buildingUI.GenerateRandomChoices();
+            connectUI.ResetReadyButton();
+        }
         buildingUI.gameObject.SetActive(!toFps);
 
         Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
-
+        player.ToggleMove(toFps);
         player.ToggleFirstPerson(toFps);
+        player.body.ShowBodyRenderer(!toFps);
+
+    }
+
+    public FixedString512Bytes DebugInfo()
+    {
+        DebugInfoServerRpc();
+        return debugInfo.Value;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void DebugInfoServerRpc()
+    {
+        debugInfo.Value = $@"
+
+        (Game Info)
+        Game Phase: {GamePhase}
+        Loaded Players: {_loadedPlayers} / {numOfPlayers}
+        Ready Players: {_readyPlayers} / {numOfPlayers}
+        Dead Players: {_deadPlayers} / {numOfPlayers}
+        Revived Players: {_resetPlayers} / {numOfPlayers}
+        ";
     }
 
 }

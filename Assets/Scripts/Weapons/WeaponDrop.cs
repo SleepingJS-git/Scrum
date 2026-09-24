@@ -118,8 +118,7 @@ public class WeaponDrop : NetworkBehaviour
         {
             Weapon weapon = client.PlayerObject.GetComponent<Weapon>();
 
-            if (weapon.hasWeapon)
-                weapon.DropWeapon();
+            weapon.DropWeapon();
 
             // Update the player's weaponhandler with the networkvalues.
             weapon.Init(WeaponDatabase.GetWeapon(weaponID.Value), currentBullets.Value, reserveBullets.Value);

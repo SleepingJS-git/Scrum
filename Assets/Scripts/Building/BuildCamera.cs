@@ -42,7 +42,6 @@ public class BuildCamera : NetworkBehaviour
     private Quaternion targetRotation;
     [SerializeField]
     private Transform cameraTransform;
-
     float lerpDampening = 5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -136,5 +135,15 @@ public class BuildCamera : NetworkBehaviour
         currentY = Mathf.Clamp(currentY - mouseDelta.y, minPitch, maxPitch);
 
         targetRotation = Quaternion.Euler(currentY, currentX, 0);
+    }
+
+    public string DebugInfo()
+    {
+        return 
+        $@"Build Cam Pos: {transform.position}
+        Zoom Distance: {minZoom} - ({zoomDistance}) - {maxZoom}
+        Current X: {currentX}
+        Current Y: {currentY}
+        ";
     }
 }

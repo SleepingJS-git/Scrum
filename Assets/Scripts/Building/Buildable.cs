@@ -9,7 +9,7 @@ public class Buildable : NetworkBehaviour
     private Vector3Int[] occupiedCells;
 
     [SerializeField]
-    private GameObject mesh;
+    private Renderer mesh;
 
     private Vector3Int dimensions;
     public ulong Id;
@@ -36,7 +36,8 @@ public class Buildable : NetworkBehaviour
     }
     public Renderer ObjectRenderer
     {
-        get { return mesh.GetComponent<Renderer>(); }
+        // get { return mesh.GetComponent<Renderer>(); }
+        get { return mesh; } // Just do this, because u can reference the Mesh in the inspector.
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()

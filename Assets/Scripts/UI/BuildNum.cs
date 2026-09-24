@@ -1,7 +1,10 @@
 using UnityEngine;
 using TMPro;
+
+#if UNITY_EDITOR
 using System.Diagnostics;
 using System.IO;
+#endif
 
 public class GitVersionDisplay : MonoBehaviour
 {
@@ -9,27 +12,25 @@ public class GitVersionDisplay : MonoBehaviour
 
     private void Start()
     {
-    #if UNITY_EDITOR
-            string commitCount = RunGit("rev-list --count HEAD");
-            string commitHash = RunGit("rev-parse --short HEAD");
-            string branch = RunGit("branch --show-current");
+#if UNITY_EDITOR
+        string commitCount = RunGit("rev-list --count HEAD");
+        string commitHash = RunGit("rev-parse --short HEAD");
+        string branch = RunGit("branch --show-current");
 
-            versionText.text = $"Build {commitCount} | {commitHash} | {branch}";
-    #else
+        versionText.text = $"Build {commitCount} | {commitHash} | {branch}";
+#else
         versionText.gameObject.SetActive(false);
-    #endif
+#endif
     }
 
+#if UNITY_EDITOR
     private string RunGit(string arguments)
     {
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
             FileName = "git",
             Arguments = arguments,
-
-            // Root of your Unity project
             WorkingDirectory = Directory.GetParent(Application.dataPath).FullName,
-
             RedirectStandardOutput = true,
             UseShellExecute = false,
             CreateNoWindow = true
@@ -42,4 +43,5 @@ public class GitVersionDisplay : MonoBehaviour
 
         return output.Trim();
     }
+#endif
 }

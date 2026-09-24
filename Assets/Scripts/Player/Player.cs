@@ -21,6 +21,8 @@ public class Player : Entity
     private PlayerHud _hud;
     public BuildCamera buildCam;
     public Transform PlayerCam => look.cam.transform;
+    private bool _canMove;
+    public bool CanMove => _canMove;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -44,15 +46,18 @@ public class Player : Entity
         if (IsOwner)
         {
             _hud = Instantiate(playerHudPrefab);
-
-            // Request the server to spawn player at specific spawn point
-            // SpawnServerRpc();
-
             _hud.health.text = health.Value.ToString();
-
-            SpawnBuilderServerRpc();
-
-            Invoke(nameof(LoadedIn), .25f);
+            if (GameManager.Instance != null)
+            {
+                SpawnServerRpc();
+                SpawnBuilderServerRpc();
+                Invoke(nameof(LoadedIn), .25f);
+            }
+            else
+            {
+                _canMove = true;
+                ToggleFirstPerson(true);
+            }
         }
 
         // Check if the computer running this script is the client.
@@ -66,13 +71,16 @@ public class Player : Entity
 
         if (IsServer)
         {
-            AddDeathEvent(PlayerDeath);
+            if (GameManager.Instance != null)
+                AddDeathEvent(PlayerDeath);
+            else
+                AddDeathEvent(PlayerDeathSelfRevive);
         }
+
     }
 
     void LoadedIn()
     {
-
         GameManager.Instance.buildingUI.gameObject.SetActive(false);
         GameManager.Instance.PlayerLoadedServerRpc();
     }
@@ -84,7 +92,7 @@ public class Player : Entity
 
         if (!isAlive.Value) return;
 
-        if (GameManager.GamePhase != GamePhase.Combat) return;
+        if (!_canMove) return;
         move.Move(input.MoveInput);
         combat.PrimaryInput(input.PrimaryInput);
         interaction.Interaction();
@@ -97,17 +105,20 @@ public class Player : Entity
 
         if (!isAlive.Value) return;
 
-        if (GameManager.GamePhase != GamePhase.Combat) return;
+        if (!_canMove) return;
         look.Look(input.LookInput());
     }
     
     private void PlayerDeath()
     {
-        Debug.Log("Player Death was called");
-        PlayerDeatherServerRpc();
+        PlayerDeathServerRpc();
+    }
+    private void PlayerDeathSelfRevive()
+    {
+        Invoke(nameof(Revive), 1f);
     }
     [Rpc(SendTo.Server)]
-    private void PlayerDeatherServerRpc(RpcParams rpcParams = default)
+    private void PlayerDeathServerRpc(RpcParams rpcParams = default)
     {
         ulong clientID = rpcParams.Receive.SenderClientId;
         GameManager.Instance.PlayerDeath(clientID);
@@ -136,7 +147,7 @@ public class Player : Entity
     {
         Cursor.visible = !toFps;
         Cursor.lockState = toFps ? CursorLockMode.Locked : CursorLockMode.Confined;
-        buildCam.gameObject.SetActive(!toFps);
+        if (buildCam) buildCam.gameObject.SetActive(!toFps);
         look.cam.gameObject.SetActive(toFps);
     }
 
@@ -147,9 +158,16 @@ public class Player : Entity
     /// <param name="damage"></param>
     public override void OnHit(OnHitData onHitData)
     {
+        OnHitClientRpc(onHitData.damage, onHitData.sourceHit);
         base.OnHit(onHitData);
-
         UpdateHealthClientRpc(OwnerClientId);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void OnHitClientRpc(int damage, Vector3 sourceHit)
+    {
+        body.onHitData.damage = damage;
+        body.onHitData.sourceHit = sourceHit;
     }
 
     /// <summary>
@@ -209,5 +227,22 @@ public class Player : Entity
         {
             buildCam = networkObject.GetComponent<BuildCamera>();
         }
+    }
+
+    public void ToggleMove(bool canMove)
+    {
+        _canMove = canMove;
+    }
+
+    public void Revive()
+    {
+        _hud.health.text = health.Value.ToString();
+        combat.EmptyWeapon();
+        ToggleDeathHud(false);
+        body.UnRagdoll();
+        body.Play("IsMoving", false);
+        SpawnServerRpc();
+        if (buildCam) buildCam.gridBuilding.ResetCounter();
+        if (GameManager.Instance) PlayerIsReset();
     }
 }

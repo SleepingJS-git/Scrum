@@ -128,7 +128,6 @@ public class PlayerInputHandler : MonoBehaviour
         {
             if (!_main.combat.weaponInHand)
                 return;
-
             _main.combat.weaponHandler.DropWeapon();
             _main.combat.EmptyWeapon();
         }

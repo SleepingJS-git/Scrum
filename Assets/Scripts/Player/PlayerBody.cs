@@ -6,9 +6,11 @@ public class PlayerBody : MonoBehaviour
     public Animator animator;
     public Transform rightHand;
     public Renderer bodyRenderer;
+    public OnHitData onHitData;
     public void Init(bool IsOwner)
     {
         bodyRenderer.enabled = !IsOwner;
+        onHitData = new OnHitData();
     }
 
     /// <summary>
@@ -17,7 +19,7 @@ public class PlayerBody : MonoBehaviour
     public void Ragdoll()
     {
         // Turn on the renderer so that the instantiated body has its renderer on
-        bodyRenderer.enabled = true;
+        ShowBodyRenderer(true);
 
         animator.enabled = false;
 
@@ -29,12 +31,22 @@ public class PlayerBody : MonoBehaviour
             rb.useGravity = true;
             rb.isKinematic = false;
             rb.linearVelocity = Vector3.zero;
+
+            rb.AddExplosionForce(
+                onHitData.damage * 10f, 
+                onHitData.sourceHit, 2f, .5f,
+                ForceMode.Impulse);
         }
     }
 
-    public void UnRagdoll(bool showRenderer)
+    public void ShowBodyRenderer(bool showRenderer)
     {
         bodyRenderer.enabled = showRenderer;
+    }
+
+    public void UnRagdoll()
+    {
+        ShowBodyRenderer(true);
 
         foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
         {
@@ -43,6 +55,7 @@ public class PlayerBody : MonoBehaviour
         }
 
         animator.enabled = true;
+
     }
     public void Play(string para, bool val)
     {

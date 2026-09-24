@@ -1,140 +1,122 @@
+using System;
 using TMPro;
 using UnityEngine;
-using Unity.Services.Core;
-using Unity.Services.Authentication;
 using Unity.Services.Multiplayer;
-using System;
 
 public class MainMenuNetworking : MonoBehaviour
 {
     [SerializeField] private TMP_Text hostCodeText;
     [SerializeField] private TMP_InputField joinCodeInput;
     [SerializeField] private TMP_Text[] playerSlots;
+
     [SerializeField] private Color localPlayerColor = Color.green;
     [SerializeField] private Color otherPlayerColor = Color.white;
+
     [SerializeField] private TitleScreen titleScreenController;
+
     [SerializeField] private TMP_Text lobbyHeader;
     [SerializeField] private TMP_Text connectionErrorText;
 
 
-    //the session that this player is either hosting or joined to
-    private ISession currentSession;
-
-    //initializes unity cloud services
-    private async void Start()
+    private void Start()
     {
-        await UnityServices.InitializeAsync();
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        await AuthenticationService.Instance.GetPlayerNameAsync();
-
-        Debug.Log("networking online");
+        LobbyManager.Instance.LobbyChanged += RefreshPlayerList;
     }
 
 
-    //creates a lobby w/ code upon clicking host lobby button
+    private void OnDestroy()
+    {
+        // Important since this object gets destroyed when leaving the menu
+        if (LobbyManager.Instance != null)
+        {
+            LobbyManager.Instance.LobbyChanged -= RefreshPlayerList;
+        }
+    }
+
+
     public async void HostLobby()
     {
         connectionErrorText.text = "";
 
-        var options = new SessionOptions
-        {
-            MaxPlayers = 4
-        }
-        .WithRelayNetwork()
-        .WithPlayerName(VisibilityPropertyOptions.Member);
-
         try
         {
-            currentSession =
-                await MultiplayerService.Instance.CreateSessionAsync(options);
+            ISession session =
+                await LobbyManager.Instance.HostLobbyAsync();
+
+            hostCodeText.text = session.Code;
+
+            RefreshPlayerList();
+
+            titleScreenController.ShowLobbyRoom();
         }
         catch (SessionException e)
         {
-            Debug.LogError($"failed to create lobby: {e.Error}");
-            connectionErrorText.text = "Failed to create lobby. Please try again.";
+            Debug.LogError($"Failed to create lobby: {e.Error}");
+
+            connectionErrorText.text =
+                "Failed to create lobby. Please try again.";
 
             titleScreenController.ShowHostLobby();
-            return;
         }
         catch (Exception e)
         {
-            Debug.LogError($"failed to create lobby: {e}");
-            connectionErrorText.text = "Something went wrong. Please try again.";
+            Debug.LogError($"Failed to create lobby: {e}");
+
+            connectionErrorText.text =
+                "Something went wrong. Please try again.";
 
             titleScreenController.ShowHostLobby();
-            return;
         }
-
-        hostCodeText.text = currentSession.Code;
-
-        Debug.Log($"created lobby: {currentSession.Code}");
-
-        RegisterSessionEvents();
-        RefreshPlayerList();
-
-        titleScreenController.ShowLobbyRoom();
     }
 
-    //joins a lobby if code is correct
+
     public async void JoinLobby()
     {
         connectionErrorText.text = "";
 
         string code = joinCodeInput.text.Trim().ToUpper();
 
-        //Nothing entered
         if (string.IsNullOrEmpty(code))
         {
-            connectionErrorText.text = "Please enter a lobby code.";
+            connectionErrorText.text =
+                "Please enter a lobby code.";
+
             titleScreenController.ShowJoinLobby();
+
             return;
         }
 
-        var joinOptions = new JoinSessionOptions()
-            .WithPlayerName(VisibilityPropertyOptions.Member);
-
         try
         {
-            currentSession =
-                await MultiplayerService.Instance.JoinSessionByCodeAsync(
-                    code,
-                    joinOptions
-                );
+            ISession session =
+                await LobbyManager.Instance.JoinLobbyAsync(code);
+
+            hostCodeText.text = session.Code;
+
+            RefreshPlayerList();
+
+            titleScreenController.ShowLobbyRoom();
         }
-        //Incorrect lobby code entered
         catch (SessionException e)
         {
-            Debug.LogError($"failed to join lobby: {e.Error}");
-
+            Debug.LogError($"Failed to join lobby: {e.Error}");
 
             connectionErrorText.text =
                 "Couldn't join lobby. Check the code and try again.";
 
             titleScreenController.ShowJoinLobby();
-
-            return;
         }
-        //Unexpected error
         catch (Exception e)
         {
-            Debug.LogError($"failed to join lobby lobby: {e}");
+            Debug.LogError($"Failed to join lobby: {e}");
+
             connectionErrorText.text =
                 "Something went wrong. Please try again.";
 
             titleScreenController.ShowJoinLobby();
-
-            return;
         }
-
-        Debug.Log("joined lobby");
-
-        hostCodeText.text = currentSession.Code;
-
-        RegisterSessionEvents();
-        RefreshPlayerList();
-
-        titleScreenController.ShowLobbyRoom();
     }
+
 
     public async void LeaveLobby()
     {
@@ -142,32 +124,39 @@ public class MainMenuNetworking : MonoBehaviour
 
         try
         {
-            await currentSession.LeaveAsync();
+            await LobbyManager.Instance.LeaveLobbyAsync();
         }
-        catch (SessionException e) {
+        catch (SessionException e)
+        {
+            Debug.LogError($"Failed to leave lobby: {e}");
 
-            Debug.LogError($"failed to leave lobby: {e}");
-            connectionErrorText.text = "Error leaving lobby. Please try again.";
+            connectionErrorText.text =
+                "Error leaving lobby. Please try again.";
         }
-
-        Debug.Log("left lobby");
-
     }
 
-    //Use this method to refresh lobby data for UI
+
     private void RefreshPlayerList()
     {
-        //Resets player slots
+        ISession session = LobbyManager.Instance.CurrentSession;
+
+        // Reset player slots
         for (int i = 0; i < playerSlots.Length; i++)
         {
             playerSlots[i].text = "Waiting for player...";
             playerSlots[i].color = otherPlayerColor;
         }
 
-        //add players to slots
-        for (int i = 0; i < currentSession.Players.Count && i < playerSlots.Length; i++)
+        if (session == null)
+            return;
+
+
+        // Fill player slots
+        for (int i = 0;
+             i < session.Players.Count && i < playerSlots.Length;
+             i++)
         {
-            var player = currentSession.Players[i];
+            var player = session.Players[i];
 
             string playerName = player.GetPlayerName();
 
@@ -178,8 +167,7 @@ public class MainMenuNetworking : MonoBehaviour
 
             playerSlots[i].text = playerName;
 
-            //color slots based on who's who
-            if (player.Id == currentSession.CurrentPlayer.Id)
+            if (player.Id == session.CurrentPlayer.Id)
             {
                 playerSlots[i].color = localPlayerColor;
             }
@@ -188,35 +176,13 @@ public class MainMenuNetworking : MonoBehaviour
                 playerSlots[i].color = otherPlayerColor;
             }
         }
-        
-        //Add the lobby title
-        lobbyHeader.text = currentSession.Players[0].GetPlayerName() + "'s Lobby";
+
+
+        // Lobby title
+        if (session.Players.Count > 0)
+        {
+            lobbyHeader.text =
+                session.Players[0].GetPlayerName() + "'s Lobby";
+        }
     }
-
-    //Listeners for when lobby updates (player joins or leaves, or a player's name changed somehow), all listeners refresh the player list when one of these happens
-    private void RegisterSessionEvents()
-    {
-        currentSession.PlayerJoined += OnPlayerJoined;
-        currentSession.PlayerHasLeft += OnPlayerHasLeft;
-        currentSession.PlayerPropertiesChanged += OnPlayerPropertiesChanged;
-    }
-
-    private void OnPlayerJoined(string playerId)
-    {
-        Debug.Log($"Player joined: {playerId}");
-        RefreshPlayerList();
-    }
-
-    private void OnPlayerHasLeft(string playerId)
-    {
-        Debug.Log($"Player left: {playerId}");
-        RefreshPlayerList();
-    }
-
-    private void OnPlayerPropertiesChanged()
-    {
-        RefreshPlayerList();
-    }
-
-
 }
