@@ -15,11 +15,11 @@ public class GridPlacement : NetworkBehaviour
     Buildable previewObject;
     Renderer previewRenderer;
 
-    // The grid being placed on
+    [Tooltip("The grid being placed on.")]
     [SerializeField]
     Grid grid;
 
-    // The camera being used for building
+    [Tooltip("The camera being used for building.")]
     [SerializeField]
     Camera buildCam;
 
@@ -34,6 +34,8 @@ public class GridPlacement : NetworkBehaviour
 
     // Dictionary representing which cells are occupied and what they are occupied with
     private Dictionary<Vector3Int, ulong> occupiedCells = new Dictionary<Vector3Int, ulong>();
+
+    private List<Buildable> builtObjects;
 
     // The offset of the object being placed
     private Vector3 offset;
@@ -62,7 +64,7 @@ public class GridPlacement : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         Debug.Log("GridPlacement.cs IsOwner?: " + IsOwner);
-
+        builtObjects = new List<Buildable>();
         grid = GameObject.Find("Plane (Grid)").GetComponent<Grid>();
         playerInput = GetComponent<PlayerInput>();
         playerInput.enabled = IsOwner;
@@ -89,6 +91,15 @@ public class GridPlacement : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void ResetCounterServerRpc()
     {
+        if (builtObjects.Count != 0)
+        {
+            foreach (Buildable build in builtObjects)
+            {
+                build.gameObject.SetActive(true);
+                build.GetComponent<Collider>().enabled = true;
+                build.GetComponent<MeshRenderer>().enabled = true;
+            }
+        }
         currentPlacements.Value = 0;
     }
 
@@ -211,6 +222,7 @@ public class GridPlacement : NetworkBehaviour
             obj.NetworkObject.Spawn();
             SetCellsToOccupied(buildable, cellPos);
             currentPlacements.Value++;
+            if (obj.gameObject.GetComponent<BreakableStructure>() != null) {builtObjects.Add(obj);}
             return;
         }
     }

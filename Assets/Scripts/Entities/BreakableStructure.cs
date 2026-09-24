@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 [RequireComponent(typeof(Fracture))]
 public class BreakableStructure: Entity
@@ -8,14 +9,11 @@ public class BreakableStructure: Entity
     private Action fractureApart;
     [SerializeField] private float explosionForce, explosionRadius, upwardsModifier;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
         fracture = GetComponent<Fracture>();
-        fractureApart = new Action(() => {
-            fracture.CauseFracture();
-            Explosion();
-            StartCoroutine(Despawn());
-            });
+        fractureApart = new Action(FractureApartClientRpc);
         AddDeathEvent(fractureApart);
     }
 
@@ -49,11 +47,21 @@ public class BreakableStructure: Entity
             yield return new WaitForSeconds(1f);
         }
     }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void FractureApartClientRpc()
+    {
+        fracture.CauseFracture();
+        Explosion();
+        StartCoroutine(Despawn());
+    }
+
+
     
     private IEnumerator Despawn()
     {
         yield return new WaitForSeconds(5f);
         Destroy(fracture.FragmentRoot);
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }
