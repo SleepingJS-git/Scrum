@@ -901,6 +901,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 922583591963032279, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1619628862555279967, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 10.916425
@@ -941,6 +945,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1693834266301829610, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: startGameButton
+      value: 
+      objectReference: {fileID: 3115850146851864832}
+    - target: {fileID: 1693834266301829610, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: startGameCanvasGroup
+      value: 
+      objectReference: {fileID: 3115850146851864833}
     - target: {fileID: 6784794518894799866, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -948,6 +960,10 @@ PrefabInstance:
     - target: {fileID: 6784794518894799866, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: ShowMain
+      objectReference: {fileID: 0}
+    - target: {fileID: 8748429489526365625, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8850395918584302805, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
       propertyPath: m_Name
@@ -960,8 +976,39 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6154465004566295287, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 560505774}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8414630823783970574, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3115850146851864833}
   m_SourcePrefab: {fileID: 100100000, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+--- !u!1 &3115850146851864831 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8414630823783970574, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+  m_PrefabInstance: {fileID: 3115850146851864830}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3115850146851864832 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8322023675233831182, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+  m_PrefabInstance: {fileID: 3115850146851864830}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3115850146851864831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!225 &3115850146851864833
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3115850146851864831}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &3266493733850419232
 PrefabInstance:
   m_ObjectHideFlags: 0

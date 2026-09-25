@@ -6,16 +6,22 @@ using Unity.Services.Core;
 using Unity.Services.Authentication;
 using Unity.Services.Multiplayer;
 
+/// <summary>
+/// Manages Unity Multiplayer Services sessions and gives their state to the rest of the game.
+/// Persists between scenes as a Singleton
+/// </summary>
 public class LobbyManager : MonoBehaviour
 {
     public static LobbyManager Instance { get; private set; }
 
-    // The session this player is currently in
+    /// <summary>
+    /// The session this local player is currently in
+    /// </summary>
     public ISession CurrentSession { get; private set; }
 
     public bool IsInLobby => CurrentSession != null;
 
-    // Our own events that other scripts can listen to
+    // Events used by other scripts instead of subscribing directly to ISession
     public event Action LobbyChanged;
     public event Action<string> PlayerJoined;
     public event Action<string> PlayerLeft;
@@ -23,12 +29,82 @@ public class LobbyManager : MonoBehaviour
 
     private Task initializationTask;
 
+    private const string LobbyReadyKey = "LobbyReady";
+
+
     /// <summary>
-    /// create our singleton for lobbymanager
+    /// Returns whether this local player owns the current session
+    /// </summary>
+    public bool IsLocalPlayerHost
+    {
+        get
+        {
+            if (CurrentSession == null)
+                return false;
+
+            return CurrentSession.Host == CurrentSession.CurrentPlayer.Id;
+        }
+    }
+
+
+    /// <summary>
+    /// Returns true when every player in the session has finished entering the lobby
+    /// </summary>
+    public bool AreAllPlayersLobbyReady
+    {
+        get
+        {
+            if (CurrentSession == null || CurrentSession.Players.Count == 0)
+                return false;
+
+            foreach (var player in CurrentSession.Players)
+            {
+                if (!player.Properties.TryGetValue(
+                        LobbyReadyKey,
+                        out var readyProperty))
+                {
+                    return false;
+                }
+
+                if (readyProperty.Value != "true")
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+
+    /// <summary>
+    /// Sets this local player's shared LobbyReady property
+    /// </summary>
+    public async Task SetLocalLobbyReadyAsync(bool ready)
+    {
+        if (CurrentSession == null)
+            return;
+
+        CurrentSession.CurrentPlayer.SetProperty(
+            LobbyReadyKey,
+            new PlayerProperty(
+                value: ready ? "true" : "false",
+                visibility: VisibilityPropertyOptions.Member
+            )
+        );
+
+        await CurrentSession.SaveCurrentPlayerDataAsync();
+
+        // Refresh our own UI immediately after saving.
+        LobbyChanged?.Invoke();
+    }
+
+
+    /// <summary>
+    /// Creates the persistent LobbyManager singleton and begins service initialization
     /// </summary>
     private void Awake()
     {
-        // Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -37,13 +113,15 @@ public class LobbyManager : MonoBehaviour
 
         Instance = this;
 
-        // Keep this object when changing scenes
         DontDestroyOnLoad(gameObject);
 
         initializationTask = InitializeServicesAsync();
     }
 
 
+    /// <summary>
+    /// Initializes Unity Services and signs this player in anonymously if needed
+    /// </summary>
     private async Task InitializeServicesAsync()
     {
         await UnityServices.InitializeAsync();
@@ -59,9 +137,11 @@ public class LobbyManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Creates and returns a new four-player Relay session
+    /// </summary>
     public async Task<ISession> HostLobbyAsync()
     {
-        // Make sure Unity Services finished initializing first
         await initializationTask;
 
         var options = new SessionOptions
@@ -82,6 +162,9 @@ public class LobbyManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Joins and returns the session matching the supplied lobby code
+    /// </summary>
     public async Task<ISession> JoinLobbyAsync(string code)
     {
         await initializationTask;
@@ -103,6 +186,9 @@ public class LobbyManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Leaves the current session and clears its local state and listeners
+    /// </summary>
     public async Task LeaveLobbyAsync()
     {
         if (CurrentSession == null)
@@ -122,9 +208,11 @@ public class LobbyManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Stores a new current session and registers its event listeners
+    /// </summary>
     private void SetCurrentSession(ISession session)
     {
-        // Just in case we're replacing an existing session
         if (CurrentSession != null)
         {
             UnregisterSessionEvents(CurrentSession);
@@ -134,11 +222,13 @@ public class LobbyManager : MonoBehaviour
 
         RegisterSessionEvents(CurrentSession);
 
-        // Tell anything interested that lobby information now exists
         LobbyChanged?.Invoke();
     }
 
 
+    /// <summary>
+    /// Subscribes LobbyManager to changes from the supplied session
+    /// </summary>
     private void RegisterSessionEvents(ISession session)
     {
         session.PlayerJoined += OnPlayerJoined;
@@ -147,6 +237,9 @@ public class LobbyManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Removes LobbyManager's event subscriptions from the supplied session
+    /// </summary>
     private void UnregisterSessionEvents(ISession session)
     {
         session.PlayerJoined -= OnPlayerJoined;
@@ -155,6 +248,9 @@ public class LobbyManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Receives the player ID of a player who joined and forwards the change
+    /// </summary>
     private void OnPlayerJoined(string playerId)
     {
         Debug.Log($"player joined: {playerId}");
@@ -164,6 +260,9 @@ public class LobbyManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Receives the player ID of a player who left and forwards the change
+    /// </summary>
     private void OnPlayerHasLeft(string playerId)
     {
         Debug.Log($"player left: {playerId}");
@@ -173,9 +272,39 @@ public class LobbyManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Forwards changes to shared player properties such as LobbyReady
+    /// </summary>
     private void OnPlayerPropertiesChanged()
     {
         PlayerPropertiesChanged?.Invoke();
         LobbyChanged?.Invoke();
+    }
+
+
+    /// <summary>
+    /// Returns whether the supplied player ID currently has LobbyReady set to true
+    /// </summary>
+    public bool IsPlayerLobbyReady(string playerId)
+    {
+        if (CurrentSession == null)
+            return false;
+
+        foreach (var player in CurrentSession.Players)
+        {
+            if (player.Id != playerId)
+                continue;
+
+            if (!player.Properties.TryGetValue(
+                    LobbyReadyKey,
+                    out var readyProperty))
+            {
+                return false;
+            }
+
+            return readyProperty.Value == "true";
+        }
+
+        return false;
     }
 }
