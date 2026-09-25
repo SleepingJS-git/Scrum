@@ -1,8 +1,9 @@
+using TMPro;
 using UnityEngine;
 
 public class ControlsBlock : MonoBehaviour
 {
-    [SerializeField] private GameObject controlBlock;
+    [SerializeField] private CanvasGroup controlBlock;
     [SerializeField] private GamePhase visiblePhase;
 
 
@@ -11,17 +12,17 @@ public class ControlsBlock : MonoBehaviour
     {
        if(GameManager.Instance == null)
         {
-            controlBlock.SetActive(true);
+            controlBlock.alpha = 1;
         }
         else
         {
             if(GameManager.GamePhase == visiblePhase)
             {
-                controlBlock.SetActive(true);
+                controlBlock.alpha = 1;
             }
             else
             {
-                controlBlock.SetActive(false);
+                controlBlock.alpha = 0;
             }
         }
     }

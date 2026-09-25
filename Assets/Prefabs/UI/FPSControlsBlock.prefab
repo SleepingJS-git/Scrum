@@ -149,6 +149,7 @@ GameObject:
   m_Component:
   - component: {fileID: 958053011036043221}
   - component: {fileID: 466900949284388225}
+  - component: {fileID: 1866703825433956644}
   m_Layer: 5
   m_Name: FPSControlsBlock
   m_TagString: Untagged
@@ -189,8 +190,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ef9496ad77e54047a72ac3df82eb0e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controlBlock: {fileID: 4061714487955828551}
-  visiblePhase: 1
+  controlBlock: {fileID: 1866703825433956644}
+  visiblePhase: 2
+--- !u!225 &1866703825433956644
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4061714487955828551}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5685857904370790613
 GameObject:
   m_ObjectHideFlags: 0
