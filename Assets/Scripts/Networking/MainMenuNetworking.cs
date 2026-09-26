@@ -3,30 +3,35 @@ using TMPro;
 using UnityEngine;
 using Unity.Services.Multiplayer;
 
+/// <summary>
+/// Handles the main menu's networking UI
+/// Uses LobbyManager for session operations, then displays the resulting lobby data
+/// </summary>
 public class MainMenuNetworking : MonoBehaviour
 {
     [SerializeField] private TMP_Text hostCodeText;
     [SerializeField] private TMP_InputField joinCodeInput;
     [SerializeField] private TMP_Text[] playerSlots;
-
-    [SerializeField] private Color localPlayerColor = Color.green;
-    [SerializeField] private Color otherPlayerColor = Color.white;
-
     [SerializeField] private TitleScreen titleScreenController;
 
     [SerializeField] private TMP_Text lobbyHeader;
     [SerializeField] private TMP_Text connectionErrorText;
 
 
+    /// <summary>
+    /// Refreshes the player list whenever LobbyManager reports a lobby change
+    /// </summary>
     private void Start()
     {
         LobbyManager.Instance.LobbyChanged += RefreshPlayerList;
     }
 
 
+    /// <summary>
+    /// Removes lobby event listeners when this menu object is destroyed
+    /// </summary>
     private void OnDestroy()
     {
-        // Important since this object gets destroyed when leaving the menu
         if (LobbyManager.Instance != null)
         {
             LobbyManager.Instance.LobbyChanged -= RefreshPlayerList;
@@ -34,6 +39,9 @@ public class MainMenuNetworking : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Creates a lobby, displays its information, and marks the host as ready
+    /// </summary>
     public async void HostLobby()
     {
         connectionErrorText.text = "";
@@ -48,6 +56,9 @@ public class MainMenuNetworking : MonoBehaviour
             RefreshPlayerList();
 
             titleScreenController.ShowLobbyRoom();
+
+            //ready means this client has completely reached the lobby screen
+            await LobbyManager.Instance.SetLocalLobbyReadyAsync(true);
         }
         catch (SessionException e)
         {
@@ -70,6 +81,9 @@ public class MainMenuNetworking : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Joins the entered lobby code, displays the lobby, and marks this player as ready
+    /// </summary>
     public async void JoinLobby()
     {
         connectionErrorText.text = "";
@@ -96,6 +110,9 @@ public class MainMenuNetworking : MonoBehaviour
             RefreshPlayerList();
 
             titleScreenController.ShowLobbyRoom();
+
+            // The host may already see this player before this finishes
+            await LobbyManager.Instance.SetLocalLobbyReadyAsync(true);
         }
         catch (SessionException e)
         {
@@ -118,6 +135,9 @@ public class MainMenuNetworking : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Removes this player from the current lobby
+    /// </summary>
     public async void LeaveLobby()
     {
         connectionErrorText.text = "";
@@ -136,27 +156,43 @@ public class MainMenuNetworking : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Updates the lobby player slots using the latest CurrentSession data
+    /// </summary>
     private void RefreshPlayerList()
     {
         ISession session = LobbyManager.Instance.CurrentSession;
 
-        // Reset player slots
+        // Reset every slot before filling occupied ones
         for (int i = 0; i < playerSlots.Length; i++)
         {
             playerSlots[i].text = "Waiting for player...";
-            playerSlots[i].color = otherPlayerColor;
+            playerSlots[i].color = Color.white;
         }
 
         if (session == null)
             return;
 
 
-        // Fill player slots
         for (int i = 0;
              i < session.Players.Count && i < playerSlots.Length;
              i++)
         {
             var player = session.Players[i];
+
+            bool isLocalPlayer =
+                player.Id == session.CurrentPlayer.Id;
+
+            bool isReady =
+                LobbyManager.Instance.IsPlayerLobbyReady(player.Id);
+
+            // Remote players appear in the session before their lobby screen has fully loaded
+            if (!isLocalPlayer && !isReady)
+            {
+                playerSlots[i].text = "Player connecting...";
+                playerSlots[i].color = Color.cyan;
+                continue;
+            }
 
             string playerName = player.GetPlayerName();
 
@@ -167,18 +203,17 @@ public class MainMenuNetworking : MonoBehaviour
 
             playerSlots[i].text = playerName;
 
-            if (player.Id == session.CurrentPlayer.Id)
+            if (isLocalPlayer)
             {
-                playerSlots[i].color = localPlayerColor;
+                playerSlots[i].color = Color.green;
             }
             else
             {
-                playerSlots[i].color = otherPlayerColor;
+                playerSlots[i].color = Color.white;
             }
         }
 
 
-        // Lobby title
         if (session.Players.Count > 0)
         {
             lobbyHeader.text =
