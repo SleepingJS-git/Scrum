@@ -23,6 +23,14 @@ public class BreakableStructure: Entity
         
     }
 
+    public void ResetBreakable()
+    {
+       GetComponent<Collider>().enabled = true;
+       GetComponent<MeshRenderer>().enabled = true;
+       this.health.Value = maxHealth;
+        this.isAlive.Value = true;
+    }
+
     private void Explosion()
     {
         foreach(Rigidbody rb in fracture.FragmentRoot.GetComponentsInChildren<Rigidbody>())

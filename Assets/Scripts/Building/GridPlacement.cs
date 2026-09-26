@@ -96,8 +96,7 @@ public class GridPlacement : NetworkBehaviour
             foreach (Buildable build in builtObjects)
             {
                 build.gameObject.SetActive(true);
-                build.GetComponent<Collider>().enabled = true;
-                build.GetComponent<MeshRenderer>().enabled = true;
+                build.GetComponent<BreakableStructure>().ResetBreakable();
             }
         }
         currentPlacements.Value = 0;
