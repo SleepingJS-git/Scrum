@@ -122,7 +122,10 @@ public class BuildCamera : NetworkBehaviour
         Vector3 nextPos = targetPosition + (rotatedMoveDir * panSpeed * Time.deltaTime);
         for (int i = 0; i < boundaries.Length; i++)
         {
-            if (boundaries[i].bounds.Contains(nextPos)) { return; }
+            if (boundaries[i].bounds.Contains(nextPos))
+            {
+                nextPos = GetClosestPointOnBox(boundaries[i], nextPos);
+            }
         }
         targetPosition = nextPos;
     }
@@ -137,7 +140,10 @@ public class BuildCamera : NetworkBehaviour
         Vector3 nextPos = targetPosition - Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity * panSpeed);
         for (int i = 0; i < boundaries.Length; i++)
         {
-            if (boundaries[i].bounds.Contains(nextPos)) { return; }
+            if (boundaries[i].bounds.Contains(nextPos))
+            {
+                nextPos = GetClosestPointOnBox(boundaries[i], nextPos);
+            }
         }
         targetPosition = nextPos;
     }
@@ -152,6 +158,32 @@ public class BuildCamera : NetworkBehaviour
         currentY = Mathf.Clamp(currentY - mouseDelta.y, minPitch, maxPitch);
 
         targetRotation = Quaternion.Euler(currentY, currentX, 0);
+    }
+
+    private Vector3 GetClosestPointOnBox(BoxCollider box, Vector3 point)
+    {
+        Vector3 localPoint = box.transform.InverseTransformPoint(point);
+        localPoint -= box.center;
+        Vector3 halfSizes = box.size * 0.5f;
+
+        float distToMaxX = halfSizes.x - localPoint.x;
+        float distToMinX = localPoint.x + halfSizes.x;
+        float distToMaxY = halfSizes.y - localPoint.y;
+        float distToMinY = localPoint.y + halfSizes.y;
+        float distToMaxZ = halfSizes.z - localPoint.z;
+        float distToMinZ = localPoint.z + halfSizes.z;
+
+        float minDist = Mathf.Min(distToMaxX, distToMaxY, distToMaxZ, distToMinX, distToMinY, distToMinZ);
+
+        if (minDist == distToMaxX) { localPoint.x = halfSizes.x; }
+        else if (minDist == distToMinX) { localPoint.x = -halfSizes.x; }
+        else if (minDist == distToMaxY) { localPoint.y = halfSizes.y; }
+        else if (minDist == distToMinY) { localPoint.y = -halfSizes.y; }
+        else if (minDist == distToMaxZ) { localPoint.z = halfSizes.z; }
+        else if (minDist == distToMinZ) { localPoint.z = -halfSizes.z; }
+
+        localPoint += box.center;
+        return box.transform.TransformPoint(localPoint);
     }
 
     public string DebugInfo()
