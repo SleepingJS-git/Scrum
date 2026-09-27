@@ -106165,10 +106165,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   on: 1
   grid: {fileID: 1448990687}
-  gridColor: {r: 1, g: 1, b: 1, a: 0}
-  length: 10
-  width: 10
-  height: 10
+  gridColor: {r: 1, g: 1, b: 1, a: 0.09803922}
+  length: 50
+  width: 50
+  height: 50
 --- !u!156049354 &1448990687
 Grid:
   m_ObjectHideFlags: 0
@@ -106198,7 +106198,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
@@ -106210,7 +106210,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1448990685}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -106265,7 +106265,7 @@ Transform:
   m_GameObject: {fileID: 1448990685}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 63.75, y: 15.9, z: 5.66}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

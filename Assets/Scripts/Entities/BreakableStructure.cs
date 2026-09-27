@@ -3,7 +3,7 @@ using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 [RequireComponent(typeof(Fracture))]
-public class BreakableStructure: Entity
+public class BreakableStructureEntity: Entity
 {
     private Fracture fracture;
     private Action fractureApart;
