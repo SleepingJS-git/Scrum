@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.Collections;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -197,6 +198,15 @@ public class Weapon : NetworkBehaviour
                         movingDir = dir,
                         damageType = DamageType.Bullet
                     });
+
+                    if (!e.isAlive.Value)
+                    {
+                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        {
+                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                            stats.AddKill();
+                        }
+                    }
                 }
             }
         }
