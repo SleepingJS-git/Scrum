@@ -22,6 +22,7 @@ public class Player : Entity
     public BuildCamera buildCam;
     public Transform PlayerCam => look.cam.transform;
     private bool _canMove;
+    public bool CanMove => _canMove;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -107,22 +108,16 @@ public class Player : Entity
         if (!_canMove) return;
         look.Look(input.LookInput());
     }
-    
+
     private void PlayerDeath()
     {
-        PlayerDeathServerRpc();
+        GameManager.Instance.PlayerDeath(OwnerClientId);
     }
     private void PlayerDeathSelfRevive()
     {
         Invoke(nameof(Revive), 1f);
     }
-    [Rpc(SendTo.Server)]
-    private void PlayerDeathServerRpc(RpcParams rpcParams = default)
-    {
-        ulong clientID = rpcParams.Receive.SenderClientId;
-        GameManager.Instance.PlayerDeath(clientID);
-        
-    }
+
 
     public void PlayerIsReset()
     {
@@ -147,6 +142,7 @@ public class Player : Entity
         Cursor.visible = !toFps;
         Cursor.lockState = toFps ? CursorLockMode.Locked : CursorLockMode.Confined;
         if (buildCam) buildCam.gameObject.SetActive(!toFps);
+        _hud.gameObject.SetActive(toFps);
         look.cam.gameObject.SetActive(toFps);
     }
 
@@ -190,7 +186,7 @@ public class Player : Entity
     public void SpawnServerRpc(RpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
-        Vector3 pos = PlayerSpawner.GetRandomSpawnPoint().transform.position;
+        Vector3 pos = PlayerManager.GetRandomSpawnPoint().transform.position;
         // Send request back to client to make changes
         SpawnClientRpc(pos);
     }
@@ -235,6 +231,7 @@ public class Player : Entity
 
     public void Revive()
     {
+        _hud.health.text = health.Value.ToString();
         combat.EmptyWeapon();
         ToggleDeathHud(false);
         body.UnRagdoll();

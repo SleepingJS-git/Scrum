@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,16 +16,20 @@ public class GridPlacement : NetworkBehaviour
     Buildable previewObject;
     Renderer previewRenderer;
 
-    // The grid being placed on
+    [Tooltip("The grid being placed on.")]
     [SerializeField]
     Grid grid;
 
-    // The camera being used for building
+    [Tooltip("The camera being used for building.")]
     [SerializeField]
     Camera buildCam;
 
     // The current rotation of the object
-    float rotation = 0;
+    public NetworkVariable<float> rotation = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+    );
 
     // All input actions
     private PlayerInput playerInput;
@@ -32,7 +38,8 @@ public class GridPlacement : NetworkBehaviour
     private InputAction rotateRightAction;
 
     // Dictionary representing which cells are occupied and what they are occupied with
-    private Dictionary<Vector3Int, ulong> occupiedCells = new Dictionary<Vector3Int, ulong>();
+
+    private List<Buildable> builtObjects;
 
     // The offset of the object being placed
     private Vector3 offset;
@@ -47,16 +54,27 @@ public class GridPlacement : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    public NetworkVariable<bool> canPlace = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
     // UI used to determine whether we're hovering the buildable selection bar
     [SerializeField] private BuildingUI buildingUI;
     [HideInInspector] public BarHoverCheck barCheck;
 
+    public NetworkVariable<FixedString512Bytes> debugInfo = new(
+        "",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
         Debug.Log("GridPlacement.cs IsOwner?: " + IsOwner);
-
+        builtObjects = new List<Buildable>();
         grid = GameObject.Find("Plane (Grid)").GetComponent<Grid>();
         playerInput = GetComponent<PlayerInput>();
         playerInput.enabled = IsOwner;
@@ -83,12 +101,24 @@ public class GridPlacement : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void ResetCounterServerRpc()
     {
+        if (builtObjects.Count != 0)
+        {
+            foreach (Buildable build in builtObjects)
+            {
+                build.gameObject.SetActive(true);
+                build.GetComponent<BreakableStructureEntity>().ResetBreakable();
+            }
+        }
         currentPlacements.Value = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        if (IsServer)
+            DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
+
         if (!IsOwner) return;
 
         if (GameManager.Instance != null) 
@@ -101,12 +131,12 @@ public class GridPlacement : NetworkBehaviour
         // If the right rotate action is pressed, increase the rotation angle
         if (rotateRightAction.WasPressedThisFrame())
         {
-            rotation += 90;
+            rotation.Value += 90;
 
             // If the rotation angle goes above 360
-            if (rotation >= 360)
+            if (rotation.Value >= 360)
             {
-                rotation = 0;
+                rotation.Value = 0;
             }
 
         }
@@ -114,11 +144,11 @@ public class GridPlacement : NetworkBehaviour
         if (rotateLeftAction.WasPressedThisFrame())
         {
             // If the rotation angle is 0 or less go up to 360
-            if (rotation <= 0)
+            if (rotation.Value <= 0)
             {
-                rotation = 360;
+                rotation.Value = 360;
             }
-            rotation -= 90;
+            rotation.Value -= 90;
         }
 
         if (barCheck.IsHoveringBuildableBar) return;
@@ -127,32 +157,53 @@ public class GridPlacement : NetworkBehaviour
         Vector3 mousePos = MouseToWorldSpace();
         Vector3Int cellPos = grid.WorldToCell(mousePos);
 
+        PreviewObjectServerRpc(mousePos, cellPos);
 
         // If left-clicked, create the object at the location of the preview
-        if (placeAction.WasPressedThisFrame())
+        if (placeAction.WasPressedThisFrame() && canPlace.Value)
         {
-            PlaceBuildableServerRpc(cellPos, rotation);
+            PlaceBuildableServerRpc(cellPos);
         }
+    }
 
-        PreviewObjectServerRpc(mousePos, cellPos, rotation);
+    [Rpc(SendTo.ClientsAndHost)]
+    private void DebugViewOccupiedCellClientRpc(Vector3Int[] cells)
+    {
+        foreach (Vector3Int pos in cells)
+        {
+            Vector3 up = pos; up.y += 1f;
+            Vector3 right = pos; right.x += 1f;
+            Vector3 fwd = pos; fwd.z += 1f;
+
+            Vector3 oppSide = pos + Vector3.one;
+            Vector3 down = oppSide; down.y -= 1f;
+            Vector3 left = oppSide; left.x -= 1f;
+            Vector3 back = oppSide; back.z -= 1f;
+            Debug.DrawLine(pos, up, Color.red);
+            Debug.DrawLine(pos, right, Color.red);
+            Debug.DrawLine(pos, fwd, Color.red);
+            Debug.DrawLine(oppSide, down, Color.red);
+            Debug.DrawLine(oppSide, left, Color.red);
+            Debug.DrawLine(oppSide, back, Color.red);
+        }
     }
 
     [Rpc(SendTo.Server)]
-    private void PreviewObjectServerRpc(Vector3 mousePos, Vector3Int cellPos, float rotation)
+    private void PreviewObjectServerRpc(Vector3 mousePos, Vector3Int cellPos)
     {
         // Check that conditions allow for previewing the buildable
         bool isObjectVisible = CanPreviewBuildable();
-        bool isAnyCellTaken = false;
 
-        if (buildable) isAnyCellTaken = IsAnyCellTaken(cellPos, buildable);
-        
+        if (buildable) canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value);
+        else canPlace.Value = isObjectVisible;
+
         if (isObjectVisible)
         {
             // Set the rotation to the current rotation value
-            previewObject.transform.rotation = Quaternion.Euler(0, rotation, 0);
+            previewObject.transform.rotation = Quaternion.Euler(0, rotation.Value, 0);
 
             // If the cell is occupied
-            if (IsCellTaken(cellPos))
+            if (BuildableDatabase.IsCellTaken(cellPos))
             {
                 // Check if the mouse is on the x or y border of the grid space and shift the cell position accordingly
                 if (mousePos.x % 1 == 0)
@@ -169,17 +220,16 @@ public class GridPlacement : NetworkBehaviour
             previewObject.transform.position = grid.CellToWorld(cellPos);
 
             // Offset the object's position based on its rotation
-            previewObject.transform.position += (Quaternion.Euler(0, rotation, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
+            previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
         }
 
         // If any of the cells of the object are taken, change color to red
-        SetColorClientRpc(isAnyCellTaken, isObjectVisible);
+        SetColorClientRpc(isObjectVisible);
     }
     [Rpc(SendTo.ClientsAndHost)]
-    private void SetColorClientRpc(bool isAnyCellTaken, bool isObjectVisible)
+    private void SetColorClientRpc(bool isObjectVisible)
     {
         if (!previewObject) return;
-
         if (isObjectVisible)
             previewObject.gameObject.SetActive(true);
         else
@@ -187,26 +237,25 @@ public class GridPlacement : NetworkBehaviour
             previewObject.gameObject.SetActive(false);
             return;
         }
-        if (isAnyCellTaken)
+        if (!canPlace.Value)
             previewRenderer.material.color = new Color(2f, defaultColor.g, defaultColor.b, 0.1f);
         else
             previewRenderer.material.color = new Color(defaultColor.r, 2f, defaultColor.b, 0.1f);
     }
 
     [Rpc(SendTo.Server)]
-    private void PlaceBuildableServerRpc(Vector3Int cellPos, float rotation)
+    private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (!CanPreviewBuildable()) return;
-        if (!IsAnyCellTaken(cellPos, buildable))
-        {
-            // Send Server Request to create object
-            Buildable obj = Instantiate(buildable, previewObject.transform.position, Quaternion.Euler(0, rotation, 0));
-            obj.NetworkObject.Spawn();
-            SetCellsToOccupied(buildable, cellPos);
-            currentPlacements.Value++;
-            return;
-        }
+
+        // Send Server Request to create object
+        Buildable obj = Instantiate(buildable, previewObject.transform.position, Quaternion.Euler(0, rotation.Value, 0));
+        obj.NetworkObject.Spawn();
+        BuildableDatabase.SetCellsToOccupied(buildable, cellPos, rotation.Value);
+        currentPlacements.Value++;
+        if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) {builtObjects.Add(obj);}
+
+
     }
 
     /// <summary>
@@ -227,60 +276,7 @@ public class GridPlacement : NetworkBehaviour
         return new Vector3(-100, -100, -100);
     }
 
-    /// <summary>
-    /// Check whether a cell on the grid is occupied
-    /// </summary>
-    /// <param name="position"> Position of the cell being checked </param>
-    /// <returns> True if the cell is currently taken </returns>
-    bool IsCellTaken(Vector3Int position)
-    {
-        return occupiedCells.ContainsKey(position);
-    }
 
-    /// <summary>
-    /// Check if any of the cells that the placeable object occupies are taken
-    /// </summary>
-    /// <param name="originPosition"> The origin position of the object being placed</param>
-    /// <param name="buildable"> The buildable script of the object being placed </param>
-    /// <returns></returns>
-    bool IsAnyCellTaken(Vector3Int originPosition, Buildable buildable)
-    {
-        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
-        {
-            if (IsCellTaken(originPosition + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i])))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /// <summary>
-    /// Sets a cell to occupied
-    /// </summary>
-    /// <param name="position"> Position of the occupied cell </param>
-    /// <param name="buildableId"> ID of the buildable at that position (Currently in use! :) )</param>
-    void OccupyCell(Vector3Int position, ulong buildableId)
-    {
-        if (!IsCellTaken(position))
-        {
-            occupiedCells.Add(position, buildableId);
-        }
-    }
-
-    /// <summary>
-    /// Sets all cells of the object being placed to occupid
-    /// </summary>
-    /// <param name="buildable"> Buildable script attached to placeable object</param>
-    /// <param name="originPos"> The origin position of the object being placed </param>
-    /// <param name="objectID"> The object ID for the object being placed </param>
-    void SetCellsToOccupied(Buildable buildable, Vector3Int originPos)
-    {
-        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
-        {
-            OccupyCell(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]), buildable.Id);
-        }
-    }
 
     /// <summary>
     /// Update the offset variable to the offset of the current object
@@ -357,6 +353,25 @@ public class GridPlacement : NetworkBehaviour
              //return false;
 
         return true;
+    }
+
+    public FixedString512Bytes DebugInfo()
+    {
+        DebugInfoServerRpc();
+        return debugInfo.Value;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void DebugInfoServerRpc()
+    {
+        string buildableName = "None";
+        if (buildable) buildableName = $"{buildable.name} ({buildable.Id})";
+        debugInfo.Value =  $@"(Grid Placement)
+        Current Buildable: {buildableName}
+        Current Placements: {currentPlacements.Value} / {maxPlacements}
+        Preview Object: {previewObject}
+        CanPreviewBuildable: {CanPreviewBuildable()}
+        ";
     }
 }
 

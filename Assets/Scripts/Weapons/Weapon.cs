@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -66,6 +67,12 @@ public class Weapon : NetworkBehaviour
     [SerializeField] private float spreadRecoveryTime = 0.15f;
     [SerializeField] private float spreadRecoverySpeed = 5f;
     public bool hasWeapon;
+
+    public NetworkVariable<FixedString64Bytes> debugInfo = new(
+        "",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     public override void OnNetworkSpawn()
     {
 
@@ -175,7 +182,7 @@ public class Weapon : NetworkBehaviour
             Debug.Log(hit.collider.name + "was hit!");
             // If the raycast hit a player, damage the entity. For right now it just
             // damages the entity.
-            if (hit.collider.CompareTag("Player"))
+            if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("Buildable"))
             {
                 Entity e = hit.collider.GetComponent<Entity>();
                 // Check if the entity is alive
@@ -190,6 +197,15 @@ public class Weapon : NetworkBehaviour
                         movingDir = dir,
                         damageType = DamageType.Bullet
                     });
+
+                    if (!e.isAlive.Value && e is Player)
+                    {
+                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        {
+                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                            stats.AddKill();
+                        }
+                    }
                 }
             }
         }
@@ -360,5 +376,17 @@ public class Weapon : NetworkBehaviour
         {
             Destroy(combat.weaponInHand);
         }
+    }
+
+    public FixedString64Bytes DebugInfo()
+    {
+        DebugInfoServerRpc();
+        return debugInfo.Value;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void DebugInfoServerRpc()
+    {
+        debugInfo.Value = $@"Weapon Spread: {currentSpread} / {maxSpread}";
     }
 }

@@ -20,7 +20,7 @@ public class GridVisual : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        //if (!on) { return; }
+        if (!on) { return; }
         Gizmos.color = gridColor;
 
         for (int y = -(height/2); y <= height/2; y++)

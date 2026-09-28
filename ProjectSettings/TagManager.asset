@@ -8,6 +8,8 @@ TagManager:
   - Wall
   - Interactable
   - Hitbox
+  - Buildable
+  - Ragdoll
   layers:
   - Default
   - TransparentFX

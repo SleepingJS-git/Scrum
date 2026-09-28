@@ -13,13 +13,12 @@ public class BuildCamera : NetworkBehaviour
     private InputAction orbit;
     private InputAction zoom;
     private InputAction drag;
+    private InputAction speed;
 
     // Speed for the camera pan
     [SerializeField] private float panSpeed = 20f;
+    [SerializeField] private float speedMultiplier = 2f;
     [SerializeField] private float dragSensitivity = 0.25f;
-
-    // Point for the camera to orbit around
-    private Vector3 orbitTargetPoint;
     [SerializeField] private float orbitSensitivity = 0.5f;
 
     // Maximum distance for raycast
@@ -44,9 +43,12 @@ public class BuildCamera : NetworkBehaviour
     private Transform cameraTransform;
     float lerpDampening = 5f;
 
+    private BoxCollider[] boundaries;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
+        boundaries = GameObject.Find("CameraBounds").GetComponents<BoxCollider>();
         playerInput = gridBuilding.GetComponent<PlayerInput>();
 
         playerInput.enabled = IsOwner;
@@ -57,6 +59,7 @@ public class BuildCamera : NetworkBehaviour
         orbit = playerInput.actions.FindAction("Orbit");
         zoom = playerInput.actions.FindAction("Zoom");
         drag = playerInput.actions.FindAction("Drag");
+        speed = playerInput.actions.FindAction("Speed");
 
         currentX = transform.eulerAngles.y;
         currentY = transform.eulerAngles.x;
@@ -99,9 +102,23 @@ public class BuildCamera : NetworkBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lerpDampening);
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0f);
 
-        // Set the distance of the camera based on the zoom
+        // Set the distance of the camera based on the zoom\
+        Debug.Log(zoomDistance);
         float currentDistance = Mathf.Lerp(cameraTransform.localPosition.z,-zoomDistance, Time.deltaTime * lerpDampening);
-        cameraTransform.localPosition = new Vector3(0, 0, currentDistance);
+        Debug.Log("Current Distance from lerp: " + currentDistance);
+        Vector3 potentialGlobalCamPosition = transform.TransformPoint(new Vector3(0, 0, currentDistance));
+        Debug.Log("Potential Global position before bounds check: " + potentialGlobalCamPosition);
+        for (int i = 0; i < boundaries.Length; i++)
+        {
+            if (boundaries[i].bounds.Contains(potentialGlobalCamPosition))
+            {
+                potentialGlobalCamPosition = GetClosestPointOnBox(boundaries[i], potentialGlobalCamPosition);
+                zoomDistance = Vector3.Distance(potentialGlobalCamPosition, transform.position);
+            }
+        }
+        Debug.Log("Final Potential global Position: " + potentialGlobalCamPosition);
+        cameraTransform.localPosition = transform.InverseTransformPoint(potentialGlobalCamPosition);
+        Debug.Log("Camera local transform: " + cameraTransform.localPosition);
     }
 
 
@@ -112,7 +129,19 @@ public class BuildCamera : NetworkBehaviour
     void PanCamera(Vector3 moveDir)
     {
         Vector3 rotatedMoveDir = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * moveDir;
-        targetPosition += rotatedMoveDir * panSpeed * Time.deltaTime;
+        if (speed.IsPressed())
+        {
+            rotatedMoveDir *= speedMultiplier;
+        }
+        Vector3 nextPos = targetPosition + (rotatedMoveDir * panSpeed * Time.deltaTime);
+        for (int i = 0; i < boundaries.Length; i++)
+        {
+            if (boundaries[i].bounds.Contains(nextPos))
+            {
+                nextPos = GetClosestPointOnBox(boundaries[i], nextPos);
+            }
+        }
+        targetPosition = nextPos;
     }
 
     /// <summary>
@@ -122,7 +151,15 @@ public class BuildCamera : NetworkBehaviour
     {
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
         Vector3 mouseDeltaTo3D = new Vector3(mouseDelta.x, 0, mouseDelta.y);
-        targetPosition -= Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity * panSpeed);
+        Vector3 nextPos = targetPosition - Quaternion.Euler(0, targetRotation.eulerAngles.y, 0) * (mouseDeltaTo3D * Time.deltaTime * dragSensitivity * panSpeed);
+        for (int i = 0; i < boundaries.Length; i++)
+        {
+            if (boundaries[i].bounds.Contains(nextPos))
+            {
+                nextPos = GetClosestPointOnBox(boundaries[i], nextPos);
+            }
+        }
+        targetPosition = nextPos;
     }
 
     /// <summary>
@@ -135,5 +172,41 @@ public class BuildCamera : NetworkBehaviour
         currentY = Mathf.Clamp(currentY - mouseDelta.y, minPitch, maxPitch);
 
         targetRotation = Quaternion.Euler(currentY, currentX, 0);
+    }
+
+    private Vector3 GetClosestPointOnBox(BoxCollider box, Vector3 point)
+    {
+        Vector3 localPoint = box.transform.InverseTransformPoint(point);
+        localPoint -= box.center;
+        Vector3 halfSizes = box.size * 0.5f;
+
+        float distToMaxX = halfSizes.x - localPoint.x;
+        float distToMinX = localPoint.x + halfSizes.x;
+        float distToMaxY = halfSizes.y - localPoint.y;
+        float distToMinY = localPoint.y + halfSizes.y;
+        float distToMaxZ = halfSizes.z - localPoint.z;
+        float distToMinZ = localPoint.z + halfSizes.z;
+
+        float minDist = Mathf.Min(distToMaxX, distToMaxY, distToMaxZ, distToMinX, distToMinY, distToMinZ);
+
+        if (minDist == distToMaxX) { localPoint.x = halfSizes.x; }
+        else if (minDist == distToMinX) { localPoint.x = -halfSizes.x; }
+        else if (minDist == distToMaxY) { localPoint.y = halfSizes.y; }
+        else if (minDist == distToMinY) { localPoint.y = -halfSizes.y; }
+        else if (minDist == distToMaxZ) { localPoint.z = halfSizes.z; }
+        else if (minDist == distToMinZ) { localPoint.z = -halfSizes.z; }
+
+        localPoint += box.center;
+        return box.transform.TransformPoint(localPoint);
+    }
+
+    public string DebugInfo()
+    {
+        return 
+        $@"Build Cam Pos: {transform.position}
+        Zoom Distance: {minZoom} - ({zoomDistance}) - {maxZoom}
+        Current X: {currentX}
+        Current Y: {currentY}
+        ";
     }
 }

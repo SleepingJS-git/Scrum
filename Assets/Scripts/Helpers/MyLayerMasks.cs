@@ -11,10 +11,17 @@ public static class Layer
     public static int Projectile{ get { return 1 << 12; }}
     public static int Ragdoll{ get { return 1 << 13; }}
     public static int WeaponOverlay{ get { return 1 << 14; }}
+    public static int Debris{ get { return 1 << 15; }}
     public static int BulletSurfaces {
     get
         {
             return Ground | Wall | Entity | Player | Buildable;        
+        }
+    }
+    public static int ExplosionEffected {
+    get
+        {
+            return Ground | Debris | Ragdoll | Entity | Player | Buildable;        
         }
     }
 }

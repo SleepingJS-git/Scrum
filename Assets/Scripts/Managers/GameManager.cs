@@ -1,6 +1,10 @@
 using System.Collections;
+using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
+using Unity.Services.Multiplayer;
 using UnityEngine;
+using TMPro;
 
 public class GameManager : NetworkBehaviour
 {
@@ -10,13 +14,17 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private GamePhase gamePhase;
     public static GamePhase GamePhase => Instance.gamePhase;
     [SerializeField] private int numOfPlayers;
+    [SerializeField] private TMP_Text roundWinnerText;
+    [SerializeField] private CanvasGroup roundWinnerCanvasGroup;
     private int _loadedPlayers;
     private int _deadPlayers;
     private int _readyPlayers;
     private int _resetPlayers;
-    public static bool CanMove => 
-        Instance.gamePhase == GamePhase.Combat || 
-        Instance.gamePhase == GamePhase.EndOfCombat;
+    public NetworkVariable<FixedString512Bytes> debugInfo = new(
+        "",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     void Awake()
     {
         Instance = this;
@@ -24,12 +32,12 @@ public class GameManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+
         // Test, eventually there needs to be code to check if all
         // players spawned in.
 
         if (!IsServer) return;
         ChangeGamePhaseServerRpc(GamePhase.Loading);
-
 
     }
 
@@ -64,10 +72,15 @@ public class GameManager : NetworkBehaviour
         {
             Player player = client.PlayerObject.GetComponent<Player>();
 
+            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+            stats.AddDeath();
+
+
             _deadPlayers++;
 
             Debug.Log("Dead Players: " + _deadPlayers);
         }
+
     }
 
     [Rpc(SendTo.Server)]
@@ -158,7 +171,8 @@ public class GameManager : NetworkBehaviour
                 _readyPlayers = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
-                Invoke(nameof(ReviveAllPlayers), 2f);
+                ShowRoundWinner();
+                Invoke(nameof(ReviveAllPlayers), 5f);
                 break;
         }
     }
@@ -171,6 +185,7 @@ public class GameManager : NetworkBehaviour
         {
             Player player = client.PlayerObject.GetComponent<Player>();
             player.health.Value = 100;
+            player.UpdateHealthClientRpc(player.OwnerClientId);
             player.isAlive.Value = true;
             player.combat.EmptyWeapon();
             player.combat.weaponHandler.DropWeapon();
@@ -210,6 +225,7 @@ public class GameManager : NetworkBehaviour
 
         if (gamePhase == GamePhase.Building)
         {
+            roundWinnerCanvasGroup.alpha = 0f;
             buildingUI.GenerateRandomChoices();
             connectUI.ResetReadyButton();
         }
@@ -222,7 +238,66 @@ public class GameManager : NetworkBehaviour
 
     }
 
+    public FixedString512Bytes DebugInfo()
+    {
+        //DebugInfoServerRpc();
+        return debugInfo.Value;
+    }
+
+    //[Rpc(SendTo.Server)]
+    //private void DebugInfoServerRpc()
+    //{
+    //    debugInfo.Value = $@"
+
+    //    (Game Info)
+    //    Game Phase: {GamePhase}
+    //    Loaded Players: {_loadedPlayers} / {numOfPlayers}
+    //    Ready Players: {_readyPlayers} / {numOfPlayers}
+    //    Dead Players: {_deadPlayers} / {numOfPlayers}
+    //    Revived Players: {_resetPlayers} / {numOfPlayers}
+    //    ";
+    //}
+
+    /// <summary>
+    /// Method for showing text declaring who won the round
+    /// </summary>
+    private void ShowRoundWinner()
+    {
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            Player player = client.PlayerObject.GetComponent<Player>();
+
+            if (player != null && player.isAlive.Value)
+            {
+                PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+
+                stats.AddRoundWin();
+
+                string winnerName = stats.PlayerName.Value.ToString();
+
+                ShowRoundWinnerRpc(winnerName);
+
+                return;
+            }
+        }
+
+        Debug.LogWarning("Could not find a surviving player.");
+    }
+
+    /// <summary>
+    /// Update the round winner text on each player's screen
+    /// </summary>
+    /// <param name="winnerName"></param>
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ShowRoundWinnerRpc(string winnerName)
+    {
+        roundWinnerText.text = $"{winnerName} won the round!";
+        roundWinnerCanvasGroup.alpha = 1f;
+    }
+
 }
+
+
 
 public enum GamePhase
 {
