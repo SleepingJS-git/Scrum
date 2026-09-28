@@ -186,7 +186,7 @@ public class Player : Entity
     public void SpawnServerRpc(RpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
-        Vector3 pos = PlayerSpawner.GetRandomSpawnPoint().transform.position;
+        Vector3 pos = PlayerManager.GetRandomSpawnPoint().transform.position;
         // Send request back to client to make changes
         SpawnClientRpc(pos);
     }

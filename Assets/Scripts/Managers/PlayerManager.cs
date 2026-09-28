@@ -1,9 +1,15 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerSpawner : MonoBehaviour
+/// <summary>
+/// Host manages all player stuff.
+/// </summary>
+public class PlayerManager : MonoBehaviour
 {
-    public static PlayerSpawner Instance;
+    public static PlayerManager Instance { get; private set; }
+
+    // Keep track of who is the host, and who is the local player
+    public static Player LocalPlayer { get; private set; }
     public Transform[] spawnPoints;
     void Awake()
     {
