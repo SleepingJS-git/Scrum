@@ -240,23 +240,23 @@ public class GameManager : NetworkBehaviour
 
     public FixedString512Bytes DebugInfo()
     {
-        DebugInfoServerRpc();
+        //DebugInfoServerRpc();
         return debugInfo.Value;
     }
 
-    [Rpc(SendTo.Server)]
-    private void DebugInfoServerRpc()
-    {
-        debugInfo.Value = $@"
+    //[Rpc(SendTo.Server)]
+    //private void DebugInfoServerRpc()
+    //{
+    //    debugInfo.Value = $@"
 
-        (Game Info)
-        Game Phase: {GamePhase}
-        Loaded Players: {_loadedPlayers} / {numOfPlayers}
-        Ready Players: {_readyPlayers} / {numOfPlayers}
-        Dead Players: {_deadPlayers} / {numOfPlayers}
-        Revived Players: {_resetPlayers} / {numOfPlayers}
-        ";
-    }
+    //    (Game Info)
+    //    Game Phase: {GamePhase}
+    //    Loaded Players: {_loadedPlayers} / {numOfPlayers}
+    //    Ready Players: {_readyPlayers} / {numOfPlayers}
+    //    Dead Players: {_deadPlayers} / {numOfPlayers}
+    //    Revived Players: {_resetPlayers} / {numOfPlayers}
+    //    ";
+    //}
 
     /// <summary>
     /// Method for showing text declaring who won the round
