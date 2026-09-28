@@ -172,6 +172,7 @@ public class GameManager : NetworkBehaviour
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 ShowRoundWinner();
+                buildingUI.GenerateRandomChoices();
                 Invoke(nameof(ReviveAllPlayers), 5f);
                 break;
         }
