@@ -102,9 +102,23 @@ public class BuildCamera : NetworkBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lerpDampening);
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0f);
 
-        // Set the distance of the camera based on the zoom
+        // Set the distance of the camera based on the zoom\
+        Debug.Log(zoomDistance);
         float currentDistance = Mathf.Lerp(cameraTransform.localPosition.z,-zoomDistance, Time.deltaTime * lerpDampening);
-        cameraTransform.localPosition = new Vector3(0, 0, currentDistance);
+        Debug.Log("Current Distance from lerp: " + currentDistance);
+        Vector3 potentialGlobalCamPosition = transform.TransformPoint(new Vector3(0, 0, currentDistance));
+        Debug.Log("Potential Global position before bounds check: " + potentialGlobalCamPosition);
+        for (int i = 0; i < boundaries.Length; i++)
+        {
+            if (boundaries[i].bounds.Contains(potentialGlobalCamPosition))
+            {
+                potentialGlobalCamPosition = GetClosestPointOnBox(boundaries[i], potentialGlobalCamPosition);
+                zoomDistance = Vector3.Distance(potentialGlobalCamPosition, transform.position);
+            }
+        }
+        Debug.Log("Final Potential global Position: " + potentialGlobalCamPosition);
+        cameraTransform.localPosition = transform.InverseTransformPoint(potentialGlobalCamPosition);
+        Debug.Log("Camera local transform: " + cameraTransform.localPosition);
     }
 
 
