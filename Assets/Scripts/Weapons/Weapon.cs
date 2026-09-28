@@ -198,7 +198,7 @@ public class Weapon : NetworkBehaviour
                         damageType = DamageType.Bullet
                     });
 
-                    if (!e.isAlive.Value)
+                    if (!e.isAlive.Value && e is Player)
                     {
                         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
                         {

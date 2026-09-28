@@ -195,7 +195,7 @@ public class GridPlacement : NetworkBehaviour
         bool isObjectVisible = CanPreviewBuildable();
 
         if (buildable) canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value);
-        else canPlace.Value = false;
+        else canPlace.Value = isObjectVisible;
 
         if (isObjectVisible)
         {

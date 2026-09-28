@@ -6,10 +6,11 @@ public class PlayerBody : MonoBehaviour
     public Animator animator;
     public Transform rightHand;
     public Renderer bodyRenderer;
+    public GameObject accessoryFolder;
     public OnHitData onHitData;
     public void Init(bool IsOwner)
     {
-        bodyRenderer.enabled = !IsOwner;
+        ShowBodyRenderer(!IsOwner);
         onHitData = new OnHitData();
     }
 
@@ -42,6 +43,7 @@ public class PlayerBody : MonoBehaviour
     public void ShowBodyRenderer(bool showRenderer)
     {
         bodyRenderer.enabled = showRenderer;
+        accessoryFolder.SetActive(showRenderer);
     }
 
     public void UnRagdoll()
