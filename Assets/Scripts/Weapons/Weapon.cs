@@ -197,6 +197,15 @@ public class Weapon : NetworkBehaviour
                         movingDir = dir,
                         damageType = DamageType.Bullet
                     });
+
+                    if (!e.isAlive.Value)
+                    {
+                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        {
+                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                            stats.AddKill();
+                        }
+                    }
                 }
             }
         }

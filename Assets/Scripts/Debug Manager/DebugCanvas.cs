@@ -29,6 +29,9 @@ public class DebugCanvas : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!IsOwner) return;
+        if (!NetworkManager.Singleton.IsListening) return;
+
         _debugText = "";
 
         if (player)

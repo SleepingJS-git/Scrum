@@ -108,22 +108,16 @@ public class Player : Entity
         if (!_canMove) return;
         look.Look(input.LookInput());
     }
-    
+
     private void PlayerDeath()
     {
-        PlayerDeathServerRpc();
+        GameManager.Instance.PlayerDeath(OwnerClientId);
     }
     private void PlayerDeathSelfRevive()
     {
         Invoke(nameof(Revive), 1f);
     }
-    [Rpc(SendTo.Server)]
-    private void PlayerDeathServerRpc(RpcParams rpcParams = default)
-    {
-        ulong clientID = rpcParams.Receive.SenderClientId;
-        GameManager.Instance.PlayerDeath(clientID);
-        
-    }
+
 
     public void PlayerIsReset()
     {
@@ -148,6 +142,7 @@ public class Player : Entity
         Cursor.visible = !toFps;
         Cursor.lockState = toFps ? CursorLockMode.Locked : CursorLockMode.Confined;
         if (buildCam) buildCam.gameObject.SetActive(!toFps);
+        _hud.gameObject.SetActive(toFps);
         look.cam.gameObject.SetActive(toFps);
     }
 
