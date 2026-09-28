@@ -976,7 +976,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4244698334
+  GlobalObjectIdHash: 2508019869
   InScenePlacedSourceGlobalObjectIdHash: 2508019869
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
@@ -1686,7 +1686,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -9070493210130169274, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_LocalScale.x
@@ -1754,7 +1754,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7657966619581158213, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -7360747449169001873, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_Layer
@@ -1770,7 +1770,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -6170625038081293824, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -6056541330796499132, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_Layer
@@ -1794,7 +1794,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -4332706925441422008, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -3542885339558904099, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_Layer
@@ -1806,7 +1806,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -3086436065929644917, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -2084811680363313996, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_Layer
@@ -1818,7 +1818,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -1781356600409242780, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -1703473491307067327, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_Layer
@@ -1842,7 +1842,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -290750445479886849, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -203856693384778745, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_Layer
@@ -1862,7 +1862,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1082271958561512970, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: 1339101018200438765, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_Layer
@@ -1882,7 +1882,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3135921509060577837, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: 3592506131919666903, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1898,7 +1898,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3948933247560734027, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: 3974016661214395164, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_Layer
@@ -1926,7 +1926,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8817898888258712963, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3257,7 +3257,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5267489798400835163, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -4739559932708204855, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3269,7 +3269,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -4722832476942706373, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -3239687478157462740, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3281,7 +3281,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2794185673625126519, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -2283638187148961533, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3293,7 +3293,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -1635440122350089462, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -1549781719785884221, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3301,7 +3301,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -1549781719785884221, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: -1260351113727226961, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3337,7 +3337,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 615404015555949032, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: 777000295186314797, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3361,7 +3361,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1336695988749935637, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: 1760481439079171380, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3373,7 +3373,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1989469465245179905, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: 2124170798165199878, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3397,7 +3397,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5369092719686050238, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: 5528860797864257434, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3405,7 +3405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5528860797864257434, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     - target: {fileID: 5728896271880125183, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_Layer
@@ -3465,7 +3465,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9087919558675825381, guid: eef782b561c8b2a47b2c101b07714fce, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: Ragdoll
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
