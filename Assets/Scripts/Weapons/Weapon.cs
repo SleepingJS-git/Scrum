@@ -389,4 +389,5 @@ public class Weapon : NetworkBehaviour
     {
         debugInfo.Value = $@"Weapon Spread: {currentSpread} / {maxSpread}";
     }
+    
 }

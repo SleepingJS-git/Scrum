@@ -24,4 +24,14 @@ public class AudioManager : MonoBehaviour
     {
         uiAudioSource.PlayOneShot(audioData.hitmarkerSound);
     }
+
+    public int GetRandomDeathSoundIndex()
+    {
+        return Random.Range(0, audioData.deathSounds.Length);
+    }
+
+    public AudioClip GetDeathSound(int index)
+    {
+        return audioData.deathSounds[index];
+    }
 }
