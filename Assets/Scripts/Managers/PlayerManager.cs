@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -32,6 +33,8 @@ public class PlayerManager : MonoBehaviour
     public static NetworkClient LocalClient {get; private set;} // NetworkManager.Singleton.LocalClient;
 
     public Transform[] spawnPoints;
+
+    private readonly HashSet<int> takenSpawns = new();
     void Awake()
     {
         Instance = this;
@@ -82,7 +85,31 @@ public class PlayerManager : MonoBehaviour
     public static Transform GetRandomSpawnPoint()
     {
         int count = Instance.spawnPoints.Length;
-        return Instance.spawnPoints[UnityEngine.Random.Range(0, count)];
+
+        List<int> availableSpawns = new();
+
+        //find all the available spawn points
+        for (int i = 0; i < count; i++)
+        {
+            if (!Instance.takenSpawns.Contains(i))
+                availableSpawns.Add(i);
+        }
+
+        //all spawn points taken
+        if (availableSpawns.Count == 0)
+        {
+            Debug.LogWarning("No available spawn points!");
+            return Instance.spawnPoints[UnityEngine.Random.Range(0, count)];
+        }
+
+        int chosenIndex = availableSpawns[UnityEngine.Random.Range(0, availableSpawns.Count)];
+        Instance.takenSpawns.Add(chosenIndex);
+        return Instance.spawnPoints[chosenIndex];
+    }
+
+    public static void ClearSpawnPoints()
+    {
+        Instance.takenSpawns.Clear();
     }
 
     private void ConfigureDebugManager()

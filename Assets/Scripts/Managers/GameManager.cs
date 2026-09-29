@@ -182,6 +182,7 @@ public class GameManager : NetworkBehaviour
     /// </summary>
     private void ReviveAllPlayers()
     {
+        PlayerManager.ClearSpawnPoints();
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             Player player = client.PlayerObject.GetComponent<Player>();
