@@ -286,17 +286,6 @@
                     "action": "Drop Weapon",
                     "isComposite": false,
                     "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "bdc35345-ef07-4c56-8968-63eff9e3be2f",
-                    "path": "<Keyboard>/b",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard & Mouse",
-                    "action": "ToBuilding (Test)",
-                    "isComposite": false,
-                    "isPartOfComposite": false
                 }
             ]
         }
