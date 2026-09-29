@@ -16,6 +16,8 @@ public class NetworkPlayerSpawner : NetworkBehaviour
             return;
 
         NetworkManager.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
+
+        Debug.Log("NetworkSpawner is Awakened");
     }
 
     //spawn players once NGO has loaded

@@ -12,4 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aec396b567b3ac84e918f51033b550d2, type: 3}
   m_Name: GameAudio
   m_EditorClassIdentifier: 
-  hitmarkerSound: {fileID: 8300000, guid: 9b26bba0b7e4d35428873172c8e6e729, type: 3}
+  hitmarkerSound: {fileID: 8300000, guid: d7e861ed15f1c74449703275159d2493, type: 3}
+  deathSounds:
+  - {fileID: 8300000, guid: 985d18b0469117b4180c221aa12b0939, type: 3}
+  - {fileID: 8300000, guid: 3fbec024093997c4087623ae4e4340eb, type: 3}
+  - {fileID: 8300000, guid: 77522231cf4d6144da789bde29d4fa2f, type: 3}
+  - {fileID: 8300000, guid: 8f336add378f4374d827327e42f11bac, type: 3}
+  - {fileID: 8300000, guid: 946e782cc31826f44a48a12885a5f8f2, type: 3}

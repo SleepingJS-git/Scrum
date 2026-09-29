@@ -11,7 +11,7 @@ public class ConnectUI : MonoBehaviour
     {
         hostButton.onClick.AddListener(HostButtonOnClick);
         clientButton.onClick.AddListener(ClientButtonOnClick);
-        readyButton.onClick.AddListener(PlayerIsReady);
+        if (readyButton) readyButton.onClick.AddListener(PlayerIsReady);
     }
 
     /// <summary>

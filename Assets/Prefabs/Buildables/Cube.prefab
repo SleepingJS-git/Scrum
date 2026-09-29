@@ -280,9 +280,9 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 1
-  explosionForce: 0
-  explosionRadius: 0
-  upwardsModifier: 0
+  explosionForce: 10
+  explosionRadius: 5
+  upwardsModifier: 0.05
 --- !u!65 &5115320798844887305
 BoxCollider:
   m_ObjectHideFlags: 0

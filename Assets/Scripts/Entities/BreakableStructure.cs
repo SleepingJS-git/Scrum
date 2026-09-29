@@ -5,9 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(Fracture))]
 public class BreakableStructureEntity: Entity
 {
-    private Fracture fracture;
-    private Action fractureApart;
-    [SerializeField] private float explosionForce, explosionRadius, upwardsModifier;
+    protected Fracture fracture;
+    protected Action fractureApart;
+    [SerializeField] protected float explosionForce, explosionRadius, upwardsModifier;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
@@ -25,13 +25,13 @@ public class BreakableStructureEntity: Entity
 
     public void ResetBreakable()
     {
-       GetComponent<Collider>().enabled = true;
-       GetComponent<MeshRenderer>().enabled = true;
-       this.health.Value = maxHealth;
+        GetComponent<Collider>().enabled = true;
+        GetComponent<MeshRenderer>().enabled = true;
+        this.health.Value = maxHealth;
         this.isAlive.Value = true;
     }
 
-    private void Explosion()
+    private void Fracture()
     {
         foreach(Rigidbody rb in fracture.FragmentRoot.GetComponentsInChildren<Rigidbody>())
         {
@@ -57,10 +57,10 @@ public class BreakableStructureEntity: Entity
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void FractureApartClientRpc()
+    protected void FractureApartClientRpc()
     {
         fracture.CauseFracture();
-        Explosion();
+        Fracture();
         StartCoroutine(Despawn());
     }
 

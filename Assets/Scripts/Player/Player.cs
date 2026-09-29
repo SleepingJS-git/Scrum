@@ -1,4 +1,5 @@
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 /// <summary>
@@ -22,6 +23,8 @@ public class Player : Entity
     public BuildCamera buildCam;
     public Transform PlayerCam => look.cam.transform;
     private bool _canMove;
+    [SerializeField]
+    private AudioSource playerAudioSource;
     public bool CanMove => _canMove;
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
@@ -111,11 +114,22 @@ public class Player : Entity
 
     private void PlayerDeath()
     {
+        int soundIndex = AudioManager.Instance.GetRandomDeathSoundIndex();
+        PlayDeathSoundRpc(soundIndex);
         GameManager.Instance.PlayerDeath(OwnerClientId);
     }
     private void PlayerDeathSelfRevive()
     {
         Invoke(nameof(Revive), 1f);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void PlayDeathSoundRpc(int soundIndex)
+    {
+        AudioClip clip = AudioManager.Instance.GetDeathSound(soundIndex);
+        bool isLocalDeath = NetworkManager.Singleton.LocalClientId == OwnerClientId;
+        playerAudioSource.spatialBlend = isLocalDeath ? 0f : 1f;
+        playerAudioSource.PlayOneShot(clip);
     }
 
 

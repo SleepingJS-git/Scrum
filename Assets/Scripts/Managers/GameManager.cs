@@ -172,6 +172,7 @@ public class GameManager : NetworkBehaviour
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 ShowRoundWinner();
+                buildingUI.GenerateRandomChoices();
                 Invoke(nameof(ReviveAllPlayers), 5f);
                 break;
         }
@@ -181,6 +182,7 @@ public class GameManager : NetworkBehaviour
     /// </summary>
     private void ReviveAllPlayers()
     {
+        PlayerManager.ClearSpawnPoints();
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             Player player = client.PlayerObject.GetComponent<Player>();

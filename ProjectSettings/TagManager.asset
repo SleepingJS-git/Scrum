@@ -9,6 +9,7 @@ TagManager:
   - Interactable
   - Hitbox
   - Buildable
+  - Ragdoll
   layers:
   - Default
   - TransparentFX
