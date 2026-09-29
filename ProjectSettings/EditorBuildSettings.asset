@@ -35,6 +35,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/FractureTesting.unity
     guid: cfe319f653e7d4249a7086d13b3dfc33
+  - enabled: 1
+    path: Assets/Scenes/3D Asset Library.unity
+    guid: 177ae0b61e6a4fc41bfcbf6a2e37f466
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
