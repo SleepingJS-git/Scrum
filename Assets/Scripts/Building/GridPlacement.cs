@@ -95,11 +95,18 @@ public class GridPlacement : NetworkBehaviour
 
     public void ResetCounter()
     {
+        ResetBuildablesRpc();
         ResetCounterServerRpc();
     }
 
     [Rpc(SendTo.Server)]
     private void ResetCounterServerRpc()
+    {     
+        currentPlacements.Value = 0;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ResetBuildablesRpc()
     {
         if (builtObjects.Count != 0)
         {
@@ -109,13 +116,12 @@ public class GridPlacement : NetworkBehaviour
                 build.GetComponent<BreakableStructureEntity>().ResetBreakable();
             }
         }
-        currentPlacements.Value = 0;
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-
         if (IsServer)
             DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
 
@@ -254,7 +260,7 @@ public class GridPlacement : NetworkBehaviour
         BuildableDatabase.SetCellsToOccupied(buildable, cellPos, rotation.Value);
         currentPlacements.Value++;
         if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) {builtObjects.Add(obj);}
-
+        Debug.Log(builtObjects.Count);
 
     }
 

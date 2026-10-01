@@ -8,6 +8,10 @@ public class BreakableStructureEntity: Entity
     protected Fracture fracture;
     protected Action fractureApart;
     [SerializeField] protected float explosionForce, explosionRadius, upwardsModifier;
+
+    [Tooltip("The amount of time the object waits before breaking.")]
+    [SerializeField] private float breakDelay;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
@@ -31,7 +35,7 @@ public class BreakableStructureEntity: Entity
         this.isAlive.Value = true;
     }
 
-    private void Fracture()
+    private void Explode()
     {
         foreach(Rigidbody rb in fracture.FragmentRoot.GetComponentsInChildren<Rigidbody>())
         {
@@ -59,15 +63,13 @@ public class BreakableStructureEntity: Entity
     [Rpc(SendTo.ClientsAndHost)]
     protected void FractureApartClientRpc()
     {
-        fracture.CauseFracture();
-        Fracture();
-        StartCoroutine(Despawn());
+        StartCoroutine(Break());     
     }
 
-
-    
-    private IEnumerator Despawn()
-    {
+    private IEnumerator Break() { 
+        yield return new WaitForSeconds(breakDelay);
+        fracture.CauseFracture();
+        Explode();
         yield return new WaitForSeconds(5f);
         Destroy(fracture.FragmentRoot);
         gameObject.SetActive(false);
