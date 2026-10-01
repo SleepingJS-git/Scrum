@@ -17,9 +17,7 @@ public class Scoreboard : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-
         _canvasGroup = GetComponent<CanvasGroup>();
-
         SetScoreboardVisible(false);
     }
 
