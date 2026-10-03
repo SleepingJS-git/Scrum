@@ -5,11 +5,11 @@ using Unity.Netcode;
 using Unity.Services.Multiplayer;
 using UnityEngine;
 using TMPro;
+using System;
 
 public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance;
-    public BuildingUI buildingUI;
     public ConnectUI connectUI;
     [SerializeField] private GamePhase gamePhase;
     public static GamePhase GamePhase => Instance.gamePhase;
@@ -38,40 +38,46 @@ public class GameManager : NetworkBehaviour
 
         if (!IsServer) return;
         ChangeGamePhaseServerRpc(GamePhase.Loading);
-
-    }
-
-    //Set player count, used in NetworkSpawner after spawning players in
+    }    
+    /// <summary>
+    /// Set player count, used in NetworkSpawner after spawning players in
+    /// </summary>
+    /// <param name="count"></param>
     public void SetPlayerCount(int count)
     {
         numOfPlayers = count;
     }
-
+    
     /// <summary>
-    /// When the players get loaded, set the number of players that the manager will wait to load.
-    /// Once every player is loaded, game will begin.
+    /// Called on Server.
+    /// Player is loaded
     /// </summary>
-    [Rpc(SendTo.Server)]
-    public void SetNumOfPlayersServerRpc(int num)
+    /// <param name="clientId"></param>
+    public void PlayerLoaded(ulong clientId)
     {
-        numOfPlayers = num;
-    }
-
-    [Rpc(SendTo.Server)]
-    public void PlayerLoadedServerRpc(RpcParams rpcParams = default)
-    {
+        if (!IsServer) return;
         _loadedPlayers++;
 
         Debug.Log($"Players Joined: {_loadedPlayers} / {numOfPlayers}");
+
+        if (_loadedPlayers == numOfPlayers)
+        {
+            ChangeGamePhaseServerRpc(GamePhase.Building);
+        }
     }
 
+    /// <summary>
+    /// Called on server.
+    /// This player has died.
+    /// </summary>
+    /// <param name="clientID"></param>
     public void PlayerDeath(ulong clientID)
     {
-
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
         {
             Player player = client.PlayerObject.GetComponent<Player>();
 
+            if (player.isAlive.Value) return;   // Player is not dead.
             PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
             stats.AddDeath();
 
@@ -79,6 +85,11 @@ public class GameManager : NetworkBehaviour
             _deadPlayers++;
 
             Debug.Log("Dead Players: " + _deadPlayers);
+        }
+
+        if (_deadPlayers >= numOfPlayers - 1)
+        {
+            ChangeGamePhaseServerRpc(GamePhase.EndOfCombat);
         }
 
     }
@@ -89,6 +100,12 @@ public class GameManager : NetworkBehaviour
         _resetPlayers++;
 
         Debug.Log($"Players Reset: {_resetPlayers} / {numOfPlayers}");
+
+        if (_resetPlayers == numOfPlayers)
+        {
+            if (gamePhase != GamePhase.Building)
+                ChangeGamePhaseServerRpc(GamePhase.Building);
+        }
     }
 
     [Rpc(SendTo.Server)]
@@ -97,52 +114,21 @@ public class GameManager : NetworkBehaviour
         _readyPlayers++;
 
         Debug.Log($"Players Ready: {_loadedPlayers} / {numOfPlayers}");
+
+        if (_readyPlayers == numOfPlayers)
+            ChangeGamePhaseServerRpc(GamePhase.Combat);
     }
-
-
-    void Update()
-    {
-        if (!IsServer) return;
-
-        switch (gamePhase)
-        {
-            case GamePhase.Loading:
-                if (_loadedPlayers == numOfPlayers)
-                {
-                    if (gamePhase != GamePhase.Building)
-                        ChangeGamePhaseServerRpc(GamePhase.Building);
-                }
-                break;
-            case GamePhase.Building:
-                if (_readyPlayers == numOfPlayers)
-                {
-                    if (gamePhase != GamePhase.Combat)
-                        ChangeGamePhaseServerRpc(GamePhase.Combat);
-                }
-                break;
-            case GamePhase.Combat:
-                if (_deadPlayers >= numOfPlayers - 1)
-                {
-                    if (gamePhase != GamePhase.EndOfCombat)
-                        ChangeGamePhaseServerRpc(GamePhase.EndOfCombat);
-                }
-                break;
-            case GamePhase.EndOfCombat:
-                if (_resetPlayers == numOfPlayers)
-                {
-                    if (gamePhase != GamePhase.Building)
-                        ChangeGamePhaseServerRpc(GamePhase.Building);
-                }
-                break;
-        }
-
-    }
-
-
+    /// <summary>
+    /// Debug Button
+    /// </summary>
     public void ChangeToCombat()
     {
         ChangeGamePhaseServerRpc(GamePhase.Combat);
     }
+
+    /// <summary>
+    /// Debug Button
+    /// </summary>
     public void ChangeToBuilding()
     {
         ChangeGamePhaseServerRpc(GamePhase.Building);
@@ -157,14 +143,14 @@ public class GameManager : NetworkBehaviour
                 _readyPlayers = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
-                CamControlClientRpc(true, (int)gamePhase);
+                PlayerControllerRpc((int) gamePhase);
                 break;
 
             case GamePhase.Building:
                 _readyPlayers = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
-                CamControlClientRpc(false, (int)gamePhase);
+                PlayerControllerRpc((int) gamePhase);
                 break;
 
             case GamePhase.EndOfCombat:
@@ -172,73 +158,33 @@ public class GameManager : NetworkBehaviour
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 ShowRoundWinner();
-                buildingUI.GenerateRandomChoices();
-                Invoke(nameof(ReviveAllPlayers), 5f);
+                Invoke(nameof(ResetPlayers), 5f);
                 break;
         }
     }
-    /// <summary>
-    /// Revive all Players
-    /// </summary>
-    private void ReviveAllPlayers()
-    {
-        PlayerManager.ClearSpawnPoints();
-        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
-        {
-            Player player = client.PlayerObject.GetComponent<Player>();
-            player.health.Value = 100;
-            player.UpdateHealthClientRpc(player.OwnerClientId);
-            player.isAlive.Value = true;
-            player.combat.EmptyWeapon();
-            player.combat.weaponHandler.DropWeapon();
-        }
 
-        EndCombatClientRpc();
+    private void ResetPlayers()
+    {
+        PlayerManager.ResetEvent();
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void EndCombatClientRpc()
+    private void PlayerControllerRpc(int gamePhaseInt)
     {
-        foreach (NetworkObject networkObject in NetworkManager.Singleton.SpawnManager.SpawnedObjectsList)
-        {
-            Player player = networkObject.GetComponent<Player>();
-
-            if (player == null)
-                continue;
-
-            if (player.IsOwner)
-            {
-                player.Revive();
-            }
-            else
-            {
-                player.body.UnRagdoll();
-                player.body.Play("IsMoving", false);
-                Destroy(player.combat.weaponInHand);
-            }
-            
-            player.move.OnDeathCollider(false);
-        }
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void CamControlClientRpc(bool toFps, int gamePhaseInt)
-    {
-        gamePhase = (GamePhase)gamePhaseInt;
+        gamePhase = (GamePhase) gamePhaseInt;
 
         if (gamePhase == GamePhase.Building)
         {
+            PlayerManager.ChangePov(1);
             roundWinnerCanvasGroup.alpha = 0f;
-            buildingUI.GenerateRandomChoices();
             connectUI.ResetReadyButton();
         }
-        buildingUI.gameObject.SetActive(!toFps);
-
-        Player player = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
-        player.ToggleMove(toFps);
-        player.ToggleFirstPerson(toFps);
-        player.body.ShowBodyRenderer(!toFps);
-
+        else if (gamePhase == GamePhase.Combat)
+        {
+            PlayerManager.ChangePov(0);
+        }
     }
+
 
     public FixedString512Bytes DebugInfo()
     {

@@ -7,24 +7,25 @@ using UnityEngine;
 /// </summary>
 public class Player : Entity
 {
-    [HideInInspector] public PlayerInputHandler input;
-    [HideInInspector] public PlayerCombat combat;
-    [HideInInspector] public PlayerMovement move;
-    [HideInInspector] public PlayerLook look;
-    [HideInInspector] public PlayerInteraction interaction;
-    [HideInInspector] public PlayerBody body;
+    // Components
+    public PlayerInputHandler Input { get; private set; }
+    public PlayerCombat Combat { get; private set; }
+    public PlayerMovement Move { get; private set; }
+    public PlayerLook Look { get; private set; }
+    public PlayerInteraction Interaction { get; private set; }
+    public PlayerBody Body { get; private set; }
+    public PlayerStats Stats { get; private set; }
+    [SerializeField] private AudioSource playerAudioSource;
 
-    // I know this is messy. This is a test. Eventually I want to have a singleton manager have a variable
-    // so the player can reference it themselves.
-    [SerializeField] private PlayerHud playerHudPrefab;
-    [SerializeField] private BuildCamera buildCamPrefab;
-    private PlayerHud _hud;
-    public BuildCamera buildCam;
-    public Transform PlayerCam => look.cam.transform;
-    private bool _canMove;
-    [SerializeField]
-    private AudioSource playerAudioSource;
-    public bool CanMove => _canMove;
+    // Player Hud - Gets set by PlayerManager
+    private PlayerHud hud;
+    public void SetHud(PlayerHud h) => this.hud = h; 
+
+    // Random garbage
+    public Transform PlayerCam => Look.cam.transform;
+    public bool CanMove { get; private set; }
+    [SerializeField] private bool _initialized = false;
+
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -38,53 +39,32 @@ public class Player : Entity
     {
         // Value for health is set
         base.OnNetworkSpawn();
-        input = GetComponent<PlayerInputHandler>();
-        combat = GetComponent<PlayerCombat>();
-        move = GetComponent<PlayerMovement>();
-        look = GetComponent<PlayerLook>();
-        interaction = GetComponent<PlayerInteraction>();
-        body = GetComponent<PlayerBody>();
-
-        if (IsOwner)
-        {
-            _hud = Instantiate(playerHudPrefab);
-            _hud.health.text = health.Value.ToString();
-            if (GameManager.Instance != null)
-            {
-                SpawnServerRpc();
-                SpawnBuilderServerRpc();
-                Invoke(nameof(LoadedIn), .25f);
-            }
-            else
-            {
-                _canMove = true;
-                ToggleFirstPerson(true);
-            }
-        }
+        Input = GetComponent<PlayerInputHandler>();
+        Combat = GetComponent<PlayerCombat>();
+        Move = GetComponent<PlayerMovement>();
+        Look = GetComponent<PlayerLook>();
+        Interaction = GetComponent<PlayerInteraction>();
+        Body = GetComponent<PlayerBody>();
+        Stats = GetComponent<PlayerStats>();
 
         // Check if the computer running this script is the client.
         // If it is then IsOwner = true.
-        input.Init(IsOwner);
-        body.Init(IsOwner);
-        move.Init(IsOwner);
-        look.Init(IsOwner);
-        combat.Init(IsOwner, _hud);
-        interaction.Init(look.cam.transform, _hud);
-
-        if (IsServer)
+        Input.Init(IsOwner);
+        Body.Init(IsOwner);
+        Move.Init(IsOwner);
+        Look.Init(IsOwner);
+        if (IsOwner)
         {
-            if (GameManager.Instance != null)
-                AddDeathEvent(PlayerDeath);
-            else
-                AddDeathEvent(PlayerDeathSelfRevive);
+            PlayerManager.Instance.SetLocalPlayer(this);
+
+            Interaction.Init(Look.cam.transform, hud);
         }
 
-    }
+        Combat.Init(IsOwner, hud);
 
-    void LoadedIn()
-    {
-        GameManager.Instance.buildingUI.gameObject.SetActive(false);
-        GameManager.Instance.PlayerLoadedServerRpc();
+        
+
+        _initialized = true;
     }
 
     void Update()
@@ -92,12 +72,12 @@ public class Player : Entity
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
 
-        if (!isAlive.Value) return;
+        // No controls unless all values are true
+        if (!_initialized || !isAlive.Value || !CanMove) return;
 
-        if (!_canMove) return;
-        move.Move(input.MoveInput);
-        combat.PrimaryInput(input.PrimaryInput);
-        interaction.Interaction();
+        Move.Move(Input.MoveInput);
+        Combat.PrimaryInput(Input.PrimaryInput);
+        Interaction.Interaction();
     }
 
     void LateUpdate()
@@ -105,58 +85,29 @@ public class Player : Entity
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
 
-        if (!isAlive.Value) return;
+        // No controls unless all values are true
+        if (!_initialized || !isAlive.Value || !CanMove) return;
 
-        if (!_canMove) return;
-        look.Look(input.LookInput());
+        Look.Look(Input.LookInput());
     }
 
-    private void PlayerDeath()
+    /// <summary>
+    /// Play death sound
+    /// </summary>
+    /// <param name="soundIndex"></param>
+    public void PlayDeathSound()
     {
+        // Instead of an Everyone Rpc, just add this method to OnDeathEffects in Inspector.
         int soundIndex = AudioManager.Instance.GetRandomDeathSoundIndex();
-        PlayDeathSoundRpc(soundIndex);
-        GameManager.Instance.PlayerDeath(OwnerClientId);
-    }
-    private void PlayerDeathSelfRevive()
-    {
-        Invoke(nameof(Revive), 1f);
-    }
-
-    [Rpc(SendTo.Everyone)]
-    private void PlayDeathSoundRpc(int soundIndex)
-    {
         AudioClip clip = AudioManager.Instance.GetDeathSound(soundIndex);
-        bool isLocalDeath = NetworkManager.Singleton.LocalClientId == OwnerClientId;
-        playerAudioSource.spatialBlend = isLocalDeath ? 0f : 1f;
+        playerAudioSource.spatialBlend = IsOwner ? 0f : 1f;
         playerAudioSource.PlayOneShot(clip);
-    }
-
-
-    public void PlayerIsReset()
-    {
-        GameManager.Instance.PlayerResetServerRpc();
     }
 
     public void ToggleDeathHud(bool isDead)
     {
         if (!IsOwner) return;
-        _hud.youAreDeadObj.SetActive(isDead);
-    }
-
-    /// <summary>
-    /// Toggles the control of first person.
-    /// True = the player gains control of FP Movement
-    /// False = the player loses control of FP Movement
-    /// Controls will be overwrited outside of this script.
-    /// </summary>
-    /// <param name="toFps"></param>
-    public void ToggleFirstPerson(bool toFps)
-    {
-        Cursor.visible = !toFps;
-        Cursor.lockState = toFps ? CursorLockMode.Locked : CursorLockMode.Confined;
-        if (buildCam) buildCam.gameObject.SetActive(!toFps);
-        _hud.gameObject.SetActive(toFps);
-        look.cam.gameObject.SetActive(toFps);
+        hud.youAreDeadObj.SetActive(isDead);
     }
 
     /// <summary>
@@ -174,8 +125,8 @@ public class Player : Entity
     [Rpc(SendTo.ClientsAndHost)]
     private void OnHitClientRpc(int damage, Vector3 sourceHit)
     {
-        body.onHitData.damage = damage;
-        body.onHitData.sourceHit = sourceHit;
+        Body.onHitData.damage = damage;
+        Body.onHitData.sourceHit = sourceHit;
     }
 
     /// <summary>
@@ -186,71 +137,22 @@ public class Player : Entity
     public void UpdateHealthClientRpc(ulong clientId)
     {
         if (NetworkManager.Singleton.LocalClientId == clientId)
-            _hud.health.text = health.Value.ToString();
-    }
-
-
-    /// <summary>
-    /// Server uses the sender client's id to figure out which
-    /// spawn point is to be used.
-    /// </summary>
-    /// <param name="rpcParams"></param>
-    [Rpc(SendTo.Server)]
-    public void SpawnServerRpc(RpcParams rpcParams = default)
-    {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        Vector3 pos = PlayerManager.GetRandomSpawnPoint().transform.position;
-        // Send request back to client to make changes
-        SpawnClientRpc(pos);
-    }
-
-    /// <summary>
-    /// The client is told to move a position by the server.
-    /// </summary>
-    /// <param name="pos"></param>
-    [Rpc(SendTo.ClientsAndHost)]
-    public void SpawnClientRpc(Vector3 pos)
-    {
-        if (!IsOwner)
-            return;
-
-        transform.position = pos;
-    }
-
-    [Rpc(SendTo.Server)]
-    public void SpawnBuilderServerRpc(RpcParams rpcParams = default)
-    {
-        ulong clientId = rpcParams.Receive.SenderClientId;
-        BuildCamera buildCam = Instantiate(buildCamPrefab);
-        buildCam.NetworkObject.SpawnWithOwnership(clientId);
-
-        SetBuilderClientRpc(buildCam.NetworkObjectId);
-    }
-
-    [Rpc(SendTo.ClientsAndHost)]
-    private void SetBuilderClientRpc(ulong networkObjectId)
-    {
-        if (!IsOwner) return;
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
-        {
-            buildCam = networkObject.GetComponent<BuildCamera>();
-        }
+            hud.health.SetText(health.Value.ToString());
     }
 
     public void ToggleMove(bool canMove)
     {
-        _canMove = canMove;
+        CanMove = canMove;
+        Input.ToggleInput(canMove);
     }
 
     public void Revive()
     {
-        _hud.health.text = health.Value.ToString();
-        combat.EmptyWeapon();
+        hud.health.text = health.Value.ToString();
+        Combat.EmptyWeapon();
         ToggleDeathHud(false);
-        body.UnRagdoll();
-        body.Play("IsMoving", false);
-        SpawnServerRpc();
-        if (buildCam) buildCam.gridBuilding.ResetCounter();
-        if (GameManager.Instance) PlayerIsReset();
+        Body.UnRagdoll();
+        Body.Play("IsMoving", false);
+        Move.OnDeathCollider(false);
     }
 }

@@ -9,6 +9,7 @@ using UnityEngine.Events;
 public abstract class Entity : NetworkBehaviour
 {
     [SerializeField] protected int maxHealth;
+    public int MaxHealth => maxHealth;
     [SerializeField] private UnityEvent onDeathEffects;
     [SerializeField] private UnityEvent onDeathLocalClient;
     private event Action OnDeath;

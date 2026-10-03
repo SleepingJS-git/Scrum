@@ -8,79 +8,343 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Host manages all player stuff.
 /// </summary>
-public class PlayerManager : MonoBehaviour
+[DefaultExecutionOrder(-100)] 
+public class PlayerManager : NetworkBehaviour
 {
     public static PlayerManager Instance { get; private set; }
-
+    
+    #region Local Player Tracking
     // Keep track of who is the local player
     public static Player LocalPlayer { get; private set; }
     public static BuildCamera LocalBuilder {get; private set; }
 
     // The Player's hud. Only one instance of this should exist in the scene.
     [SerializeField] private PlayerHud playerHud;
-    public PlayerHud PlayerHud => playerHud;
+    [SerializeField] private BuildingUI builderHud;
+    public static BuildingUI BuildingUI => Instance.builderHud;
 
-    // Player Events | ulong is clientId
-    public static event Action<ulong> OnPlayerSpawned;
-    public static event Action<ulong> OnPlayerDeath;
-    public static event Action<ulong> OnPlayerReset;
+    // State Tracking
+    public static PointOfView POV { get; private set; }
+
+    // Client Tracking
+    public static bool IsHostClient { get; private set; }
+    public static ulong LocalClientId { get; private set; } // NetworkManager.Singleton.LocalClientId;
+    public static NetworkClient LocalClient { get; private set; } // NetworkManager.Singleton.LocalClient;
+    
+    // Local Client Events
+    public static event Action OnPlayerReset;
+    
+    #endregion
 
     // Debugger
-    public static DebugManager DebugManager {get; private set;} 
+    private DebugConfig debugConfig;
 
-    public static bool IsHost {get; private set;}  // NetworkManager.Singleton.IsHost;
-    public static ulong LocalClientId {get; private set;} // NetworkManager.Singleton.LocalClientId;
-    public static NetworkClient LocalClient {get; private set;} // NetworkManager.Singleton.LocalClient;
 
+    // Spawnpoint transforms
     public Transform[] spawnPoints;
-
+    
+    // Spawnpoint tracker
     private readonly HashSet<int> takenSpawns = new();
+
+    // Private Prefabs
+    [SerializeField] private Player playerPrefab;
+    [SerializeField] private BuildCamera builderPrefab;
+
+    // Server-side events - Subscribe methods to these depending on what the config says
+    public static event Action<ulong> OnPlayerDeath;   // What happens when the player dies.
+    public static event Action OnAllPlayersReset;
+
     void Awake()
     {
         Instance = this;
         Debug.Log("PlayerManager is Awakened");
-
-        // Check if the LobbyManager was created. If yes, then the game was loaded from a Lobby. 
-        // If not, the game is being ran in Play Mode directly in the scene.
-        if (LobbyManager.Instance)
-        {
-            // If this is the normal game, then we can get stuff from LobbyManager to set up all players.
-            // Im pretty sure NetworkPlayerSpawner is also only created when loading from lobby.
-        }
-        else
-        {
-            DebugManager = GetComponentInChildren<DebugManager>();
-            if (DebugManager) ConfigureDebugManager();
-        }
-
-        OnPlayerSpawned += SetLocalPlayer;
-
-        // Wait for NetworkManager to load
-        StartCoroutine(WaitForNetworkManager());
     }
-    private IEnumerator WaitForNetworkManager()
+
+
+    public override void OnNetworkSpawn()
     {
-        while (!NetworkManager.Singleton || !NetworkManager.Singleton.IsListening)
-        {
-            yield return null;
-        }
+        if (!IsOwner) return;
+    }
 
-        // Once the NetworkManager is ready to go, now try to spawn player based on LocalClient
-        OnPlayerSpawned?.Invoke(NetworkManager.Singleton.LocalClientId);
-    }
-    private void SetLocalPlayer(ulong clientId)
+    /// <summary>
+    /// Server-side Configuration
+    /// </summary>
+    /// <param name="config"></param>
+    public void ConfigureSpawning(DebugConfig config)
     {
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out NetworkClient client))
+        debugConfig = config;
+        // If it was configured, then run in debug mode
+        // If not, carry on with normal game
+
+        switch (debugConfig.debuggingType)
         {
-            LocalClientId = clientId;
-            LocalClient = client;
-            LocalPlayer = LocalClient.PlayerObject.GetComponent<Player>();
+            case DebugType.Solo_Fps:
+                // Host is controlling themselves so this is ok, but dont copy this for multiplayer
+                NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayer;
+                NetworkManager.Singleton.OnClientConnectedCallback += (clientId) =>
+                {
+                    ChangePov(0);
+                };
+                // Host Respawn the player immediately (the host is respawning themselves so its ok)
+                OnPlayerDeath += (clientId) =>
+                {
+                    Invoke(nameof(ResetPlayer), 1f);
+                };
+            break;
+
+            case DebugType.Solo_Building:
+                NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
+            break;
+
+            case DebugType.MVP:
+                NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
+                NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayer;
+
+                // Tell the gamemanager that the player is spawned and loaded.
+                NetworkManager.Singleton.OnClientConnectedCallback += GameManager.Instance.PlayerLoaded;
+
+                // The host will reset server-side players
+                OnAllPlayersReset += ClearSpawnPoints;
+                OnAllPlayersReset += ServerPlayersReset;
+
+                // The host/server will tell all clients to reset their players
+                OnAllPlayersReset += ResetAllPlayers;
+
+                // Tell gamemanager that a player had died
+                OnPlayerDeath += GameManager.Instance.PlayerDeath;
+
+            break;
         }
     }
+
+    public static void ResetEvent()
+    {
+        OnAllPlayersReset?.Invoke();
+    }
+
+    private void ServerPlayersReset()
+    {
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            Player player = client.PlayerObject.GetComponent<Player>();
+            player.health.Value = 100;
+            player.UpdateHealthClientRpc(player.OwnerClientId);
+            player.isAlive.Value = true;
+            player.Combat.EmptyWeapon();
+            player.Combat.weaponHandler.DropWeapon();
+        }
+    }
+    private void ResetAllPlayers()
+    {
+        ClientPlayerResetRpc();
+    }
+
+    /// <summary>
+    /// Invoked by server. Method is subscribed to server's OnAllPlayersReset.
+    /// The host will tell all clients to reset their local players.
+    /// </summary>
+    [Rpc(SendTo.Everyone)]
+    private void ClientPlayerResetRpc()
+    {
+        ResetPlayer();
+        ResetNonLocalPlayers();
+
+        OnPlayerReset?.Invoke();
+    }
+
+#region Player Setup
+    /// <summary>
+    /// Called while on the server
+    /// </summary>
+    /// <param name="clientId"></param>
+    public void SpawnPlayer(ulong clientId)
+    {
+        if (!IsServer) return;
+        Transform spawnPoint = GetRandomSpawnPoint();
+        Vector3 pos = spawnPoint.position; pos.y += 1.5f;
+        Player player = Instantiate(
+            playerPrefab,
+            pos,
+            spawnPoint.rotation
+        );
+
+        player.NetworkObject.SpawnAsPlayerObject(clientId, true);
+        Debug.Log("Player Spawned for Client: " + clientId);
+        // Set up player Serverside
+        // Add events that would actually effect the server when the player dies.
+        player.AddDeathEvent(() =>
+        {
+            OnPlayerDeath?.Invoke(clientId);
+        });
+    }
+    public void SetLocalPlayer(Player p)
+    {
+        // Set up player local-side
+        IsHostClient = IsHost;
+        LocalClientId = NetworkManager.Singleton.LocalClientId;
+        LocalClient = NetworkManager.Singleton.LocalClient;
+        LocalPlayer = p;
+        Debug.Log("Local Player is: " + LocalClientId);
+        // Set up hud
+        LocalPlayer.SetHud(playerHud);
+        playerHud.health.text = LocalPlayer.MaxHealth.ToString();
+
+        OnPlayerReset += OnReset;
+
+        if (LocalBuilder) ChangePov(1);
+    }
+
+
+    /// <summary>
+    /// Called by Client
+    /// Local clients need to reset their versions of other players
+    /// </summary>
+    private void ResetNonLocalPlayers()
+    {
+        foreach (NetworkClient networkClient in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            Player player = networkClient.PlayerObject.GetComponent<Player>();
+
+            if (player == null || player == LocalPlayer)
+                continue;
+
+            player.Body.UnRagdoll();
+            player.Body.Play("IsMoving", false);
+            player.Move.OnDeathCollider(false);
+            Destroy(player.Combat.weaponInHand);
+        }
+    }
+    
+    private void OnReset()
+    {
+        GameManager.Instance.PlayerResetServerRpc();
+    }
+#endregion
+
+#region Builder Setup
+    public void SpawnBuilder(ulong clientId)
+    {
+        if (!IsServer) return;
+        BuildCamera buildCam = Instantiate(
+            builderPrefab
+        );
+
+        buildCam.NetworkObject.SpawnWithOwnership(clientId, true);
+    }
+
+
+    public void SetLocalBuilder(BuildCamera cam)
+    {
+        if (!LocalPlayer)
+        {
+            IsHostClient = IsHost;
+            LocalClientId = NetworkManager.Singleton.LocalClientId;
+            LocalClient = NetworkManager.Singleton.LocalClient;
+        }
+        // Get the builder object from the NetworkManager's SpawnManager's SpawnedObjects dictionary.
+        Debug.Log("Local Builder Is: " + LocalClientId);
+        
+        LocalBuilder = cam;
+        SetUpBuilder();
+    }
+
+    private void SetUpBuilder()
+    {
+        // The manager is the one who handles the resetting stuff.
+        OnPlayerReset += LocalBuilder.gridBuilding.ResetCounter;
+        OnPlayerReset += builderHud.GenerateRandomChoices;
+    }
+
+
+#endregion
+
+#region Player Managing
+    /// <summary>
+    /// Needs to be called by Client or ClientRpc
+    /// Changes the POV and controls of LOCAL Client
+    /// </summary>
+    /// <param name="newPov"></param>
+    public static void ChangePov(int newPov)
+    {
+        POV = (PointOfView) newPov;
+
+        switch (POV)
+        {
+            case PointOfView.FPS:
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                
+                if (LocalPlayer)
+                { 
+                    LocalPlayer.Look.cam.gameObject.SetActive(true);
+                    LocalPlayer.Body.ShowBodyRenderer(false);
+                }
+                if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
+
+                TogglePlayerControls(true);
+            break;
+            case PointOfView.Building:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.Confined;
+
+                if (LocalPlayer)
+                {
+                    LocalPlayer.Look.cam.gameObject.SetActive(false);
+                    LocalPlayer.Body.ShowBodyRenderer(true);
+                } 
+                if (LocalBuilder) LocalBuilder.gameObject.SetActive(true);
+
+
+                TogglePlayerControls(false);
+            break;
+            case PointOfView.Spectate:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.Confined;
+
+                if (LocalPlayer) LocalPlayer.Look.cam.gameObject.SetActive(false);
+                if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
+
+                // Spectate Cam needs to be added soon.
+                TogglePlayerControls(false);
+            break;
+        }
+    }
+
+
+    /// <summary>
+    /// Swaps the LOCAL Player Controls.
+    /// </summary>
+    /// <param name="canMove">True = FPS Input is on. False = Builder Input is on</param>
+    public static void TogglePlayerControls(bool canMove)
+    {
+        LocalPlayer.ToggleMove(canMove);
+        LocalBuilder.ToggleInput(!canMove);
+    }
+
+
+    /// <summary>
+    /// Needs to be called by Client or ClientRpc
+    /// </summary>
+    private void ResetPlayer()
+    {
+        LocalPlayer.Revive();
+        TeleportPlayer(GetRandomSpawnPoint().position);
+    }
+
+    private void TeleportPlayer(Vector3 pos)
+    {
+        LocalPlayer.transform.position = pos;
+    }
+
+#endregion
+
+// Might just move this into its own class
+#region Spawnpoint Management
     public static Transform GetSpawnPoint(ulong index)
     {
         return Instance.spawnPoints[index];
     }
+
 
     public static Transform GetRandomSpawnPoint()
     {
@@ -107,35 +371,19 @@ public class PlayerManager : MonoBehaviour
         return Instance.spawnPoints[chosenIndex];
     }
 
+
     public static void ClearSpawnPoints()
     {
         Instance.takenSpawns.Clear();
     }
 
-    private void ConfigureDebugManager()
-    {
-        DebugManager.enabled = true;
-        
-        DebugConfig config = DebugManager.debugConfig;
+#endregion
 
-        if (!config.configured)
-        {
-            config = new DebugConfig();
-            // Depending on the scene, we have to register the player differently.
-            switch (SceneManager.GetActiveScene().name)
-            {
-                case "Player Testing (Single Player)":
-                    config.debuggingType = DebugType.Fps;
-                    
-                break;
+}
 
-                case "MVP Testing":
-                    config.debuggingType = DebugType.MVP;
-                break;
-            }
-        }
-
-        DebugManager.ConfigureDebugManager(config);
-    }
-
+public enum PointOfView
+{
+    FPS = 0,
+    Building = 1,
+    Spectate = 2,
 }

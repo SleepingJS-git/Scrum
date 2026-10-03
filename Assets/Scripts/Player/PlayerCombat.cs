@@ -59,7 +59,7 @@ public class PlayerCombat : MonoBehaviour
         // If no weapon, then what are u dropping?
         if (!weaponInHand) return;
         
-        _main.body.Play("HasWeapon", false);
+        _main.Body.Play("HasWeapon", false);
         // Reset Hud Stuff for the client owner only
         if (_main.IsOwner)
             UpdateWeaponInfo();
@@ -88,7 +88,7 @@ public class PlayerCombat : MonoBehaviour
         
         _weaponType = data.WeaponType;
 
-        _main.body.Play("HasWeapon", true);
+        _main.Body.Play("HasWeapon", true);
 
         // If the weapon is hitscan, give it the normal gun firing behavior
         if (_weaponType == WeaponType.Hitscan)
@@ -109,7 +109,7 @@ public class PlayerCombat : MonoBehaviour
     public void EquipWeapon3D(WeaponData data)
     {
         Debug.Log("Equip3D was called");
-        weaponInHand = Instantiate(data.weaponModel, _main.body.rightHand);
+        weaponInHand = Instantiate(data.weaponModel, _main.Body.rightHand);
         weaponHandler.firingPoint = weaponInHand.transform.Find("Firing Point");
     }
 
