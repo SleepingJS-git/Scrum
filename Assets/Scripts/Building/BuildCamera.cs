@@ -48,7 +48,12 @@ public class BuildCamera : NetworkBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
-        boundaries = GameObject.Find("CameraBounds").GetComponents<BoxCollider>();
+        GameObject boundaryObj = GameObject.Find("CameraBounds");
+        if (boundaryObj)
+        {
+            boundaries = boundaryObj.GetComponents<BoxCollider>();
+        }
+        else boundaries = new BoxCollider[0];
         playerInput = gridBuilding.GetComponent<PlayerInput>();
 
         playerInput.enabled = IsOwner;

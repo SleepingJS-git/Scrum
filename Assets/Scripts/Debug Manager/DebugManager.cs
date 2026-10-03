@@ -48,6 +48,10 @@ public class DebugManager : MonoBehaviour
                 NetworkManager.Singleton.StartHost();
                 break;
 
+            case DebugType.Solo_Building:
+                NetworkManager.Singleton.StartHost();
+                break;
+
             case DebugType.MVP:
                 hostButton.gameObject.SetActive(true);
                 clientButton.gameObject.SetActive(true);

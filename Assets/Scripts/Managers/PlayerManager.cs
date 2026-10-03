@@ -94,6 +94,10 @@ public class PlayerManager : NetworkBehaviour
 
             case DebugType.Solo_Building:
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
+                NetworkManager.Singleton.OnClientConnectedCallback += (clientId) =>
+                {
+                    ChangePov(1);
+                };
             break;
 
             case DebugType.MVP:
@@ -317,8 +321,8 @@ public class PlayerManager : NetworkBehaviour
     /// <param name="canMove">True = FPS Input is on. False = Builder Input is on</param>
     public static void TogglePlayerControls(bool canMove)
     {
-        LocalPlayer.ToggleMove(canMove);
-        LocalBuilder.ToggleInput(!canMove);
+        if (LocalPlayer) LocalPlayer.ToggleMove(canMove);
+        if (LocalBuilder) LocalBuilder.ToggleInput(!canMove);
     }
 
 
