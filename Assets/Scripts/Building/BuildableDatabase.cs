@@ -18,11 +18,14 @@ public class BuildableDatabase : MonoBehaviour
     {
         Instance = this;
         data = new Dictionary<ulong, Buildable>();
-        foreach(Buildable b in buildablePrefabs)
+        foreach (Buildable b in buildablePrefabs)
             data[b.Id] = b;
 
         OccupiedCells = new Dictionary<Vector3Int, ulong>();
-        SetSpawnPointsOccupied();
+        if (spawnPoints.Length > 0 && grid != null)
+        {
+            SetSpawnPointsOccupied();
+        }
     }
     /// <summary>
     /// Check whether a cell on the grid is occupied
@@ -62,6 +65,7 @@ public class BuildableDatabase : MonoBehaviour
         if (!IsCellTaken(position))
         {
             OccupiedCells.Add(position, buildableId);
+            Debug.Log("Occupied " + position);
         }
     }
 
@@ -74,7 +78,7 @@ public class BuildableDatabase : MonoBehaviour
     public static void SetCellsToOccupied(Buildable buildable, Vector3Int originPos, float rotation)
     {
         Debug.Log("Occupied Cells:");
-        foreach(Vector3Int pos in OccupiedCells.Keys)
+        foreach (Vector3Int pos in OccupiedCells.Keys)
         {
             Debug.Log(pos);
         }
@@ -100,15 +104,16 @@ public class BuildableDatabase : MonoBehaviour
             BoxCollider bounds = spawnPoints[i].Find("Bounds").GetComponent<BoxCollider>();
             for (int x = 0; x < bounds.size.x; x++)
             {
-                float currentOffsetX = spawnPoints[i].position.x - (bounds.size.x / 2);
+                float currentOffsetX = spawnPoints[i].position.x + ((bounds.size.x / 2) - x);
                 for (int y = 0; y < bounds.size.y; y++)
                 {
-                    float currentOffsetY = spawnPoints[i].position.y - (bounds.size.y / 2);
+                    float currentOffsetY = spawnPoints[i].position.y + ((bounds.size.y / 2) - y);
                     for (int z = 0; z < bounds.size.z; z++)
                     {
-                        float currentOffsetZ = spawnPoints[i].position.z - (bounds.size.z / 2);
+                        float currentOffsetZ = spawnPoints[i].position.z + ((bounds.size.z / 2) - z);
                         Vector3 offsetPos = new Vector3(currentOffsetX, currentOffsetY, currentOffsetZ);
                         Vector3Int cellPos = grid.WorldToCell(offsetPos);
+                        Debug.Log(cellPos);
                         OccupyCell(cellPos, 0);
                     }
                 }
