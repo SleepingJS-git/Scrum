@@ -72,6 +72,7 @@ public class PlayerManager : NetworkBehaviour
     /// <param name="config"></param>
     public void ConfigureSpawning(DebugConfig config)
     {
+        if (!IsServer) return;
         debugConfig = config;
         // If it was configured, then run in debug mode
         // If not, carry on with normal game

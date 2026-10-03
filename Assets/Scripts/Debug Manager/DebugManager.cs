@@ -21,17 +21,10 @@ public class DebugManager : MonoBehaviour
         
         // Check if the LobbyManager was created. If yes, then the game was loaded from a Lobby. 
         // If not, the game is being ran in Play Mode directly in the scene.
-        if (LobbyManager.Instance)
-        {
-            // If this is the normal game, then we can get stuff from LobbyManager to set up all players.
-            // Im pretty sure NetworkPlayerSpawner is also only created when loading from lobby.
-        }
-        else
-        {
-            debugConfig = new DebugConfig();
-            ConfigureDebugManager();
-        }
+        if (LobbyManager.Instance) return;
 
+        debugConfig = new DebugConfig();
+        ConfigureDebugManager();
     }
 
     void Start()
