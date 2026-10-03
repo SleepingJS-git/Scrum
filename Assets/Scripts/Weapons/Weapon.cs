@@ -269,7 +269,7 @@ public class Weapon : NetworkBehaviour
         if (!player)
             return;
 
-        player.combat.UpdateWeaponInfo(
+        player.Combat.UpdateWeaponInfo(
             data.weaponName,
             $"{currentBullets} / {reserveBullets}"
         );
@@ -344,7 +344,7 @@ public class Weapon : NetworkBehaviour
         ulong clientID = OwnerClientId;
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
         {
-            Transform cam = client.PlayerObject.GetComponent<Player>().look.cam.transform;
+            Transform cam = client.PlayerObject.GetComponent<Player>().Look.cam.transform;
 
             WeaponDrop drop = Instantiate(
                 WeaponDatabase.TemplateDrop,

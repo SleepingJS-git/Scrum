@@ -20,7 +20,7 @@ public class ExplosiveStructure : BreakableStructureEntity
 
     private void Explode()
     {
-            PlayExplosionSoundRpc();
+        PlayExplosionSoundRpc();
 
         Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius, Layer.ExplosionEffected);
         OnHitData onHitData = new()
@@ -58,5 +58,34 @@ public class ExplosiveStructure : BreakableStructureEntity
         float delay = UnityEngine.Random.Range(0f, 0.5f);
         yield return new WaitForSeconds(delay);
         explosionAudioSource.Play();
+    }
+
+    private void Fracture()
+    {
+        foreach(Rigidbody rb in fracture.FragmentRoot.GetComponentsInChildren<Rigidbody>())
+        {
+            rb.AddExplosionForce(
+                explosionForce, 
+                transform.position, explosionRadius, upwardsModifier,
+                ForceMode.Impulse);
+        }
+    }
+
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void FractureApartClientRpc()
+    {
+        fracture.CauseFracture();
+        Fracture();
+        StartCoroutine(Despawn());
+    }
+
+
+    
+    private IEnumerator Despawn()
+    {
+        yield return new WaitForSeconds(5f);
+        Destroy(fracture.FragmentRoot);
+        gameObject.SetActive(false);
     }
 }

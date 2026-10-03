@@ -38,9 +38,22 @@ public class PlayerStats : NetworkBehaviour
 
         if (IsOwner)
         {
-            string playerName =
-                LobbyManager.Instance.CurrentSession.CurrentPlayer.GetPlayerName();
-
+            string playerName = "No Name";
+            if (LobbyManager.Instance)
+            {                
+                playerName =
+                    LobbyManager.Instance.CurrentSession.CurrentPlayer.GetPlayerName();
+            }
+            else
+            {
+                if (IsServer)
+                    playerName = "(Host) Player " + OwnerClientId;
+                else
+                    playerName = "Player " + OwnerClientId;
+            }
+                
+            
+            
             SetPlayerNameServerRpc(playerName);
         }
     }

@@ -9,8 +9,8 @@ public class ConnectUI : MonoBehaviour
     [SerializeField] private Button readyButton;
     void Start()
     {
-        hostButton.onClick.AddListener(HostButtonOnClick);
-        clientButton.onClick.AddListener(ClientButtonOnClick);
+        // hostButton.onClick.AddListener(HostButtonOnClick);
+        // clientButton.onClick.AddListener(ClientButtonOnClick);
         if (readyButton) readyButton.onClick.AddListener(PlayerIsReady);
     }
 
