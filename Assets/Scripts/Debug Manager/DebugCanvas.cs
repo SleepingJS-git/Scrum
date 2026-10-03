@@ -16,75 +16,75 @@ public class DebugCanvas : NetworkBehaviour
     private WeaponData _wpnData;
     public override void OnNetworkSpawn()
     {
-        if (!IsOwner) return;
+        // if (!IsOwner) return;
 
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(OwnerClientId, out NetworkClient client))
-        {
-            player = client.PlayerObject.GetComponent<Player>();
-            if (player) buildCam = player.buildCam;
-            else buildCam = client.PlayerObject.GetComponent<BuildCamera>();
-        }
+        // if (NetworkManager.Singleton.ConnectedClients.TryGetValue(OwnerClientId, out NetworkClient client))
+        // {
+        //     player = client.PlayerObject.GetComponent<Player>();
+        //     // if (player) buildCam = player.buildCam;
+        //     // else buildCam = client.PlayerObject.GetComponent<BuildCamera>();
+        // }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!IsOwner) return;
-        if (!NetworkManager.Singleton.IsListening) return;
+        // if (!IsOwner) return;
+        // if (!NetworkManager.Singleton.IsListening) return;
 
-        _debugText = "";
+        // _debugText = "";
 
-        if (player)
-        {
-            _hasWeapon = player.combat.weaponHandler.hasWeapon;
-            if (_hasWeapon)
-            {
-                if (!_wpnData)
-                {
-                    _wpnData = WeaponDatabase.GetWeapon(player.combat.weaponHandler.weaponID.Value);
-                    return;
-                }
+        // if (player)
+        // {
+        //     _hasWeapon = player.Combat.weaponHandler.hasWeapon;
+        //     if (_hasWeapon)
+        //     {
+        //         if (!_wpnData)
+        //         {
+        //             _wpnData = WeaponDatabase.GetWeapon(player.Combat.weaponHandler.weaponID.Value);
+        //             return;
+        //         }
 
-                _currentWeapon = $"{_wpnData.name}";
-            }
-            else
-            {
-                _wpnData = null;
-                _currentWeapon = "None";
-            }
+        //         _currentWeapon = $"{_wpnData.name}";
+        //     }
+        //     else
+        //     {
+        //         _wpnData = null;
+        //         _currentWeapon = "None";
+        //     }
 
-            _debugText = 
-            $@"Player Client ID: {OwnerClientId}
-            Is Server: {IsServer}
-            Health: {player.health.Value}
-            Is Alive: {player.isAlive.Value}
-            Can Move: {player.CanMove}
-            Position: {player.transform.position}
-            Has Weapon: {_hasWeapon}
-            Current Weapon: {_currentWeapon}
-            {player.combat.weaponHandler.DebugInfo()}
-            ";
-        }
+        //     _debugText = 
+        //     $@"Player Client ID: {OwnerClientId}
+        //     Is Server: {IsServer}
+        //     Health: {player.health.Value}
+        //     Is Alive: {player.isAlive.Value}
+        //     Can Move: {player.CanMove}
+        //     Position: {player.transform.position}
+        //     Has Weapon: {_hasWeapon}
+        //     Current Weapon: {_currentWeapon}
+        //     {player.Combat.weaponHandler.DebugInfo()}
+        //     ";
+        // }
 
-        if (buildCam)
-        {
-            _buildCam = $@"Build Cam: {buildCam}
-            {buildCam.DebugInfo()}";
+        // // if (buildCam)
+        // // {
+        // //     _buildCam = $@"Build Cam: {buildCam}
+        // //     {buildCam.DebugInfo()}";
 
-            if (buildCam.gridBuilding)
-                _gridPlacement = buildCam.gridBuilding.DebugInfo();
-            else _gridPlacement = "Grid Placement: None";
-        }
-        else _buildCam = "Build Cam: None";
+        // //     if (buildCam.gridBuilding)
+        // //         _gridPlacement = buildCam.gridBuilding.DebugInfo();
+        // //     else _gridPlacement = "Grid Placement: None";
+        // // }
+        // // else _buildCam = "Build Cam: None";
         
 
-        _debugText += _buildCam;
-        _debugText += _gridPlacement;
+        // // _debugText += _buildCam;
+        // // _debugText += _gridPlacement;
 
-        if (GameManager.Instance)
-        {
-            _debugText += GameManager.Instance.DebugInfo();
-        }
-        debugStates.text = _debugText;
+        // if (GameManager.Instance)
+        // {
+        //     _debugText += GameManager.Instance.DebugInfo();
+        // }
+        // debugStates.text = _debugText;
     }
 }

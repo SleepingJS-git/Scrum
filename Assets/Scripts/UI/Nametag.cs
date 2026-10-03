@@ -32,7 +32,10 @@ public class Nametag : NetworkBehaviour
         nameText.text = playerStats.PlayerName.Value.ToString();
 
         if (IsOwner)
-            nametag.SetActive(false);
+        {
+            nameText.SetText("You");
+            nameText.color = Color.green;
+        }
     }
 
     public override void OnNetworkDespawn()
@@ -49,8 +52,8 @@ public class Nametag : NetworkBehaviour
 
     private void LateUpdate()
     {
-        if (IsOwner || !nametag.activeSelf)
-            return;
+        // if (IsOwner || !nametag.activeSelf)
+        //     return;
 
         if (localCamera == null)
             localCamera = Camera.main;

@@ -57,7 +57,7 @@ public class BreakableStructureEntity: Entity
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    protected void FractureApartClientRpc()
+    private void FractureApartClientRpc()
     {
         fracture.CauseFracture();
         Fracture();

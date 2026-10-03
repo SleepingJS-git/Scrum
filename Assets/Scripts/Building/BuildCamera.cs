@@ -48,11 +48,20 @@ public class BuildCamera : NetworkBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
-        boundaries = GameObject.Find("CameraBounds").GetComponents<BoxCollider>();
+        GameObject boundaryObj = GameObject.Find("CameraBounds");
+        if (boundaryObj)
+        {
+            boundaries = boundaryObj.GetComponents<BoxCollider>();
+        }
+        else boundaries = new BoxCollider[0];
         playerInput = gridBuilding.GetComponent<PlayerInput>();
 
         playerInput.enabled = IsOwner;
+
+        Debug.Log("Build Cam Is Owner?: " + IsOwner);
         if (!IsOwner) return;
+
+        PlayerManager.Instance.SetLocalBuilder(this);
 
         //Set up inputs 
         pan = playerInput.actions.FindAction("Pan");
@@ -67,10 +76,16 @@ public class BuildCamera : NetworkBehaviour
         targetPosition = Vector3.zero;
     }
 
+    public void ToggleInput(bool enableInput)
+    {
+        playerInput.enabled = enableInput;
+    }
+
     // Update is called once per frame
     void Update()
     {
         if (!IsOwner) return;
+
         // Find the direction to pan
         Vector3 panVector = pan.ReadValue<Vector3>().normalized;
 
@@ -103,11 +118,11 @@ public class BuildCamera : NetworkBehaviour
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0f);
 
         // Set the distance of the camera based on the zoom\
-        Debug.Log(zoomDistance);
+        // Debug.Log(zoomDistance);
         float currentDistance = Mathf.Lerp(cameraTransform.localPosition.z,-zoomDistance, Time.deltaTime * lerpDampening);
-        Debug.Log("Current Distance from lerp: " + currentDistance);
+        // Debug.Log("Current Distance from lerp: " + currentDistance);
         Vector3 potentialGlobalCamPosition = transform.TransformPoint(new Vector3(0, 0, currentDistance));
-        Debug.Log("Potential Global position before bounds check: " + potentialGlobalCamPosition);
+        // Debug.Log("Potential Global position before bounds check: " + potentialGlobalCamPosition);
         for (int i = 0; i < boundaries.Length; i++)
         {
             if (boundaries[i].bounds.Contains(potentialGlobalCamPosition))
@@ -116,9 +131,9 @@ public class BuildCamera : NetworkBehaviour
                 zoomDistance = Vector3.Distance(potentialGlobalCamPosition, transform.position);
             }
         }
-        Debug.Log("Final Potential global Position: " + potentialGlobalCamPosition);
+        // Debug.Log("Final Potential global Position: " + potentialGlobalCamPosition);
         cameraTransform.localPosition = transform.InverseTransformPoint(potentialGlobalCamPosition);
-        Debug.Log("Camera local transform: " + cameraTransform.localPosition);
+        // Debug.Log("Camera local transform: " + cameraTransform.localPosition);
     }
 
 
