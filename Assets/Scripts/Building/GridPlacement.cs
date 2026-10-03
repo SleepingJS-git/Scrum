@@ -80,10 +80,8 @@ public class GridPlacement : NetworkBehaviour
         playerInput.enabled = IsOwner;
         buildCam.enabled = IsOwner;
         if (!IsOwner) return;
+        PlayerManager.BuildingUI.SetGridPlacement(this);
         // Initialize all inputs
-        GameObject buildingUIObj = GameObject.Find("BuildingUI");
-        buildingUIObj.GetComponent<BuildingUI>().SetGridPlacement(this);
-
         placeAction = playerInput.actions.FindAction("Place");
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
@@ -95,18 +93,11 @@ public class GridPlacement : NetworkBehaviour
 
     public void ResetCounter()
     {
-        ResetBuildablesRpc();
         ResetCounterServerRpc();
     }
 
     [Rpc(SendTo.Server)]
     private void ResetCounterServerRpc()
-    {     
-        currentPlacements.Value = 0;
-    }
-
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ResetBuildablesRpc()
     {
         if (builtObjects.Count != 0)
         {
@@ -116,14 +107,15 @@ public class GridPlacement : NetworkBehaviour
                 build.GetComponent<BreakableStructureEntity>().ResetBreakable();
             }
         }
-        
+        currentPlacements.Value = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (IsServer)
-            DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
+
+        //if (IsServer)
+            //DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
 
         if (!IsOwner) return;
 
@@ -253,14 +245,14 @@ public class GridPlacement : NetworkBehaviour
     private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-
+        if (currentPlacements.Value >= maxPlacements) return;
         // Send Server Request to create object
         Buildable obj = Instantiate(buildable, previewObject.transform.position, Quaternion.Euler(0, rotation.Value, 0));
         obj.NetworkObject.Spawn();
         BuildableDatabase.SetCellsToOccupied(buildable, cellPos, rotation.Value);
         currentPlacements.Value++;
         if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) {builtObjects.Add(obj);}
-        Debug.Log(builtObjects.Count);
+
 
     }
 

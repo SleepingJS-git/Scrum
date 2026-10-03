@@ -61,7 +61,7 @@ public class BreakableStructureEntity: Entity
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    protected void FractureApartClientRpc()
+    private void FractureApartClientRpc()
     {
         StartCoroutine(Break());     
     }

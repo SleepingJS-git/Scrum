@@ -22,7 +22,7 @@ public class PlayerInputHandler : MonoBehaviour
     public void Init(bool enableInput)
     {
         playerInput = GetComponent<PlayerInput>();
-        playerInput.enabled = enableInput;
+        ToggleInput(enableInput);
         if (enableInput)
         {
             move = GetComponent<PlayerMovement>();
@@ -31,10 +31,11 @@ public class PlayerInputHandler : MonoBehaviour
             _main = GetComponent<Player>();
 
         }
+    }
 
-        if (enableInput)
-            Debug.Log("Input Enabled: " + enableInput);
-
+    public void ToggleInput(bool enableInput)
+    {
+        playerInput.enabled = enableInput;
     }
 
     /// <summary>
@@ -118,7 +119,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (ctx.started)
         {
-            _main.interaction.OnInteract();
+            _main.Interaction.OnInteract();
         }
     }
 
@@ -126,10 +127,10 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (ctx.started)
         {
-            if (!_main.combat.weaponInHand)
+            if (!_main.Combat.weaponInHand)
                 return;
-            _main.combat.weaponHandler.DropWeapon();
-            _main.combat.EmptyWeapon();
+            _main.Combat.weaponHandler.DropWeapon();
+            _main.Combat.EmptyWeapon();
         }
     }
 
