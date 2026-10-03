@@ -72,7 +72,6 @@ public class PlayerManager : NetworkBehaviour
     /// <param name="config"></param>
     public void ConfigureSpawning(DebugConfig config)
     {
-        if (!IsServer) return;
         debugConfig = config;
         // If it was configured, then run in debug mode
         // If not, carry on with normal game
@@ -102,6 +101,7 @@ public class PlayerManager : NetworkBehaviour
             break;
 
             case DebugType.MVP:
+                Debug.Log("Are we running MVP???");
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayer;
 
