@@ -21,7 +21,16 @@ public class DebugManager : MonoBehaviour
         
         // Check if the LobbyManager was created. If yes, then the game was loaded from a Lobby. 
         // If not, the game is being ran in Play Mode directly in the scene.
-        if (LobbyManager.Instance) return;
+
+        // if (LobbyManager.Instance)
+        // {
+
+
+        // }
+        // else
+        // {
+            
+        // }
 
         debugConfig = new DebugConfig();
         ConfigureDebugManager();
@@ -30,11 +39,11 @@ public class DebugManager : MonoBehaviour
     void Start()
     {
         if (debugConfig == null) return;
-        if (!debugConfig.IsConfigured)
-        {
-            NetworkManager.Singleton.StartClient();
-            return;
-        }
+        // if (!debugConfig.IsConfigured)
+        // {
+        //     NetworkManager.Singleton.StartClient();
+        //     return;
+        // }
         switch (debugConfig.debuggingType)
         {
             case DebugType.Solo_Fps:
@@ -46,6 +55,7 @@ public class DebugManager : MonoBehaviour
                 break;
 
             case DebugType.MVP:
+                Debug.Log("Start MVP");
                 hostButton.gameObject.SetActive(true);
                 clientButton.gameObject.SetActive(true);
                 hostButton.onClick.AddListener(StartHost);
@@ -58,6 +68,7 @@ public class DebugManager : MonoBehaviour
 
     private void StartHost()
     {
+        Debug.Log("Start Host");
         PlayerManager.Instance.ConfigureSpawning(debugConfig);
 
         NetworkManager.Singleton.StartHost();
@@ -90,6 +101,7 @@ public class DebugManager : MonoBehaviour
             break;
 
             case "MVP Testing (With New PlayerManager)":
+                Debug.Log("WE ARE ON MVP????");
                 debugConfig.debuggingType = DebugType.MVP;
             break;
         }
