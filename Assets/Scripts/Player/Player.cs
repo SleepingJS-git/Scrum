@@ -165,6 +165,9 @@ public class Player : Entity
     [Rpc(SendTo.Server)]
     public void ChangeMoveStateServerRpc(int newMoveState)
     {
+        if (MoveState.Value == newMoveState)
+            return;
+
         int lastMoveState = MoveState.Value;
         MoveState.Value = newMoveState;
         ChangeMoveStateClientRpc(newMoveState, lastMoveState);
@@ -176,11 +179,15 @@ public class Player : Entity
         switch((MovementState) newMoveState)
         {
             case MovementState.Standing:
-                if (lastMoveState == 1)
+                if (lastMoveState == (int) MovementState.Crouching || 
+                    lastMoveState == (int) MovementState.Sliding)
                     Move.UnCrouch();
             break;
             case MovementState.Crouching:
                 Move.Crouch();
+            break;
+            case MovementState.Sliding:
+                Move.Slide();
             break;
             
         }

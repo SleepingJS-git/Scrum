@@ -23,38 +23,200 @@ public class PlayerMovement : MonoBehaviour
     [Header("Sprinting")]
     public float sprintSpeed;
 
+    [Header("Sliding")]
+    public float slideSpeed;
+    public float slideDeceleration;
+    public float slideMinSpeed;
+    public float slideDuration;
+    public float slideCooldown;
+
     // Private Variables
+    // Current Move State
+    private MovementState moveState => (MovementState) main.MoveState.Value;
+    private bool isChangingState = false;
+
+    // Horizontal movement
     private bool isMoving;
     private Vector3 velocity;       // Actual Velocity    
     private Vector3 moveDir;        // Movement Direction
+    private bool isSprinting = false;
+
+    // Crouching
+    private float defaultHeight;
+    private float targetCamLevel;
+
+    // Sliding
+    private Vector3 slideDirection;
+    private float slideVelocity;
+    private float slideTimer;
+    private float slideElapsed;
+    // Components
     private CharacterController cc; 
     private PlayerBody body;
     private Player main;
-    private float defaultHeight;
-    private float targetCamLevel;
-    private bool isChangingState = false;
-    private MovementState moveState => (MovementState) main.MoveState.Value;
-    [SerializeField] private float crouchTuner;
     public void Init(bool isOwner)
     {
         cc = GetComponent<CharacterController>();
+        main = GetComponent<Player>();
+
         isMoving = false;
         defaultHeight = cc.height;
 
         if (isOwner) 
         {
             body = GetComponent<PlayerBody>();
-            main = GetComponent<Player>();
         }
     }
 
+    #region Basic Movement
+    /// <summary>
+    /// This does the movement for vertical (walking) and horizontal (gravity)
+    /// </summary>
+    /// <param name="moveInput"></param>
+    public void Move(Vector3 moveInput)
+    {
+        if (!cc.enabled) return;
+        if (moveState == MovementState.Sliding)
+        {
+            SlideMovement();
+            return;
+        }
+
+
+        isMoving = moveInput.sqrMagnitude > 0.0001f;
+        if (isMoving) Sprint();
+
+        // The actual direction relative to the way the player is facing
+        moveDir = transform.right * moveInput.x + transform.forward * moveInput.z;
+        moveDir.Normalize();
+        
+        // Cache the current speed
+        currentSpeed = DetermineMoveSpeed();
+
+        Vector3 targetVelocity = currentSpeed * moveDir;
+        
+
+        // If is grounded, accelerate if moving or decelerate if not
+        float accel = isMoving ? groundAccel : groundDecel;
+
+        float velY = velocity.y;
+        targetVelocity.y = 0f;
+        velocity.y = 0f;
+
+        // Accelerate current velocity to target
+        velocity = Vector3.MoveTowards(velocity, targetVelocity, accel * Time.deltaTime);
+        velocity.y = velY;
+
+        // Gravity
+        if (cc.isGrounded && velocity.y < 0f)
+            velocity.y = -2f;
+        else
+        {
+            if (velocity.y > 0f) velocity.y -= gravityScale * upwardGravMult * Time.deltaTime;
+            else velocity.y -= gravityScale * Time.deltaTime;
+        }
+        cc.Move(velocity * Time.deltaTime);
+        
+        UpdateAnimation();
+    }
+
+    private float DetermineMoveSpeed()
+    {
+        if (isMoving)
+        {
+            switch ((MovementState) main.MoveState.Value)
+            {
+                case MovementState.Standing:
+                return walkSpeed;
+                case MovementState.Crouching:
+                return crouchSpeed;
+                case MovementState.Sprinting:
+                return sprintSpeed; // Change to Sprint Speed
+            }
+        }
+        return 0f;
+    }
+
+    private void SlideMovement()
+    {
+        slideVelocity = Mathf.MoveTowards(
+            slideVelocity,
+            0f,
+            slideDeceleration * Time.deltaTime
+        );
+
+        Vector3 horizontalVelocity = slideDirection * slideVelocity;
+
+        velocity.x = horizontalVelocity.x;
+        velocity.z = horizontalVelocity.z;
+
+        if (cc.isGrounded && velocity.y < 0f)
+        {
+            velocity.y = -2f;
+        }
+        else
+        {
+            velocity.y -= gravityScale * Time.deltaTime;
+        }
+
+        cc.Move(velocity * Time.deltaTime);
+
+        slideTimer += Time.deltaTime;
+
+        if (slideVelocity <= slideMinSpeed || slideTimer >= slideDuration)
+        {
+            main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
+            slideElapsed = Time.time;
+        }
+    }
+
+
+    /// <summary>
+    /// The client controls the animations
+    /// </summary>
+    void UpdateAnimation()
+    {
+        body.Play("IsMoving", isMoving);
+
+        if (!isMoving)
+        {
+            body.Play("Forward", 0f);
+            body.Play("Strafe", 0f);
+            return;
+        }
+
+        Vector3 forward = transform.forward;
+        Vector3 right = transform.right;
+
+        float forwardAmount = Vector3.Dot(moveDir.normalized, forward);
+        float strafeAmount = Vector3.Dot(moveDir.normalized, right);
+
+        body.Play("Forward", forwardAmount);
+        body.Play("Strafe", strafeAmount);
+    }
+
+    public void OnDeathCollider(bool isDead)
+    {
+        cc.enabled = !isDead;
+        // if (isDead)
+        //     cc.excludeLayers += Layer.Player;
+        // else cc.excludeLayers -= Layer.Player;
+    }
+    #endregion
+
+    #region Advanced Movement
     public void Jump()
     {
         if (cc.isGrounded)
         {
             if (moveState == MovementState.Crouching)
             {
-                main.ChangeMoveStateServerRpc(0);
+                main.ChangeMoveStateServerRpc((int) MovementState.Standing);
+            }
+            else if (moveState == MovementState.Sliding)
+            {
+                main.ChangeMoveStateServerRpc((int) MovementState.Standing);
+                velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
             }
             else
             {
@@ -65,15 +227,21 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnSprint(bool isSprinting)
     {
+        this.isSprinting = isSprinting;
+    }
+
+    private void Sprint()
+    {
         if (isSprinting)
         {
+            Debug.Log("MoveState: " + moveState);
             if (moveState == MovementState.Crouching)
             {
-                main.ChangeMoveStateServerRpc(0);
+                main.ChangeMoveStateServerRpc((int) MovementState.Standing);
             }
             else if (moveState == MovementState.Standing)
             {
-                main.ChangeMoveStateServerRpc(2);
+                main.ChangeMoveStateServerRpc((int) MovementState.Sprinting);
             }
             else if (moveState == MovementState.Sprinting)
             {
@@ -82,23 +250,46 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            main.ChangeMoveStateServerRpc(0);
+            if (moveState == MovementState.Standing) return;
+            if (moveState == MovementState.Crouching) return;
+            main.ChangeMoveStateServerRpc((int) MovementState.Standing);
             // main.Body.Play("IsSprinting", false);
         }
-        
     }
 
     public void CrouchOrSlide()
     {
         if (isChangingState) return;
-        if (moveState == MovementState.Standing || moveState == MovementState.Sprinting)
+        if (moveState == MovementState.Standing)
         {
-            main.ChangeMoveStateServerRpc(1);
+            main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
         }
         else if (moveState == MovementState.Crouching)
         {
-            main.ChangeMoveStateServerRpc(0);
+            main.ChangeMoveStateServerRpc((int) MovementState.Standing);
         }
+        else if (moveState == MovementState.Sprinting)
+        {
+            if (Time.time < slideElapsed + slideCooldown) return;
+            slideDirection = moveDir;
+            // slideVelocity = Mathf.Max(
+            //     new Vector3(velocity.x, 0f, velocity.z).magnitude,
+            //     slideSpeed
+            // );
+            slideVelocity = new Vector3(velocity.x, 0f, velocity.z).magnitude + slideSpeed;
+            slideTimer = 0f;
+            main.ChangeMoveStateServerRpc((int) MovementState.Sliding);
+        }
+    }
+    public void Slide()
+    {
+        if (!main.IsOwner)
+        {
+            cc.height = crouchHeight;
+            // body.Play("IsCrouching", true);
+        }
+        else
+            StartCoroutine(CrouchRoutine(true));
     }
 
     public void Crouch()
@@ -163,100 +354,7 @@ public class PlayerMovement : MonoBehaviour
 
         isChangingState = false;
     }
-
-
-
-    /// <summary>
-    /// This does the movement for vertical (walking) and horizontal (gravity)
-    /// </summary>
-    /// <param name="moveInput"></param>
-    public void Move(Vector3 moveInput)
-    {
-        if (!cc.enabled) return;
-        isMoving = moveInput.sqrMagnitude > 0.0001f;
-
-        // The actual direction relative to the way the player is facing
-        moveDir = transform.right * moveInput.x + transform.forward * moveInput.z;
-        moveDir.Normalize();
-        
-        // Cache the current speed
-        currentSpeed = DetermineMoveSpeed();
-
-        Vector3 targetVelocity = currentSpeed * moveDir;
-        
-
-        // If is grounded, accelerate if moving or decelerate if not
-        float accel = isMoving ? groundAccel : groundDecel;
-
-        float velY = velocity.y;
-        targetVelocity.y = 0f;
-        velocity.y = 0f;
-
-        // Accelerate current velocity to target
-        velocity = Vector3.MoveTowards(velocity, targetVelocity, accel * Time.deltaTime);
-        velocity.y = velY;
-
-        // Gravity
-        if (cc.isGrounded && velocity.y < 0f)
-            velocity.y = -2f;
-        else
-        {
-            if (velocity.y > 0f) velocity.y -= gravityScale * upwardGravMult * Time.deltaTime;
-            else velocity.y -= gravityScale * Time.deltaTime;
-        }
-        cc.Move(velocity * Time.deltaTime);
-        
-        UpdateAnimation();
-    }
-
-    private float DetermineMoveSpeed()
-    {
-        if (isMoving)
-        {
-            switch ((MovementState) main.MoveState.Value)
-            {
-                case MovementState.Standing:
-                return walkSpeed;
-                case MovementState.Crouching:
-                return crouchSpeed;
-                case MovementState.Sprinting:
-                return sprintSpeed; // Change to Sprint Speed
-            }
-        }
-        return 0f;
-    }
-
-    /// <summary>
-    /// The client controls the animations
-    /// </summary>
-    void UpdateAnimation()
-    {
-        body.Play("IsMoving", isMoving);
-
-        if (!isMoving)
-        {
-            body.Play("Forward", 0f);
-            body.Play("Strafe", 0f);
-            return;
-        }
-
-        Vector3 forward = transform.forward;
-        Vector3 right = transform.right;
-
-        float forwardAmount = Vector3.Dot(moveDir.normalized, forward);
-        float strafeAmount = Vector3.Dot(moveDir.normalized, right);
-
-        body.Play("Forward", forwardAmount);
-        body.Play("Strafe", strafeAmount);
-    }
-
-    public void OnDeathCollider(bool isDead)
-    {
-        cc.enabled = !isDead;
-        // if (isDead)
-        //     cc.excludeLayers += Layer.Player;
-        // else cc.excludeLayers -= Layer.Player;
-    }
+    #endregion
 }
 public enum MovementState
 {

@@ -1570,7 +1570,11 @@ MonoBehaviour:
   crouchHeight: 1
   positionChangeSpeed: 0.125
   sprintSpeed: 9
-  crouchTuner: 0
+  slideSpeed: 5
+  slideDeceleration: 8
+  slideMinSpeed: 2
+  slideDuration: 0.4
+  slideCooldown: 0.25
 --- !u!114 &5570463379167910784
 MonoBehaviour:
   m_ObjectHideFlags: 0
