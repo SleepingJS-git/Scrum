@@ -80,10 +80,8 @@ public class GridPlacement : NetworkBehaviour
         playerInput.enabled = IsOwner;
         buildCam.enabled = IsOwner;
         if (!IsOwner) return;
+        PlayerManager.BuildingUI.SetGridPlacement(this);
         // Initialize all inputs
-        GameObject buildingUIObj = GameObject.Find("BuildingUI");
-        buildingUIObj.GetComponent<BuildingUI>().SetGridPlacement(this);
-
         placeAction = playerInput.actions.FindAction("Place");
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
@@ -116,8 +114,8 @@ public class GridPlacement : NetworkBehaviour
     void Update()
     {
 
-        if (IsServer)
-            DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
+        //if (IsServer)
+            //DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
 
         if (!IsOwner) return;
 
@@ -247,7 +245,7 @@ public class GridPlacement : NetworkBehaviour
     private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-
+        if (currentPlacements.Value >= maxPlacements) return;
         // Send Server Request to create object
         Buildable obj = Instantiate(buildable, previewObject.transform.position, Quaternion.Euler(0, rotation.Value, 0));
         obj.NetworkObject.Spawn();
