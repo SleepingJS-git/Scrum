@@ -1593,7 +1593,7 @@ MonoBehaviour:
   slideCooldown: 0.25
   kickReach: 2.75
   kickUpForce: 2.5
-  kickHorizForce: 4
+  kickHorizForce: 3
   wallKickCooldown: 0.65
 --- !u!114 &5570463379167910784
 MonoBehaviour:
