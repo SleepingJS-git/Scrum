@@ -134,6 +134,14 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 
+    public void OnCrouchOrSlide(CallbackContext ctx)
+    {
+        if (move == null) return;
+
+        if (ctx.started)
+            move.CrouchOrSlide();
+    }
+
     public void ToBuildTest(CallbackContext ctx)
     {
         if (ctx.started)

@@ -26,6 +26,12 @@ public class Player : Entity
     public bool CanMove { get; private set; }
     [SerializeField] private bool _initialized = false;
 
+    public NetworkVariable<int> MoveState = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -154,5 +160,35 @@ public class Player : Entity
         Body.UnRagdoll();
         Body.Play("IsMoving", false);
         Move.OnDeathCollider(false);
+    }
+
+    [Rpc(SendTo.Server)]
+    public void ChangeMoveStateServerRpc()
+    {
+        if (MoveState.Value == (int) MovementState.Standing)
+        {
+            MoveState.Value = (int) MovementState.Crouching;
+            ChangeMoveStateClientRpc(1);
+        }
+        else if (MoveState.Value == (int) MovementState.Crouching)
+        {
+            MoveState.Value = (int) MovementState.Standing;
+            ChangeMoveStateClientRpc(0);
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void ChangeMoveStateClientRpc(int moveStateInt)
+    {
+        switch((MovementState) moveStateInt)
+        {
+            case MovementState.Standing:
+                Move.UnCrouch();
+            break;
+            case MovementState.Crouching:
+                Move.Crouch();
+            break;
+            
+        }
     }
 }

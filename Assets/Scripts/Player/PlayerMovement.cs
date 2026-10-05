@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public MovementState moveState;
+
     [Header("Ground Movement")]
     public float moveSpeed;         // Movespeed of player
     public float groundAccel, groundDecel;      // Acceleration and Deceleration of speed
@@ -12,22 +14,59 @@ public class PlayerMovement : MonoBehaviour
     public float jumpHeight;        // How high the player jumps
     public float gravityScale;      // Gravity
     public float upwardGravMult;    // How fast the player jumps
+    
+    [Header("Crouching")]
+    public float crouchHeight = 1f;
     private bool isMoving;
     private Vector3 velocity;       // Actual Velocity    
     private Vector3 moveDir;        // Movement Direction
     private CharacterController cc; 
     private PlayerBody body;
+    private Player main;
+    private float defaultHeight;
     public void Init(bool isOwner)
     {
+        moveState = MovementState.Standing;
         cc = GetComponent<CharacterController>();
         isMoving = false;
+        defaultHeight = cc.height;
 
-        if (isOwner) body = GetComponent<PlayerBody>();
+        if (isOwner) 
+        {
+            body = GetComponent<PlayerBody>();
+            main = GetComponent<Player>();
+        }
     }
 
     public void Jump()
     {
         if (cc.isGrounded) velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+    }
+
+    public void CrouchOrSlide()
+    {
+        main.ChangeMoveStateServerRpc();
+    }
+
+    public void Crouch()
+    {
+        if (!main.IsOwner)
+        {
+            cc.height = crouchHeight;
+            // body.Play("IsCrouching", true);
+        }
+        else
+            LocalCrouch();
+    }
+
+    public void UnCrouch()
+    {
+        cc.height = defaultHeight;
+    }
+
+    private void LocalCrouch()
+    {
+        cc.height = crouchHeight;
     }
 
     /// <summary>
@@ -104,5 +143,11 @@ public class PlayerMovement : MonoBehaviour
         //     cc.excludeLayers += Layer.Player;
         // else cc.excludeLayers -= Layer.Player;
     }
-
+}
+public enum MovementState
+{
+    Standing = 0,   // Standing or Walking
+    Crouching = 1,  // Crouching or Crouch Walking
+    Sprinting = 2,  // Standing + Sprinting
+    Sliding = 3     // Sliding
 }

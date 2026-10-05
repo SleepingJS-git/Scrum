@@ -89,6 +89,7 @@ public class PlayerManager : NetworkBehaviour
                 OnPlayerDeath += (clientId) =>
                 {
                     Invoke(nameof(ResetPlayer), 1f);
+                    
                 };
             break;
 
