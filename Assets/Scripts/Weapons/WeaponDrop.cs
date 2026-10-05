@@ -92,7 +92,7 @@ public class WeaponDrop : NetworkBehaviour
         Vector3 finalForce = (rot * Vector3.forward * throwForce) + (rot * Vector3.up * upForce);
         rb.AddForce(finalForce, ForceMode.Impulse);
 
-        Vector3 finalTorque = (Helper.RandomTorque(1f, 3f) * .25f) + (rot * Vector3.forward);
+        Vector3 finalTorque = (Helper.RandomTorque(-3f, 3f) * .25f) + (rot * Vector3.forward);
         rb.AddTorque(finalTorque, ForceMode.Impulse);
     }
 

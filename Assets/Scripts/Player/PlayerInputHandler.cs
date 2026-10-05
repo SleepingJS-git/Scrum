@@ -142,6 +142,14 @@ public class PlayerInputHandler : MonoBehaviour
             move.CrouchOrSlide();
     }
 
+    public void OnSprint(CallbackContext ctx)
+    {
+         if (ctx.started)
+            move.OnSprint(true);
+        else if (ctx.canceled)
+            move.OnSprint(false);
+    }
+
     public void ToBuildTest(CallbackContext ctx)
     {
         if (ctx.started)

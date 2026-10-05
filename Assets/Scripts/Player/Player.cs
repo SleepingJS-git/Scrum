@@ -163,27 +163,21 @@ public class Player : Entity
     }
 
     [Rpc(SendTo.Server)]
-    public void ChangeMoveStateServerRpc()
+    public void ChangeMoveStateServerRpc(int newMoveState)
     {
-        if (MoveState.Value == (int) MovementState.Standing)
-        {
-            MoveState.Value = (int) MovementState.Crouching;
-            ChangeMoveStateClientRpc(1);
-        }
-        else if (MoveState.Value == (int) MovementState.Crouching)
-        {
-            MoveState.Value = (int) MovementState.Standing;
-            ChangeMoveStateClientRpc(0);
-        }
+        int lastMoveState = MoveState.Value;
+        MoveState.Value = newMoveState;
+        ChangeMoveStateClientRpc(newMoveState, lastMoveState);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    public void ChangeMoveStateClientRpc(int moveStateInt)
+    public void ChangeMoveStateClientRpc(int newMoveState, int lastMoveState)
     {
-        switch((MovementState) moveStateInt)
+        switch((MovementState) newMoveState)
         {
             case MovementState.Standing:
-                Move.UnCrouch();
+                if (lastMoveState == 1)
+                    Move.UnCrouch();
             break;
             case MovementState.Crouching:
                 Move.Crouch();

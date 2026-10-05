@@ -1329,6 +1329,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 52727586-9b9f-45e9-bf7d-694185296f9a
     m_ActionName: 'FPS Controls/Crouch[/Keyboard/leftCtrl]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5283261713411698337}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnSprint
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 16be4726-2f6f-4852-932b-c1b788a19286
+    m_ActionName: 'FPS Controls/Sprinting[/Keyboard/shift]'
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Keyboard & Mouse
   m_DefaultActionMap: FPS Controls
@@ -1544,14 +1560,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bad1a5499b661fe4db868f94512c06b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveState: 0
-  moveSpeed: 6
+  walkSpeed: 5.75
   groundAccel: 35
   groundDecel: 45
   jumpHeight: 3
   gravityScale: 15
   upwardGravMult: 2
+  crouchSpeed: 3.75
   crouchHeight: 1
+  positionChangeSpeed: 0.125
+  sprintSpeed: 9
+  crouchTuner: 0
 --- !u!114 &5570463379167910784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1565,7 +1584,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 7080063504236081095}
+  camHolder: {fileID: 7987162703804155532}
   sensitivity: {x: 0.1, y: 0.06}
+  standCamLevel: 0.5
+  crouchCamLevel: 0.325
 --- !u!114 &5042190757247243880
 MonoBehaviour:
   m_ObjectHideFlags: 0

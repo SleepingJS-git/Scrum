@@ -3,9 +3,12 @@ using UnityEngine;
 public class PlayerLook : MonoBehaviour
 {
     public Camera cam;
+    public Transform camHolder;
     [Tooltip("X is for left and Right, Y is for Up and Down")]
     public Vector2 sensitivity;
-
+    [Header("Crouching")]
+    public float standCamLevel;
+    public float crouchCamLevel;
     private float xRot;
     public void Init(bool camEnabled)
     {

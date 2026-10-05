@@ -1,12 +1,12 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public MovementState moveState;
 
     [Header("Ground Movement")]
-    public float moveSpeed;         // Movespeed of player
+    public float walkSpeed;         // Movespeed of player while walking
     public float groundAccel, groundDecel;      // Acceleration and Deceleration of speed
     private float currentSpeed;     // Current speed
 
@@ -16,7 +16,14 @@ public class PlayerMovement : MonoBehaviour
     public float upwardGravMult;    // How fast the player jumps
     
     [Header("Crouching")]
+    public float crouchSpeed;       // Movespeed of player while crouching
     public float crouchHeight = 1f;
+    public float positionChangeSpeed;
+
+    [Header("Sprinting")]
+    public float sprintSpeed;
+
+    // Private Variables
     private bool isMoving;
     private Vector3 velocity;       // Actual Velocity    
     private Vector3 moveDir;        // Movement Direction
@@ -24,9 +31,12 @@ public class PlayerMovement : MonoBehaviour
     private PlayerBody body;
     private Player main;
     private float defaultHeight;
+    private float targetCamLevel;
+    private bool isChangingState = false;
+    private MovementState moveState => (MovementState) main.MoveState.Value;
+    [SerializeField] private float crouchTuner;
     public void Init(bool isOwner)
     {
-        moveState = MovementState.Standing;
         cc = GetComponent<CharacterController>();
         isMoving = false;
         defaultHeight = cc.height;
@@ -40,12 +50,55 @@ public class PlayerMovement : MonoBehaviour
 
     public void Jump()
     {
-        if (cc.isGrounded) velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+        if (cc.isGrounded)
+        {
+            if (moveState == MovementState.Crouching)
+            {
+                main.ChangeMoveStateServerRpc(0);
+            }
+            else
+            {
+                velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+            }
+        }
+    }
+
+    public void OnSprint(bool isSprinting)
+    {
+        if (isSprinting)
+        {
+            if (moveState == MovementState.Crouching)
+            {
+                main.ChangeMoveStateServerRpc(0);
+            }
+            else if (moveState == MovementState.Standing)
+            {
+                main.ChangeMoveStateServerRpc(2);
+            }
+            else if (moveState == MovementState.Sprinting)
+            {
+                // main.Body.Play("IsSprinting", true);
+            }
+        }
+        else
+        {
+            main.ChangeMoveStateServerRpc(0);
+            // main.Body.Play("IsSprinting", false);
+        }
+        
     }
 
     public void CrouchOrSlide()
     {
-        main.ChangeMoveStateServerRpc();
+        if (isChangingState) return;
+        if (moveState == MovementState.Standing || moveState == MovementState.Sprinting)
+        {
+            main.ChangeMoveStateServerRpc(1);
+        }
+        else if (moveState == MovementState.Crouching)
+        {
+            main.ChangeMoveStateServerRpc(0);
+        }
     }
 
     public void Crouch()
@@ -56,18 +109,62 @@ public class PlayerMovement : MonoBehaviour
             // body.Play("IsCrouching", true);
         }
         else
-            LocalCrouch();
+            StartCoroutine(CrouchRoutine(true));
     }
 
     public void UnCrouch()
     {
-        cc.height = defaultHeight;
+        if (!main.IsOwner)
+        {
+            cc.height = defaultHeight;
+            // body.Play("IsCrouching", true);
+        }
+        else
+            StartCoroutine(CrouchRoutine(false));
     }
 
-    private void LocalCrouch()
+    private IEnumerator CrouchRoutine(bool toCrouch)
     {
-        cc.height = crouchHeight;
+        isChangingState = true;
+        if (!toCrouch && cc.isGrounded) 
+            velocity.y = Mathf.Sqrt(30f);
+        float startHeight = cc.height;
+        float targetHeight = toCrouch ? crouchHeight: defaultHeight;
+        targetCamLevel = toCrouch ? main.Look.crouchCamLevel: main.Look.standCamLevel;
+        float t = 0f;
+        Vector3 pos = main.Look.camHolder.localPosition;
+        float startCamLevel = pos.y;
+        bool ceiling = false;
+        while (t < 1)
+        {
+            Vector3 origin = transform.position + new Vector3(0, cc.height / 2, 0);
+            ceiling = Physics.Raycast(origin, Vector3.up, 0.2f, Layer.Wall | Layer.Ground) && !toCrouch;
+
+            if (!ceiling)
+            {
+                pos.y = Mathf.Lerp(startCamLevel, targetCamLevel, t);
+                main.Look.camHolder.localPosition = pos;
+                cc.height = Mathf.Lerp(startHeight, targetHeight, t);
+
+                t += Time.deltaTime / positionChangeSpeed;
+            }
+            else { ceiling = true; break; }
+
+            yield return null;
+        }
+
+        if (!ceiling)
+        {
+            pos.y = targetCamLevel;
+            main.Look.camHolder.localPosition = pos;
+
+            cc.height = targetHeight;
+        }
+
+        isChangingState = false;
     }
+
+
 
     /// <summary>
     /// This does the movement for vertical (walking) and horizontal (gravity)
@@ -83,7 +180,7 @@ public class PlayerMovement : MonoBehaviour
         moveDir.Normalize();
         
         // Cache the current speed
-        currentSpeed = isMoving ? moveSpeed : 0f;
+        currentSpeed = DetermineMoveSpeed();
 
         Vector3 targetVelocity = currentSpeed * moveDir;
         
@@ -110,6 +207,23 @@ public class PlayerMovement : MonoBehaviour
         cc.Move(velocity * Time.deltaTime);
         
         UpdateAnimation();
+    }
+
+    private float DetermineMoveSpeed()
+    {
+        if (isMoving)
+        {
+            switch ((MovementState) main.MoveState.Value)
+            {
+                case MovementState.Standing:
+                return walkSpeed;
+                case MovementState.Crouching:
+                return crouchSpeed;
+                case MovementState.Sprinting:
+                return sprintSpeed; // Change to Sprint Speed
+            }
+        }
+        return 0f;
     }
 
     /// <summary>
