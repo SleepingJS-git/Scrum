@@ -30,6 +30,12 @@ public class PlayerMovement : MonoBehaviour
     public float slideDuration;
     public float slideCooldown;
 
+    [Header("Wall Kicking")]
+    public float kickReach;
+    public float kickUpForce;
+    public float kickHorizForce;
+    public float wallKickCooldown;
+
     // Private Variables
     // Current Move State
     private MovementState moveState => (MovementState) main.MoveState.Value;
@@ -50,6 +56,11 @@ public class PlayerMovement : MonoBehaviour
     private float slideVelocity;
     private float slideTimer;
     private float slideElapsed;
+
+    // Wall Kicking
+    private int wallKicks;
+    private float wallKickElapsed;
+
     // Components
     private CharacterController cc; 
     private PlayerBody body;
@@ -82,7 +93,6 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-
         isMoving = moveInput.sqrMagnitude > 0.0001f;
         if (isMoving) Sprint();
 
@@ -95,6 +105,7 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 targetVelocity = currentSpeed * moveDir;
         
+        if (cc.isGrounded) wallKicks = 0;
 
         // If is grounded, accelerate if moving or decelerate if not
         float accel = isMoving ? groundAccel : groundDecel;
@@ -205,6 +216,34 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Advanced Movement
+    public void WallKick()
+    {
+        if (cc.isGrounded) return;
+        if (Time.time < wallKickElapsed + wallKickCooldown) return;
+
+        if (Physics.Raycast(main.PlayerCam.position, main.PlayerCam.forward, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
+        {
+            Vector3 direction;
+            if (wallKicks == 0)
+            {
+                float y = Mathf.Sqrt(kickUpForce * 2f * gravityScale);
+                direction = -main.PlayerCam.forward * kickHorizForce;
+                direction.y += y;
+                velocity = direction;
+            }
+            else
+            {
+                float y = Mathf.Sqrt(kickUpForce / (wallKicks + 1) * 2f * gravityScale);
+                direction = -main.PlayerCam.forward;
+                direction.y = y;
+                velocity += direction;
+            }
+
+            wallKicks++;
+            wallKickElapsed = Time.time;
+        }
+
+    }
     public void Jump()
     {
         if (cc.isGrounded)
@@ -234,7 +273,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isSprinting)
         {
-            Debug.Log("MoveState: " + moveState);
             if (moveState == MovementState.Crouching)
             {
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);

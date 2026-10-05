@@ -144,10 +144,20 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnSprint(CallbackContext ctx)
     {
-         if (ctx.started)
+        if (ctx.started)
             move.OnSprint(true);
         else if (ctx.canceled)
             move.OnSprint(false);
+    }
+
+    public void OnKick(CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            move.WallKick();
+
+            // Combat Melee Kick Method
+        }
     }
 
     public void ToBuildTest(CallbackContext ctx)
