@@ -227,8 +227,6 @@ MonoBehaviour:
   - {fileID: 5253606220733998174}
   - {fileID: 3750194309768530666}
   - {fileID: 4142061847625822515}
-  localPlayerColor: {r: 0, g: 1, b: 0, a: 1}
-  otherPlayerColor: {r: 1, g: 1, b: 1, a: 1}
   titleScreenController: {fileID: 1693834266301829610}
   lobbyHeader: {fileID: 4974454191032549290}
   connectionErrorText: {fileID: 81291414326336077}
@@ -1187,7 +1185,9 @@ MonoBehaviour:
   lobbyRoomScreen: {fileID: 3908027026332443637}
   loadingLobbyScreen: {fileID: 4832379774419121350}
   tutorialScreen: {fileID: 5419346275489522160}
-  sceneName: MVP Testing
+  startGameButton: {fileID: 0}
+  startGameCanvasGroup: {fileID: 0}
+  sceneName: MVP Testing (With New PlayerManager)
 --- !u!1 &2060734993203220483
 GameObject:
   m_ObjectHideFlags: 0

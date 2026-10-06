@@ -55,12 +55,30 @@ public class DebugManager : MonoBehaviour
                 break;
 
             case DebugType.MVP:
-                Debug.Log("Start MVP");
-                hostButton.gameObject.SetActive(true);
-                clientButton.gameObject.SetActive(true);
-                hostButton.onClick.AddListener(StartHost);
-                clientButton.onClick.AddListener(StartClient);
-                break;
+                {
+                    // Had to add this because I can't test relay/main menu stuff
+                    bool alreadyInSession = LobbyManager.Instance != null && LobbyManager.Instance.IsInLobby;
+                    if (!alreadyInSession)
+                    {
+                        Debug.Log("MVP directly from scene");
+
+                        hostButton.gameObject.SetActive(true);
+                        clientButton.gameObject.SetActive(true);
+
+                        hostButton.onClick.AddListener(StartHost);
+                        clientButton.onClick.AddListener(StartClient);
+                        break;
+                    }
+
+                    Debug.Log("MVP from Main Menu");
+
+                    if (NetworkManager.Singleton.IsServer)
+                    {
+                        PlayerManager.Instance.ConfigureSpawning(debugConfig);
+                    }
+
+                    break;
+                }
         }
 
         // PlayerManager.Instance.GetComponent<NetworkObject>().Spawn();

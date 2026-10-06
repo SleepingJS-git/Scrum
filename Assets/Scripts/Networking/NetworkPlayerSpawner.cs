@@ -5,11 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class NetworkPlayerSpawner : NetworkBehaviour
 {
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private Transform[] spawnPoints;
-
-
-    //Make sure the host is the only one giving player spawns
+    // Make sure the host is the only one giving player spawns
     public override void OnNetworkSpawn()
     {
         if (!IsServer)
@@ -20,7 +16,7 @@ public class NetworkPlayerSpawner : NetworkBehaviour
         Debug.Log("NetworkSpawner is Awakened");
     }
 
-    //spawn players once NGO has loaded
+    // Spawn players once NGO has loaded the gameplay scene
     private void OnLoadEventCompleted(
         string sceneName,
         LoadSceneMode loadSceneMode,
@@ -30,33 +26,23 @@ public class NetworkPlayerSpawner : NetworkBehaviour
         if (sceneName != gameObject.scene.name)
             return;
 
-        int spawnIndex = 0;
-
         foreach (ulong clientId in clientsCompleted)
         {
-            //Prevent accidentally giving somebody two PlayerObjects
-            if (NetworkManager.ConnectedClients[clientId].PlayerObject != null)
-                continue;
+            // Give this client their FPS Player
+            if (NetworkManager.ConnectedClients[clientId].PlayerObject == null)
+            {
+                PlayerManager.Instance.SpawnPlayer(clientId);
+            }
 
-            //players will spawn on top of each other if there aren't enough spawn points
-            Transform spawnPoint = spawnPoints[
-                spawnIndex % spawnPoints.Length
-            ];
+            // Give this client their Builder
+            PlayerManager.Instance.SpawnBuilder(clientId);
 
-            GameObject player = Instantiate(
-                playerPrefab,
-                spawnPoint.position,
-                spawnPoint.rotation
-            );
-
-            player.GetComponent<NetworkObject>()
-                .SpawnAsPlayerObject(clientId, true);
-
-            spawnIndex++;
+            // Tell GameManager this player finished loading
+            GameManager.Instance.PlayerLoaded(clientId);
         }
 
-        //Figure out how many players we have
-        GameManager.Instance.SetPlayerCount(spawnIndex);
+        // Tell GameManager how many players are here
+        GameManager.Instance.SetPlayerCount(clientsCompleted.Count);
 
         NetworkManager.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
     }
