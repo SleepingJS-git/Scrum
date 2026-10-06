@@ -96,8 +96,8 @@ public class GridPlacement : NetworkBehaviour
         ResetCounterServerRpc();
     }
 
-    [Rpc(SendTo.Server)]
-    private void ResetCounterServerRpc()
+    [Rpc(SendTo.ClientsAndHost)]
+    private void ResetBreakablesRpc()
     {
         if (builtObjects.Count != 0)
         {
@@ -107,6 +107,11 @@ public class GridPlacement : NetworkBehaviour
                 build.GetComponent<BreakableStructureEntity>().ResetBreakable();
             }
         }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ResetCounterServerRpc()
+    {      
         currentPlacements.Value = 0;
     }
 
@@ -251,9 +256,13 @@ public class GridPlacement : NetworkBehaviour
         obj.NetworkObject.Spawn();
         BuildableDatabase.SetCellsToOccupied(buildable, cellPos, rotation.Value);
         currentPlacements.Value++;
-        if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) {builtObjects.Add(obj);}
+        BreakableToClientRpc(obj.NetworkObjectId);
+    }
 
-
+    [Rpc(SendTo.ClientsAndHost)]
+    private void BreakableToClientRpc(ulong networkObjID)
+    {
+        //if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj); }
     }
 
     /// <summary>
