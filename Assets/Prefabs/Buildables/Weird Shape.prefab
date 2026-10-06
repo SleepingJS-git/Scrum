@@ -133,7 +133,7 @@ MonoBehaviour:
   - {x: 2, y: 0, z: 1}
   - {x: 2, y: 1, z: 0}
   - {x: 2, y: 2, z: 0}
-  mesh: {fileID: 0}
+  mesh: {fileID: 8755468180394624992}
   Id: 6
 --- !u!33 &6249034917241201286
 MeshFilter:

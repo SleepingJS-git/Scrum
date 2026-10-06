@@ -125,8 +125,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   occupiedCells:
   - {x: 0, y: 0, z: 0}
-  - {x: 1, y: 0, z: 1}
-  - {x: 2, y: 0, z: 2}
+  - {x: 1, y: 0, z: 0}
+  - {x: 2, y: 0, z: 0}
   mesh: {fileID: 5018729480159341880}
   Id: 3
 --- !u!33 &6813575909085849087
