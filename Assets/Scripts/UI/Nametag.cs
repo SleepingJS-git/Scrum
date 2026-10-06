@@ -17,7 +17,6 @@ public class Nametag : NetworkBehaviour
     private PlayerStats playerStats;
     private Camera localCamera;
     private Vector3 baseScale;
-
     private void Awake()
     {
         playerStats = GetComponent<PlayerStats>();
@@ -27,6 +26,16 @@ public class Nametag : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        PlayerManager.ToBuild += RefreshMainCam;
+        PlayerManager.ToCombat += RefreshMainCam;
+
+        PlayerManager.ToBuild += () => {
+            ToggleSelf(true);
+        };
+        PlayerManager.ToCombat += () => {
+            ToggleSelf(false);
+        };
+
         playerStats.PlayerName.OnValueChanged += OnPlayerNameChanged;
 
         nameText.text = playerStats.PlayerName.Value.ToString();
@@ -41,6 +50,16 @@ public class Nametag : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         playerStats.PlayerName.OnValueChanged -= OnPlayerNameChanged;
+    }
+
+    private void RefreshMainCam()
+    {
+        localCamera = Camera.main;
+    }
+
+    private void ToggleSelf(bool isOn)
+    {
+        nameText.text = isOn ? playerStats.PlayerName.Value.ToString() : "";
     }
 
     private void OnPlayerNameChanged(

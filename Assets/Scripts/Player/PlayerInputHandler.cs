@@ -138,8 +138,27 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (move == null) return;
 
-        if (ctx.started)
-            move.CrouchOrSlide();
+
+        if (PlayerManager.PlayerSettings.crouchType == PlayerSettings.CrouchType.Toggle)
+        {
+            if (ctx.started)
+            {
+                move.CrouchOrSlide();
+            }
+        }
+        else
+        {
+            if (ctx.started)
+            {
+                move.CrouchHold(true);
+            }
+            else if (ctx.canceled)
+            {
+                move.CrouchHold(false);
+            }
+        }
+        
+            
     }
 
     public void OnSprint(CallbackContext ctx)

@@ -50,6 +50,7 @@ public class PlayerMovement : MonoBehaviour
     // Crouching
     private float defaultHeight;
     private float targetCamLevel;
+    private bool isCrouchHolding;
 
     // Sliding
     private Vector3 slideDirection;
@@ -294,7 +295,35 @@ public class PlayerMovement : MonoBehaviour
             // main.Body.Play("IsSprinting", false);
         }
     }
-
+    public void CrouchHold(bool isCrouching)
+    {
+        if (isCrouching)
+        {
+            if (moveState == MovementState.Standing)
+            {
+                main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
+            }
+            else if (moveState == MovementState.Sprinting)
+            {
+                if (Time.time < slideElapsed + slideCooldown) return;
+                slideDirection = moveDir;
+                // slideVelocity = Mathf.Max(
+                //     new Vector3(velocity.x, 0f, velocity.z).magnitude,
+                //     slideSpeed
+                // );
+                slideVelocity = new Vector3(velocity.x, 0f, velocity.z).magnitude + slideSpeed;
+                slideTimer = 0f;
+                main.ChangeMoveStateServerRpc((int) MovementState.Sliding);
+            }
+        }
+        else
+        {
+            if (moveState == MovementState.Crouching)
+            {
+                main.ChangeMoveStateServerRpc((int) MovementState.Standing);
+            }
+        }
+    }
     public void CrouchOrSlide()
     {
         if (isChangingState) return;

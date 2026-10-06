@@ -33,6 +33,12 @@ public class PlayerManager : NetworkBehaviour
     
     // Local Client Events
     public static event Action OnPlayerReset;
+    public static event Action ToBuild;
+    public static event Action ToCombat;
+
+    // Settings
+    public static PlayerSettings PlayerSettings { get; private set; }
+    [SerializeField] private PlayerSettings debugPlayerSettings;
     
     #endregion
 
@@ -64,6 +70,8 @@ public class PlayerManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         if (!IsOwner) return;
+
+        if (debugPlayerSettings != null) PlayerSettings = debugPlayerSettings;
     }
 
     /// <summary>
@@ -118,7 +126,6 @@ public class PlayerManager : NetworkBehaviour
 
                 // Tell gamemanager that a player had died
                 OnPlayerDeath += GameManager.Instance.PlayerDeath;
-
             break;
         }
     }
@@ -156,6 +163,15 @@ public class PlayerManager : NetworkBehaviour
         ResetNonLocalPlayers();
 
         OnPlayerReset?.Invoke();
+    }
+
+    /// <summary>
+    /// Invoked by client. 
+    /// Set up local player settings
+    /// </summary>
+    public void SetupPlayerSettings(PlayerSettings newPlayerSettings) // <- whatever you need to pass in, add it as a parameter
+    {
+        PlayerSettings = newPlayerSettings;
     }
 
 #region Player Setup
@@ -288,6 +304,7 @@ public class PlayerManager : NetworkBehaviour
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
 
                 TogglePlayerControls(true);
+                ToCombat?.Invoke();
             break;
             case PointOfView.Building:
                 Cursor.visible = true;
@@ -302,6 +319,7 @@ public class PlayerManager : NetworkBehaviour
 
 
                 TogglePlayerControls(false);
+                ToBuild?.Invoke();
             break;
             case PointOfView.Spectate:
                 Cursor.visible = true;
