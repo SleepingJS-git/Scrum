@@ -13,7 +13,8 @@ public enum MenuScreen
     JoinLobby,
     LobbyRoom,
     LoadingLobby,
-    Tutorial
+    Tutorial,
+    Settings
 }
 
 /// <summary>
@@ -28,7 +29,7 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] private GameObject lobbyRoomScreen;
     [SerializeField] private GameObject loadingLobbyScreen;
     [SerializeField] private GameObject tutorialScreen;
-
+    [SerializeField] private GameObject settingsScreen;
     [SerializeField] private Button startGameButton;
     [SerializeField] private CanvasGroup startGameCanvasGroup;
 
@@ -46,6 +47,7 @@ public class TitleScreen : MonoBehaviour
         lobbyRoomScreen.SetActive(screen == MenuScreen.LobbyRoom);
         loadingLobbyScreen.SetActive(screen == MenuScreen.LoadingLobby);
         tutorialScreen.SetActive(screen == MenuScreen.Tutorial);
+        settingsScreen.SetActive(screen == MenuScreen.Settings);
     }
 
 
@@ -79,6 +81,11 @@ public class TitleScreen : MonoBehaviour
     public void ShowTutorial()
     {
         ShowScreen(MenuScreen.Tutorial);
+    }
+
+    public void ShowSettings()
+    {
+        ShowScreen(MenuScreen.Settings);
     }
 
 
