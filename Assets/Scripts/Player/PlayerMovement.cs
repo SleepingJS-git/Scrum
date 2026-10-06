@@ -295,6 +295,29 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void CrouchHolding(bool isCrouching)
+    {
+        if (isChangingState) return;
+        if (isCrouching)
+        {
+            if (moveState == MovementState.Standing)
+            {
+                main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
+            }
+            else if (moveState == MovementState.Sprinting)
+            {
+                StartSlide();
+            }
+        }
+        else
+        {
+            if (moveState == MovementState.Crouching)
+            {
+                main.ChangeMoveStateServerRpc((int) MovementState.Standing);
+            }
+        }
+    }
+
     public void CrouchOrSlide()
     {
         if (isChangingState) return;
@@ -308,16 +331,20 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (moveState == MovementState.Sprinting)
         {
-            if (Time.time < slideElapsed + slideCooldown) return;
-            slideDirection = moveDir;
-            // slideVelocity = Mathf.Max(
-            //     new Vector3(velocity.x, 0f, velocity.z).magnitude,
-            //     slideSpeed
-            // );
-            slideVelocity = new Vector3(velocity.x, 0f, velocity.z).magnitude + slideSpeed;
-            slideTimer = 0f;
-            main.ChangeMoveStateServerRpc((int) MovementState.Sliding);
+            StartSlide();
         }
+    }
+    private void StartSlide()
+    {
+        if (Time.time < slideElapsed + slideCooldown) return;
+        slideDirection = moveDir;
+        // slideVelocity = Mathf.Max(
+        //     new Vector3(velocity.x, 0f, velocity.z).magnitude,
+        //     slideSpeed
+        // );
+        slideVelocity = new Vector3(velocity.x, 0f, velocity.z).magnitude + slideSpeed;
+        slideTimer = 0f;
+        main.ChangeMoveStateServerRpc((int) MovementState.Sliding);
     }
     public void Slide()
     {

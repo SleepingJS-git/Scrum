@@ -30,12 +30,23 @@ public class Nametag : NetworkBehaviour
         playerStats.PlayerName.OnValueChanged += OnPlayerNameChanged;
 
         nameText.text = playerStats.PlayerName.Value.ToString();
+        
+        PlayerManager.ToBuilding += RefreshLocalCam;
+        PlayerManager.ToCombat += RefreshLocalCam;
 
-        if (IsOwner)
+        if (!IsOwner) return;
+  
+
+        PlayerManager.ToBuilding += () =>
         {
-            nameText.SetText("You");
-            nameText.color = Color.green;
-        }
+            ToggleViewSelfTag(true);
+        };
+        PlayerManager.ToCombat += () =>
+        {
+            ToggleViewSelfTag(false);
+        };
+
+        nameText.color = Color.green;
     }
 
     public override void OnNetworkDespawn()
@@ -48,6 +59,16 @@ public class Nametag : NetworkBehaviour
         FixedString64Bytes newName)
     {
         nameText.text = newName.ToString();
+    }
+
+    private void RefreshLocalCam()
+    {
+        localCamera = Camera.main;
+    }
+
+    private void ToggleViewSelfTag(bool viewSelf)
+    {
+        nameText.text = viewSelf ? playerStats.PlayerName.Value.ToString(): "";
     }
 
     private void LateUpdate()
