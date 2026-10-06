@@ -19,6 +19,11 @@ public class ExitMenu : MonoBehaviour
         SetExitVisible(false);
     }
 
+    public void ExitToMainMenu()
+    {
+        LobbyManager.Instance.LeaveToMainMenu();
+    }
+
     private void SetExitVisible(bool visible)
     {
         _canvasGroup.alpha = visible ? 1f : 0f;
@@ -34,11 +39,7 @@ public class ExitMenu : MonoBehaviour
             //playerInput.actions.FindActionMap("Fps Input").Disable();
 
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                visible = false;
-                SetExitVisible(visible);
-                Cursor.visible = false;
-            }
+                CloseExitMenu();
         }
         else
         {
@@ -52,6 +53,13 @@ public class ExitMenu : MonoBehaviour
                 Cursor.visible = true;
             }
         }
+    }
+
+    public void CloseExitMenu()
+    {
+        visible = false;
+        SetExitVisible(visible);
+        Cursor.visible = false;
     }
 
 }

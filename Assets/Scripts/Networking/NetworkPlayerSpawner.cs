@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class NetworkPlayerSpawner : NetworkBehaviour
 {
@@ -12,8 +13,21 @@ public class NetworkPlayerSpawner : NetworkBehaviour
             return;
 
         NetworkManager.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
+        NetworkManager.OnClientDisconnectCallback += OnClientDisconnected;
 
         Debug.Log("NetworkSpawner is Awakened");
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (!IsServer)
+            return;
+
+        if (NetworkManager != null)
+        {
+            NetworkManager.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
+            NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
+        }
     }
 
     // Spawn players once NGO has loaded the gameplay scene
@@ -45,5 +59,28 @@ public class NetworkPlayerSpawner : NetworkBehaviour
         GameManager.Instance.SetPlayerCount(clientsCompleted.Count);
 
         NetworkManager.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        if (!IsServer)
+            return;
+
+        Debug.Log($"Client {clientId} disconnected.");
+
+        StartCoroutine(UpdatePlayerCountAfterDisconnect());
+    }
+
+    private IEnumerator UpdatePlayerCountAfterDisconnect()
+    {
+        // Let NGO finish removing the disconnected client first.
+        yield return null;
+
+        int remainingPlayers =
+            NetworkManager.Singleton.ConnectedClientsList.Count;
+
+        Debug.Log($"Players remaining: {remainingPlayers}");
+
+        GameManager.Instance.SetPlayerCount(remainingPlayers);
     }
 }
