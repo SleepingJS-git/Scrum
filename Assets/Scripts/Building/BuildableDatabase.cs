@@ -65,7 +65,6 @@ public class BuildableDatabase : MonoBehaviour
         if (!IsCellTaken(position))
         {
             OccupiedCells.Add(position, buildableId);
-            Debug.Log("Occupied " + position);
         }
     }
 
@@ -113,7 +112,6 @@ public class BuildableDatabase : MonoBehaviour
                         float currentOffsetZ = spawnPoints[i].position.z + ((bounds.size.z / 2) - z);
                         Vector3 offsetPos = new Vector3(currentOffsetX, currentOffsetY, currentOffsetZ);
                         Vector3Int cellPos = grid.WorldToCell(offsetPos);
-                        Debug.Log(cellPos);
                         OccupyCell(cellPos, 0);
                     }
                 }
