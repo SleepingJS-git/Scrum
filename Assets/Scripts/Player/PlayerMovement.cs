@@ -49,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
 
     // Crouching
     private float defaultHeight;
-    private float targetCamLevel;
+    public float TargetCamLevel { get; private set; }
 
     // Sliding
     private Vector3 slideDirection;
@@ -76,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
         if (isOwner) 
         {
             body = GetComponent<PlayerBody>();
+            TargetCamLevel = main.Look.standCamLevel;
         }
     }
 
@@ -386,7 +387,7 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = Mathf.Sqrt(30f);
         float startHeight = cc.height;
         float targetHeight = toCrouch ? crouchHeight: defaultHeight;
-        targetCamLevel = toCrouch ? main.Look.crouchCamLevel: main.Look.standCamLevel;
+        TargetCamLevel = toCrouch ? main.Look.crouchCamLevel: main.Look.standCamLevel;
         float t = 0f;
         Vector3 pos = main.Look.camHolder.localPosition;
         float startCamLevel = pos.y;
@@ -398,7 +399,7 @@ public class PlayerMovement : MonoBehaviour
 
             if (!ceiling)
             {
-                pos.y = Mathf.Lerp(startCamLevel, targetCamLevel, t);
+                pos.y = Mathf.Lerp(startCamLevel, TargetCamLevel, t);
                 main.Look.camHolder.localPosition = pos;
                 cc.height = Mathf.Lerp(startHeight, targetHeight, t);
 
@@ -411,7 +412,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!ceiling)
         {
-            pos.y = targetCamLevel;
+            pos.y = TargetCamLevel;
             main.Look.camHolder.localPosition = pos;
 
             cc.height = targetHeight;

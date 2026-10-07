@@ -75820,6 +75820,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   playerHud: {fileID: 1891984439}
   builderHud: {fileID: 1461990361}
+  debugPlayerSettings:
+    CrouchingType: 0
   spawnPoints:
   - {fileID: 1638018075}
   - {fileID: 529807757}

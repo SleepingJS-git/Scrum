@@ -30,3 +30,4 @@ MonoBehaviour:
   fireSound: {fileID: 8300000, guid: b9fd3f93a2be5e84aae63553a2c7cbfe, type: 3}
   trail: {fileID: 2059742913133304835, guid: 23e894f2da81ee8499685b78125ad8c8, type: 3}
   bulletImpact: {fileID: 4623250405035984504, guid: 5eb77df42ed0a7e47999dcc3c35d4e8a, type: 3}
+  recoilAmplitude: 15
