@@ -21,14 +21,17 @@ public class HeadBobbing : MonoBehaviour
     private Vector3 _startPos;
     private float _amplitude;
     private float _frequency;
+    private bool _enabled = true;
 
     void Start()
     {
+        enabled = main.IsOwner;
         _startPos = _cameraHolder.localPosition;
     }
 
     void Update()
     {
+        if (!_enabled) return;
         EvaluateMotion();
         CheckMotion();
         ResetPosition();

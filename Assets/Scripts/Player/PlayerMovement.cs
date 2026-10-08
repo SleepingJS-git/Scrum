@@ -177,6 +177,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (slideVelocity <= slideMinSpeed || slideTimer >= slideDuration)
         {
+            body.Play("IsSliding", false);
+            body.Play("IsCrouching", true);
             main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
             slideElapsed = Time.time;
         }
@@ -189,6 +191,7 @@ public class PlayerMovement : MonoBehaviour
     void UpdateAnimation()
     {
         body.Play("IsMoving", isMoving);
+        
 
         if (!isMoving)
         {
@@ -219,8 +222,10 @@ public class PlayerMovement : MonoBehaviour
     #region Advanced Movement
     public void WallKick()
     {
-        if (cc.isGrounded) return;
         if (Time.time < wallKickElapsed + wallKickCooldown) return;
+        body.PlayTrigger("Kick");
+        // Damage logic can happen during this window
+        if (cc.isGrounded) return;
 
         if (Physics.Raycast(main.PlayerCam.position, main.PlayerCam.forward, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {
@@ -251,10 +256,12 @@ public class PlayerMovement : MonoBehaviour
         {
             if (moveState == MovementState.Crouching)
             {
+                body.Play("IsCrouching", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);
             }
             else if (moveState == MovementState.Sliding)
             {
+                body.Play("IsSliding", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);
                 velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
             }
@@ -276,23 +283,27 @@ public class PlayerMovement : MonoBehaviour
         {
             if (moveState == MovementState.Crouching)
             {
+                body.Play("IsSprinting", true);
+                body.Play("IsCrouching", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);
             }
             else if (moveState == MovementState.Standing)
             {
+                body.Play("IsSprinting", true);
                 main.ChangeMoveStateServerRpc((int) MovementState.Sprinting);
             }
             else if (moveState == MovementState.Sprinting)
             {
-                // main.Body.Play("IsSprinting", true);
+                body.Play("IsSprinting", true);
             }
         }
         else
         {
             if (moveState == MovementState.Standing) return;
             if (moveState == MovementState.Crouching) return;
+
+            body.Play("IsSprinting", false);
             main.ChangeMoveStateServerRpc((int) MovementState.Standing);
-            // main.Body.Play("IsSprinting", false);
         }
     }
 
@@ -303,6 +314,8 @@ public class PlayerMovement : MonoBehaviour
         {
             if (moveState == MovementState.Standing)
             {
+                body.Play("IsCrouching", true);
+                body.Play("IsSprinting", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
             }
             else if (moveState == MovementState.Sprinting)
@@ -314,6 +327,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (moveState == MovementState.Crouching)
             {
+                body.Play("IsCrouching", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);
             }
         }
@@ -324,10 +338,13 @@ public class PlayerMovement : MonoBehaviour
         if (isChangingState) return;
         if (moveState == MovementState.Standing)
         {
+            body.Play("IsCrouching", true);
+            body.Play("IsSprinting", false);
             main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
         }
         else if (moveState == MovementState.Crouching)
         {
+            body.Play("IsCrouching", false);
             main.ChangeMoveStateServerRpc((int) MovementState.Standing);
         }
         else if (moveState == MovementState.Sprinting)
@@ -338,6 +355,7 @@ public class PlayerMovement : MonoBehaviour
     private void StartSlide()
     {
         if (Time.time < slideElapsed + slideCooldown) return;
+        body.Play("IsSliding", true);
         slideDirection = moveDir;
         // slideVelocity = Mathf.Max(
         //     new Vector3(velocity.x, 0f, velocity.z).magnitude,

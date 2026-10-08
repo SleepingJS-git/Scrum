@@ -224,9 +224,9 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: 10, y: 0, z: 0}
+    m_Offset: {x: 20, y: 0, z: 0}
     m_MinLimit: -65
-    m_MaxLimit: 45
+    m_MaxLimit: 55
     m_AimAxis: 4
     m_UpAxis: 2
     m_WorldUpType: 0
@@ -237,6 +237,123 @@ MonoBehaviour:
       x: 1
       y: 0
       z: 0
+--- !u!1 &2662177772346468443
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2893057923167703665}
+  - component: {fileID: 5401046928364835493}
+  m_Layer: 0
+  m_Name: Right Arm Aim
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2893057923167703665
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2662177772346468443}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.2979445, y: 0, z: -0.05336362}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 529879616162300022}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5401046928364835493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2662177772346468443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Weight: 0
+  m_Data:
+    m_ConstrainedObject: {fileID: 6730298052080640963}
+    m_SourceObjects:
+      m_Length: 1
+      m_Item0:
+        transform: {fileID: 9094302043892229471}
+        weight: 1
+      m_Item1:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item2:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item3:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item4:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item5:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item6:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item7:
+        transform: {fileID: 0}
+        weight: 0
+    m_Offset: {x: 0, y: 0, z: 0}
+    m_MinLimit: -35
+    m_MaxLimit: 65
+    m_AimAxis: 2
+    m_UpAxis: 5
+    m_WorldUpType: 0
+    m_WorldUpObject: {fileID: 0}
+    m_WorldUpAxis: 2
+    m_MaintainOffset: 0
+    m_ConstrainedAxes:
+      x: 1
+      y: 1
+      z: 1
+--- !u!1 &2738154589887247875
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9094302043892229471}
+  m_Layer: 0
+  m_Name: Right Arm Aim Target
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9094302043892229471
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2738154589887247875}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.26, y: -0.425, z: 1.167}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5181274312675402863}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2899492263920594020
 GameObject:
   m_ObjectHideFlags: 0
@@ -481,7 +598,41 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4323726472208915963}
+  - {fileID: 5181274312675402863}
   m_Father: {fileID: 6362116157266495296}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3344607867443115712
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5181274312675402863}
+  m_Layer: 9
+  m_Name: Rig Aim Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5181274312675402863
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3344607867443115712}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5055443207150518135}
+  - {fileID: 9094302043892229471}
+  m_Father: {fileID: 7987162703804155532}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3613694459425496227
 GameObject:
@@ -661,9 +812,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5055443207150518135}
   m_Layer: 0
-  m_Name: Aim Target
+  m_Name: Rig Aim Target
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -675,12 +826,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3679367840943531286}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.8}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1.205}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4323726472208915963}
+  m_Father: {fileID: 5181274312675402863}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3824361798439242752
 GameObject:
@@ -714,6 +865,7 @@ Transform:
   m_Children:
   - {fileID: 4264127163406524625}
   - {fileID: 4848307116597797148}
+  - {fileID: 2893057923167703665}
   m_Father: {fileID: 696318350263425837}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3802290272217011151
@@ -1177,7 +1329,6 @@ Transform:
   - {fileID: 8686781093670996387}
   - {fileID: 1848618495652413772}
   - {fileID: 6107189069432641731}
-  - {fileID: 5055443207150518135}
   m_Father: {fileID: 7987162703804155532}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &7080063504236081095
@@ -1653,7 +1804,7 @@ MonoBehaviour:
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -1830,6 +1981,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 6866297339908473175}
   rightHand: {fileID: 3443673609609528477}
+  rightArmRig: {fileID: 5401046928364835493}
   bodyRenderer: {fileID: 4609519911110115857}
   accessoryFolder: {fileID: 2032461095849471320}
 --- !u!114 &7517925231291135140
@@ -1859,7 +2011,7 @@ MonoBehaviour:
   slideMinSpeed: 2
   slideDuration: 0.4
   slideCooldown: 0.25
-  kickReach: 2.75
+  kickReach: 4
   kickUpForce: 3
   kickHorizForce: 2.75
   wallKickCooldown: 0.65
@@ -1877,6 +2029,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 7080063504236081095}
   camHolder: {fileID: 7987162703804155532}
+  rigAim: {fileID: 5181274312675402863}
   sensitivity: {x: 0.1, y: 0.06}
   standCamLevel: 0.8
   crouchCamLevel: 0.325
@@ -2304,7 +2457,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Weight: 0.3
   m_Data:
-    m_ConstrainedObject: {fileID: 6900995872034425262}
+    m_ConstrainedObject: {fileID: 4724692457937012778}
     m_SourceObjects:
       m_Length: 1
       m_Item0:
@@ -2331,9 +2484,9 @@ MonoBehaviour:
       m_Item7:
         transform: {fileID: 0}
         weight: 0
-    m_Offset: {x: 0, y: 0, z: 0}
-    m_MinLimit: -15
-    m_MaxLimit: 15
+    m_Offset: {x: 25, y: 0, z: 0}
+    m_MinLimit: -35
+    m_MaxLimit: 65
     m_AimAxis: 4
     m_UpAxis: 2
     m_WorldUpType: 0
@@ -2802,6 +2955,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 9100000, guid: 651ceeeb8a0e638459e9dcb468045da4, type: 2}
     - target: {fileID: 5866666021909216657, guid: 753c019b09aea734e859c89b284537ff, type: 3}
+      propertyPath: m_WarningMessage
+      value: "\nBinding warning: Some generic clip(s) animate transforms that are
+        already bound by a Humanoid avatar. These transforms can only be changed
+        by Humanoid clips.\n\tTransform 'mixamorig:RightArm'\n\tTransform 'mixamorig:Head'\n\tTransform
+        'mixamorig:Hips'\n\tTransform 'mixamorig:RightShoulder'\n\tTransform 'mixamorig:Neck'\n\tTransform
+        'mixamorig:Spine'\n\tTransform 'mixamorig:RightArm'\n\tTransform 'mixamorig:Head'\n\tTransform
+        'mixamorig:Hips'\n\tTransform 'mixamorig:RightShoulder'\n\tand more ..."
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
       objectReference: {fileID: 0}
@@ -3006,7 +3168,14 @@ MonoBehaviour:
   NetworkAnimatorExpanded: 0
   AuthorityMode: 1
   m_Animator: {fileID: 6866297339908473175}
-  TransitionStateInfoList: []
+  TransitionStateInfoList:
+  - IsCrossFadeExit: 0
+    Layer: 2
+    OriginatingState: 1917417168
+    DestinationState: -1092128709
+    TransitionDuration: 0.03291142
+    TriggerNameHash: -1092128709
+    TransitionIndex: 0
   AnimatorParameterEntries:
     ParameterEntries:
     - name: Forward
@@ -3025,8 +3194,20 @@ MonoBehaviour:
       NameHash: -1646273455
       Synchronize: 1
       ParameterType: 4
-    - name: Jump
-      NameHash: 125937960
+    - name: IsSprinting
+      NameHash: -980523212
+      Synchronize: 1
+      ParameterType: 4
+    - name: IsCrouching
+      NameHash: -1154928320
+      Synchronize: 1
+      ParameterType: 4
+    - name: IsSliding
+      NameHash: -1809564513
+      Synchronize: 1
+      ParameterType: 4
+    - name: Kick
+      NameHash: -1092128709
       Synchronize: 1
       ParameterType: 9
   AnimatorParametersExpanded: 0

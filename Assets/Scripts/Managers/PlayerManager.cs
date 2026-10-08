@@ -302,7 +302,9 @@ public class PlayerManager : NetworkBehaviour
                     LocalPlayer.Body.ShowBodyRenderer(false);
                 }
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
-                
+
+                if (Instance.builderHud) Instance.builderHud.gameObject.SetActive(false);  
+                if (Instance.playerHud) Instance.playerHud.gameObject.SetActive(true);                 
                 TogglePlayerControls(true);
 
                 ToCombat?.Invoke();
@@ -317,7 +319,8 @@ public class PlayerManager : NetworkBehaviour
                     LocalPlayer.Body.ShowBodyRenderer(true);
                 } 
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(true);
-
+                if (Instance.builderHud) Instance.builderHud.gameObject.SetActive(true);  
+                if (Instance.playerHud) Instance.playerHud.gameObject.SetActive(false);  
 
                 TogglePlayerControls(false);
                 ToBuilding?.Invoke();

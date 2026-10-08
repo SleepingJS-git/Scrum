@@ -14,16 +14,19 @@ public class WeaponSwaying : MonoBehaviour
     [SerializeField] private float maxRotStep = 0.06f;
     [SerializeField] private float smoothRot = 12f;
 
-    private Vector3 swayPos;
-    private Vector3 swayRot;
+    private Vector3 _swayPos;
+    private Vector3 _swayRot;
+    private bool _enabled = true;
+
     void Start()
     {
-        
+        _enabled = main.IsOwner;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!_enabled) return;
         CompositeSway();
 
         Sway();
@@ -34,13 +37,13 @@ public class WeaponSwaying : MonoBehaviour
     {
         transform.localPosition = Vector3.Lerp(
             transform.localPosition,
-            swayPos + (bob.bobMotion / 4f),
+            _swayPos + (bob.bobMotion / 4f),
             Time.deltaTime * smooth
         );
 
         transform.localRotation = Quaternion.Slerp(
             transform.localRotation,
-            Quaternion.Euler(swayRot),
+            Quaternion.Euler(_swayRot),
             Time.deltaTime * smoothRot
         );
     }
@@ -61,7 +64,7 @@ public class WeaponSwaying : MonoBehaviour
         maxStepDistance / 2f
     );
 
-    swayPos = invertLook;
+    _swayPos = invertLook;
 }
 
     private void SwayRotation()
@@ -80,7 +83,7 @@ public class WeaponSwaying : MonoBehaviour
             maxRotStep
         );
 
-        swayRot = new Vector3(
+        _swayRot = new Vector3(
             invertLook.y,
             invertLook.x,
             invertLook.x

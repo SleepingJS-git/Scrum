@@ -1,10 +1,12 @@
 using Unity.Netcode.Components;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerBody : MonoBehaviour
 {
     public Animator animator;
     public Transform rightHand;
+    public MultiAimConstraint rightArmRig;
     public Renderer bodyRenderer;
     public GameObject accessoryFolder;
     public OnHitData onHitData;

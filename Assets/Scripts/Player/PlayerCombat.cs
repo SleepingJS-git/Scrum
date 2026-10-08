@@ -114,6 +114,7 @@ public class PlayerCombat : MonoBehaviour
         Debug.Log("Equip3D was called");
         weaponInHand = Instantiate(data.weaponModel, _main.Body.rightHand);
         weaponHandler.firingPoint = weaponInHand.transform.Find("Firing Point");
+        _main.Body.rightArmRig.weight = 1f;
     }
 
     /// <summary>
@@ -144,9 +145,12 @@ public class PlayerCombat : MonoBehaviour
                 _cam.position,
                 _cam.forward
             );
-
-            rightHandWeapon.AddRecoil(recoilAmplitude);
         }
+    }
+
+    public void RightHandRecoil()
+    {
+        rightHandWeapon.AddRecoil(recoilAmplitude);
     }
 
     /// <summary>

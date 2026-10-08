@@ -97,6 +97,7 @@ public class Player : Entity
 
         LookInput = Input.LookInput();
         Look.Look(LookInput);
+        RotateRigAimRpc(Look.XRot);
     }
 
     /// <summary>
@@ -193,5 +194,12 @@ public class Player : Entity
             break;
             
         }
+    }
+
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void RotateRigAimRpc(float xRotation)
+    {
+        Look.RotateRigAim(xRotation);
     }
 }
