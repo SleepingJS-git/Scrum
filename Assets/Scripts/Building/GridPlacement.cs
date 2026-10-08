@@ -39,7 +39,7 @@ public class GridPlacement : NetworkBehaviour
 
     // Dictionary representing which cells are occupied and what they are occupied with
 
-    private List<Buildable> builtObjects;
+    private List<GameObject> builtObjects;
 
     // The offset of the object being placed
     private Vector3 offset;
@@ -74,7 +74,7 @@ public class GridPlacement : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         Debug.Log("GridPlacement.cs IsOwner?: " + IsOwner);
-        builtObjects = new List<Buildable>();
+        builtObjects = new List<GameObject>();
         grid = GameObject.Find("Plane (Grid)").GetComponent<Grid>();
         playerInput = GetComponent<PlayerInput>();
         playerInput.enabled = IsOwner;
@@ -101,7 +101,7 @@ public class GridPlacement : NetworkBehaviour
     {
         if (builtObjects.Count != 0)
         {
-            foreach (Buildable build in builtObjects)
+            foreach (GameObject build in builtObjects)
             {
                 build.gameObject.SetActive(true);
                 build.GetComponent<BreakableStructureEntity>().ResetBreakable();
@@ -111,7 +111,8 @@ public class GridPlacement : NetworkBehaviour
 
     [Rpc(SendTo.Server)]
     private void ResetCounterServerRpc()
-    {      
+    {   
+        ResetBreakablesRpc();
         currentPlacements.Value = 0;
     }
 
@@ -263,6 +264,8 @@ public class GridPlacement : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     private void BreakableToClientRpc(ulong networkObjID)
     {
+        NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(networkObjID, out NetworkObject obj);
+        if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj.gameObject);}
         //if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj); }
     }
 
