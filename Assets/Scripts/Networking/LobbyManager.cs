@@ -31,6 +31,7 @@ public class LobbyManager : MonoBehaviour
     public event Action PlayerPropertiesChanged;
 
     private Task initializationTask;
+    public Task InitializationTask => initializationTask;
 
     private const string LobbyReadyKey = "LobbyReady";
     private bool isLeavingSession = false;
