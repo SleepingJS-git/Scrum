@@ -18,7 +18,7 @@ public class BreakableStructureEntity: Entity
         AddDeathEvent(fractureApart);
     }
 
-    public void ResetBreakable()
+    public virtual void ResetBreakable()
     {
         GetComponent<Collider>().enabled = true;
         GetComponent<MeshRenderer>().enabled = true;

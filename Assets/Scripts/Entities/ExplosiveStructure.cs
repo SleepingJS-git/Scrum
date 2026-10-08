@@ -21,6 +21,11 @@ public class ExplosiveStructure : BreakableStructureEntity
         //AddDeathEvent(Explode);
     }
 
+    private void Update()
+    {
+        Debug.Log(GameManager.GamePhase);
+    }
+
     private void Explode()
     {
         PlayExplosionSoundRpc();
@@ -89,6 +94,19 @@ public class ExplosiveStructure : BreakableStructureEntity
         yield return new WaitForSeconds(breakDelay);
         Explode();
         Fracture();
+    }
+
+    public override void ResetBreakable()
+    {
+        base.ResetBreakable();
+        StartCoroutine(OnRoundStart());
+    }
+
+    private IEnumerator OnRoundStart()
+    {
+        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
+        GetComponent<Rigidbody>().isKinematic = false;
+        Debug.Log("Rigidbody physics enabled");
     }
     
     private IEnumerator Despawn()
