@@ -8,6 +8,9 @@ public class ExplosiveStructure : BreakableStructureEntity
 {
     public int damage;
     private AudioSource explosionAudioSource;
+    [Tooltip("The amount of time the explosive waits before exploding.")]
+    [SerializeField] private float breakDelay;
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -15,7 +18,7 @@ public class ExplosiveStructure : BreakableStructureEntity
         explosionAudioSource = GetComponent<AudioSource>();
         fractureApart = new Action(FractureApartClientRpc);
         AddDeathEvent(fractureApart);
-        AddDeathEvent(Explode);
+        //AddDeathEvent(Explode);
     }
 
     private void Explode()
@@ -75,12 +78,18 @@ public class ExplosiveStructure : BreakableStructureEntity
     [Rpc(SendTo.ClientsAndHost)]
     private void FractureApartClientRpc()
     {
-        fracture.CauseFracture();
-        Fracture();
+        StartCoroutine(DelayExplosion());
+        //fracture.CauseFracture();
+        //Fracture();
         StartCoroutine(Despawn());
     }
 
-
+    private IEnumerator DelayExplosion()
+    {
+        yield return new WaitForSeconds(breakDelay);
+        Explode();
+        Fracture();
+    }
     
     private IEnumerator Despawn()
     {

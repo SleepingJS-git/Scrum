@@ -8,6 +8,7 @@ public class BreakableStructureEntity: Entity
     protected Fracture fracture;
     protected Action fractureApart;
     [SerializeField] protected float explosionForce, explosionRadius, upwardsModifier;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
@@ -15,12 +16,6 @@ public class BreakableStructureEntity: Entity
         fracture = GetComponent<Fracture>();
         fractureApart = new Action(FractureApartClientRpc);
         AddDeathEvent(fractureApart);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void ResetBreakable()
@@ -31,7 +26,7 @@ public class BreakableStructureEntity: Entity
         this.isAlive.Value = true;
     }
 
-    private void Fracture()
+    private void Explode()
     {
         foreach(Rigidbody rb in fracture.FragmentRoot.GetComponentsInChildren<Rigidbody>())
         {
@@ -60,14 +55,11 @@ public class BreakableStructureEntity: Entity
     private void FractureApartClientRpc()
     {
         fracture.CauseFracture();
-        Fracture();
-        StartCoroutine(Despawn());
+        Explode();
+        StartCoroutine(Despawn());     
     }
 
-
-    
-    private IEnumerator Despawn()
-    {
+    private IEnumerator Despawn() { 
         yield return new WaitForSeconds(5f);
         Destroy(fracture.FragmentRoot);
         gameObject.SetActive(false);
