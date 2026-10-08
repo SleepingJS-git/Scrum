@@ -199,6 +199,7 @@ public class GridPlacement : NetworkBehaviour
         {
             // Set the rotation to the current rotation value
             previewObject.transform.rotation = Quaternion.Euler(0, rotation.Value, 0);
+            previewObject.gameObject.GetComponent<Collider>().enabled = false;
 
             // If the cell is occupied
             if (BuildableDatabase.IsCellTaken(cellPos))
