@@ -97,10 +97,18 @@ public class PlayerCombat : MonoBehaviour
         {
             OnPrimaryFire = FireWeapon;
             recoilAmplitude = (data as HitscanData).recoilAmplitude;
+            
+            // Set up Hud stuff
+            UpdateWeaponInfo(data.weaponName, $"{c} / {r}");
         }
-
-        // Set up Hud stuff
-        UpdateWeaponInfo(data.weaponName, $"{c} / {r}");
+        else if (_weaponType == WeaponType.Melee)
+        {
+            OnPrimaryFire = SwingWeapon;
+            recoilAmplitude = -(data as MeleeData).swingStrength;
+            
+            // Set up Hud stuff
+            UpdateWeaponInfo(data.weaponName, "");
+        }
     }
 
     /// <summary>
@@ -137,6 +145,19 @@ public class PlayerCombat : MonoBehaviour
             return;
         }
 
+        if (weaponHandler.IsReady)
+        {
+            // Have the weapon handler handle the weapon behavior
+            weaponHandler.Shoot(
+                _weaponType,
+                _cam.position,
+                _cam.forward
+            );
+        }
+    }
+
+    private void SwingWeapon()
+    {
         if (weaponHandler.IsReady)
         {
             // Have the weapon handler handle the weapon behavior
