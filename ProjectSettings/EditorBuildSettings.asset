@@ -44,6 +44,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Levels/TheCreek.unity
     guid: 94adb9573a1ab374e8b64db6316887f6
+  - enabled: 1
+    path: Assets/Scenes/Levels/Office.unity
+    guid: cd06e3abbc77cac4e904f8463dcec0a9
+  - enabled: 1
+    path: Assets/Scenes/Levels/Rooftop.unity
+    guid: 930235d32f0f2f24abcaf0ccda4d4d4f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

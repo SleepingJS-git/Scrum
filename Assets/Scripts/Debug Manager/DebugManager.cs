@@ -100,6 +100,18 @@ public class DebugManager : MonoBehaviour
 
                 break;
 
+            case "Office":
+                debugConfig.debuggingType = DebugType.Solo_Fps;
+                PlayerManager.Instance.ConfigureSpawning(debugConfig);
+
+                break;
+
+            case "Rooftop":
+                debugConfig.debuggingType = DebugType.Solo_Fps;
+                PlayerManager.Instance.ConfigureSpawning(debugConfig);
+
+                break;
+
             case "GridBuilding (Single Player)":
                 debugConfig.debuggingType = DebugType.Solo_Building;
                 PlayerManager.Instance.ConfigureSpawning(debugConfig);
