@@ -3,10 +3,11 @@ using UnityEngine;
 [System.Serializable]
 public class PlayerSettings
 {
-    public CrouchType crouchType;
+    public CrouchType CrouchingType;
     public enum CrouchType
     {
-        Hold,
+        Holding,
         Toggle
     }
+    
 }

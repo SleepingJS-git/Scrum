@@ -268,7 +268,7 @@ public class Weapon : NetworkBehaviour
 
         if (!player)
             return;
-
+        player.Combat.RightHandRecoil();
         player.Combat.UpdateWeaponInfo(
             data.weaponName,
             $"{currentBullets} / {reserveBullets}"
@@ -366,15 +366,16 @@ public class Weapon : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void DropClientRpc()
     {
-        PlayerCombat combat = GetComponent<PlayerCombat>();
+        Player player = GetComponent<Player>();
 
         if (IsOwner)
         {
-            combat.EmptyWeapon();
+            player.Combat.EmptyWeapon();
         }
         else
         {
-            Destroy(combat.weaponInHand);
+            Destroy(player.Combat.weaponInHand);
+            player.Body.rightArmRig.weight = 0f;
         }
     }
 

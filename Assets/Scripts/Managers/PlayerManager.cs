@@ -33,13 +33,12 @@ public class PlayerManager : NetworkBehaviour
     
     // Local Client Events
     public static event Action OnPlayerReset;
-    public static event Action ToBuild;
+    public static event Action ToBuilding;
     public static event Action ToCombat;
 
-    // Settings
-    public static PlayerSettings PlayerSettings { get; private set; }
+    // Player Settings
+    public static PlayerSettings PlayerSettings {get; private set;}
     [SerializeField] private PlayerSettings debugPlayerSettings;
-    
     #endregion
 
     // Debugger
@@ -64,6 +63,11 @@ public class PlayerManager : NetworkBehaviour
     {
         Instance = this;
         Debug.Log("PlayerManager is Awakened");
+
+
+        // Dont rely on this, this is for debugging only and it is also temporary
+        if (debugPlayerSettings != null) SetPlayerSettings(debugPlayerSettings);
+
     }
 
 
@@ -71,7 +75,6 @@ public class PlayerManager : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        if (debugPlayerSettings != null) PlayerSettings = debugPlayerSettings;
     }
 
     /// <summary>
@@ -126,6 +129,7 @@ public class PlayerManager : NetworkBehaviour
 
                 // Tell gamemanager that a player had died
                 OnPlayerDeath += GameManager.Instance.PlayerDeath;
+
             break;
         }
     }
@@ -152,6 +156,11 @@ public class PlayerManager : NetworkBehaviour
         ClientPlayerResetRpc();
     }
 
+    public void SetPlayerSettings(PlayerSettings newPlayerSettings)
+    {
+        Debug.Log("Player Settings Set");
+        PlayerSettings = newPlayerSettings;
+    }
     /// <summary>
     /// Invoked by server. Method is subscribed to server's OnAllPlayersReset.
     /// The host will tell all clients to reset their local players.
@@ -163,15 +172,6 @@ public class PlayerManager : NetworkBehaviour
         ResetNonLocalPlayers();
 
         OnPlayerReset?.Invoke();
-    }
-
-    /// <summary>
-    /// Invoked by client. 
-    /// Set up local player settings
-    /// </summary>
-    public void SetupPlayerSettings(PlayerSettings newPlayerSettings) // <- whatever you need to pass in, add it as a parameter
-    {
-        PlayerSettings = newPlayerSettings;
     }
 
 #region Player Setup
@@ -303,7 +303,10 @@ public class PlayerManager : NetworkBehaviour
                 }
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
 
+                if (Instance.builderHud) Instance.builderHud.gameObject.SetActive(false);  
+                if (Instance.playerHud) Instance.playerHud.gameObject.SetActive(true);                 
                 TogglePlayerControls(true);
+
                 ToCombat?.Invoke();
             break;
             case PointOfView.Building:
@@ -316,10 +319,11 @@ public class PlayerManager : NetworkBehaviour
                     LocalPlayer.Body.ShowBodyRenderer(true);
                 } 
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(true);
-
+                if (Instance.builderHud) Instance.builderHud.gameObject.SetActive(true);  
+                if (Instance.playerHud) Instance.playerHud.gameObject.SetActive(false);  
 
                 TogglePlayerControls(false);
-                ToBuild?.Invoke();
+                ToBuilding?.Invoke();
             break;
             case PointOfView.Spectate:
                 Cursor.visible = true;

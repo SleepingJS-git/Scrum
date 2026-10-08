@@ -49,8 +49,7 @@ public class PlayerMovement : MonoBehaviour
 
     // Crouching
     private float defaultHeight;
-    private float targetCamLevel;
-    private bool isCrouchHolding;
+    public float TargetCamLevel { get; private set; }
 
     // Sliding
     private Vector3 slideDirection;
@@ -77,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
         if (isOwner) 
         {
             body = GetComponent<PlayerBody>();
+            TargetCamLevel = main.Look.standCamLevel;
         }
     }
 
@@ -177,6 +177,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (slideVelocity <= slideMinSpeed || slideTimer >= slideDuration)
         {
+            body.Play("IsSliding", false);
+            body.Play("IsCrouching", true);
             main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
             slideElapsed = Time.time;
         }
@@ -189,11 +191,12 @@ public class PlayerMovement : MonoBehaviour
     void UpdateAnimation()
     {
         body.Play("IsMoving", isMoving);
+        
 
         if (!isMoving)
         {
-            body.Play("Forward", 0f);
-            body.Play("Strafe", 0f);
+            body.CrossBlendLocomotion("Forward", 0f);
+            body.CrossBlendLocomotion("Strafe", 0f);
             return;
         }
 
@@ -219,8 +222,10 @@ public class PlayerMovement : MonoBehaviour
     #region Advanced Movement
     public void WallKick()
     {
-        if (cc.isGrounded) return;
         if (Time.time < wallKickElapsed + wallKickCooldown) return;
+        body.PlayTrigger("Kick");
+        // Damage logic can happen during this window
+        if (cc.isGrounded) return;
 
         if (Physics.Raycast(main.PlayerCam.position, main.PlayerCam.forward, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {
@@ -251,10 +256,12 @@ public class PlayerMovement : MonoBehaviour
         {
             if (moveState == MovementState.Crouching)
             {
+                body.Play("IsCrouching", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);
             }
             else if (moveState == MovementState.Sliding)
             {
+                body.Play("IsSliding", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);
                 velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
             }
@@ -276,77 +283,87 @@ public class PlayerMovement : MonoBehaviour
         {
             if (moveState == MovementState.Crouching)
             {
+                body.Play("IsSprinting", true);
+                body.Play("IsCrouching", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);
             }
             else if (moveState == MovementState.Standing)
             {
+                body.Play("IsSprinting", true);
                 main.ChangeMoveStateServerRpc((int) MovementState.Sprinting);
             }
             else if (moveState == MovementState.Sprinting)
             {
-                // main.Body.Play("IsSprinting", true);
+                body.Play("IsSprinting", true);
             }
         }
         else
         {
             if (moveState == MovementState.Standing) return;
             if (moveState == MovementState.Crouching) return;
+
+            body.Play("IsSprinting", false);
             main.ChangeMoveStateServerRpc((int) MovementState.Standing);
-            // main.Body.Play("IsSprinting", false);
         }
     }
-    public void CrouchHold(bool isCrouching)
+
+    public void CrouchHolding(bool isCrouching)
     {
+        if (isChangingState) return;
         if (isCrouching)
         {
             if (moveState == MovementState.Standing)
             {
+                body.Play("IsCrouching", true);
+                body.Play("IsSprinting", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
             }
             else if (moveState == MovementState.Sprinting)
             {
-                if (Time.time < slideElapsed + slideCooldown) return;
-                slideDirection = moveDir;
-                // slideVelocity = Mathf.Max(
-                //     new Vector3(velocity.x, 0f, velocity.z).magnitude,
-                //     slideSpeed
-                // );
-                slideVelocity = new Vector3(velocity.x, 0f, velocity.z).magnitude + slideSpeed;
-                slideTimer = 0f;
-                main.ChangeMoveStateServerRpc((int) MovementState.Sliding);
+                StartSlide();
             }
         }
         else
         {
             if (moveState == MovementState.Crouching)
             {
+                body.Play("IsCrouching", false);
                 main.ChangeMoveStateServerRpc((int) MovementState.Standing);
             }
         }
     }
+
     public void CrouchOrSlide()
     {
         if (isChangingState) return;
         if (moveState == MovementState.Standing)
         {
+            body.Play("IsCrouching", true);
+            body.Play("IsSprinting", false);
             main.ChangeMoveStateServerRpc((int) MovementState.Crouching);
         }
         else if (moveState == MovementState.Crouching)
         {
+            body.Play("IsCrouching", false);
             main.ChangeMoveStateServerRpc((int) MovementState.Standing);
         }
         else if (moveState == MovementState.Sprinting)
         {
-            if (Time.time < slideElapsed + slideCooldown) return;
-            slideDirection = moveDir;
-            // slideVelocity = Mathf.Max(
-            //     new Vector3(velocity.x, 0f, velocity.z).magnitude,
-            //     slideSpeed
-            // );
-            slideVelocity = new Vector3(velocity.x, 0f, velocity.z).magnitude + slideSpeed;
-            slideTimer = 0f;
-            main.ChangeMoveStateServerRpc((int) MovementState.Sliding);
+            StartSlide();
         }
+    }
+    private void StartSlide()
+    {
+        if (Time.time < slideElapsed + slideCooldown) return;
+        body.Play("IsSliding", true);
+        slideDirection = moveDir;
+        // slideVelocity = Mathf.Max(
+        //     new Vector3(velocity.x, 0f, velocity.z).magnitude,
+        //     slideSpeed
+        // );
+        slideVelocity = new Vector3(velocity.x, 0f, velocity.z).magnitude + slideSpeed;
+        slideTimer = 0f;
+        main.ChangeMoveStateServerRpc((int) MovementState.Sliding);
     }
     public void Slide()
     {
@@ -388,7 +405,7 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = Mathf.Sqrt(30f);
         float startHeight = cc.height;
         float targetHeight = toCrouch ? crouchHeight: defaultHeight;
-        targetCamLevel = toCrouch ? main.Look.crouchCamLevel: main.Look.standCamLevel;
+        TargetCamLevel = toCrouch ? main.Look.crouchCamLevel: main.Look.standCamLevel;
         float t = 0f;
         Vector3 pos = main.Look.camHolder.localPosition;
         float startCamLevel = pos.y;
@@ -400,7 +417,7 @@ public class PlayerMovement : MonoBehaviour
 
             if (!ceiling)
             {
-                pos.y = Mathf.Lerp(startCamLevel, targetCamLevel, t);
+                pos.y = Mathf.Lerp(startCamLevel, TargetCamLevel, t);
                 main.Look.camHolder.localPosition = pos;
                 cc.height = Mathf.Lerp(startHeight, targetHeight, t);
 
@@ -413,7 +430,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!ceiling)
         {
-            pos.y = targetCamLevel;
+            pos.y = TargetCamLevel;
             main.Look.camHolder.localPosition = pos;
 
             cc.height = targetHeight;

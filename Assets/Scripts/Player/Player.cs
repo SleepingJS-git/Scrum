@@ -23,6 +23,7 @@ public class Player : Entity
 
     // Random garbage
     public Transform PlayerCam => Look.cam.transform;
+    public Vector2 LookInput {get; private set; }
     public bool CanMove { get; private set; }
     [SerializeField] private bool _initialized = false;
 
@@ -94,7 +95,9 @@ public class Player : Entity
         // No controls unless all values are true
         if (!_initialized || !isAlive.Value || !CanMove) return;
 
-        Look.Look(Input.LookInput());
+        LookInput = Input.LookInput();
+        Look.Look(LookInput);
+        RotateRigAimRpc(Look.XRot);
     }
 
     /// <summary>
@@ -191,5 +194,12 @@ public class Player : Entity
             break;
             
         }
+    }
+
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void RotateRigAimRpc(float xRotation)
+    {
+        Look.RotateRigAim(xRotation);
     }
 }

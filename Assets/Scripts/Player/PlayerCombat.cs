@@ -11,6 +11,7 @@ public class PlayerCombat : MonoBehaviour
     public Weapon weaponHandler;        // The script that handles the weapon behavior and networking
     public GameObject weaponInHand;     // The game object in the player's fps hand or 3d hand
     public Transform weaponHolder;      // The transform used to spawn the 3d model in the player's fps pov
+    public WeaponRecoil rightHandWeapon;
     private event Action OnPrimaryFire; // An action event that is used when the player is holding the shoot input
     private event Action OnSecondaryFire;
     private bool _canFire;              // Can the player fire their gun?
@@ -18,6 +19,7 @@ public class PlayerCombat : MonoBehaviour
     private PlayerHud _hud;             // Reference to the player hud because of ammo and weapon text
     private WeaponType _weaponType;     // Determines the weapon type when the player fires the gun
     private Transform _cam;             // Camera reference for aiming
+    private float recoilAmplitude;
     /// <summary>
     /// [Called by Client]
     /// Initialize Player Combat. If the client is the owner, then save camera transform for shooting and enable firing
@@ -94,6 +96,7 @@ public class PlayerCombat : MonoBehaviour
         if (_weaponType == WeaponType.Hitscan)
         {
             OnPrimaryFire = FireWeapon;
+            recoilAmplitude = (data as HitscanData).recoilAmplitude;
         }
 
         // Set up Hud stuff
@@ -111,6 +114,7 @@ public class PlayerCombat : MonoBehaviour
         Debug.Log("Equip3D was called");
         weaponInHand = Instantiate(data.weaponModel, _main.Body.rightHand);
         weaponHandler.firingPoint = weaponInHand.transform.Find("Firing Point");
+        _main.Body.rightArmRig.weight = 1f;
     }
 
     /// <summary>
@@ -142,6 +146,11 @@ public class PlayerCombat : MonoBehaviour
                 _cam.forward
             );
         }
+    }
+
+    public void RightHandRecoil()
+    {
+        rightHandWeapon.AddRecoil(recoilAmplitude);
     }
 
     /// <summary>
