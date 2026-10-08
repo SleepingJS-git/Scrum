@@ -1984,6 +1984,7 @@ MonoBehaviour:
   rightArmRig: {fileID: 5401046928364835493}
   bodyRenderer: {fileID: 4609519911110115857}
   accessoryFolder: {fileID: 2032461095849471320}
+  blendDampTime: 0.05
 --- !u!114 &7517925231291135140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2956,12 +2957,7 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: 651ceeeb8a0e638459e9dcb468045da4, type: 2}
     - target: {fileID: 5866666021909216657, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_WarningMessage
-      value: "\nBinding warning: Some generic clip(s) animate transforms that are
-        already bound by a Humanoid avatar. These transforms can only be changed
-        by Humanoid clips.\n\tTransform 'mixamorig:RightArm'\n\tTransform 'mixamorig:Head'\n\tTransform
-        'mixamorig:Hips'\n\tTransform 'mixamorig:RightShoulder'\n\tTransform 'mixamorig:Neck'\n\tTransform
-        'mixamorig:Spine'\n\tTransform 'mixamorig:RightArm'\n\tTransform 'mixamorig:Head'\n\tTransform
-        'mixamorig:Hips'\n\tTransform 'mixamorig:RightShoulder'\n\tand more ..."
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 753c019b09aea734e859c89b284537ff, type: 3}
       propertyPath: m_ApplyRootMotion

@@ -10,6 +10,7 @@ public class PlayerBody : MonoBehaviour
     public Renderer bodyRenderer;
     public GameObject accessoryFolder;
     public OnHitData onHitData;
+    [SerializeField] private float blendDampTime;
     public void Init(bool IsOwner)
     {
         ShowBodyRenderer(!IsOwner);
@@ -69,6 +70,11 @@ public class PlayerBody : MonoBehaviour
     public void Play(string para, float val)
     {
         animator.SetFloat(para, val);
+    }
+
+    public void CrossBlendLocomotion(string para, float val)
+    {
+        animator.SetFloat(para, val, blendDampTime, Time.deltaTime);
     }
 
     public void PlayTrigger(string para)

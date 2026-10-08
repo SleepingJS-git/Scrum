@@ -195,8 +195,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (!isMoving)
         {
-            body.Play("Forward", 0f);
-            body.Play("Strafe", 0f);
+            body.CrossBlendLocomotion("Forward", 0f);
+            body.CrossBlendLocomotion("Strafe", 0f);
             return;
         }
 
