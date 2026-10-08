@@ -15,18 +15,6 @@ public class PlayerNameSettings : MonoBehaviour
         if (!this || !isActiveAndEnabled)
             return;
 
-        if (LobbyManager.Instance == null)
-        {
-            Debug.LogError("LobbyManager instance is missing.");
-            return;
-        }
-
-        if (nameInput == null)
-        {
-            Debug.LogError("Name Input is not assigned in the Inspector.");
-            return;
-        }
-
         try
         {
             await LobbyManager.Instance.InitializationTask;
