@@ -8,6 +8,10 @@ public class BuildableDatabase : MonoBehaviour
     [SerializeField] private Buildable[] buildablePrefabs;
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private Grid grid;
+    [SerializeField] private Vector3 minBuildBound;
+    [SerializeField] private Vector3 maxBuildBound;
+    [SerializeField] private LayerMask occupiedCellsLayerMask;
+    [SerializeField] private GameObject testingCube;
     private Dictionary<ulong, Buildable> data;
     public static List<ulong> AvailablePrefabIds => Instance.data.Keys.ToList();
     public static Dictionary<Vector3Int, ulong> OccupiedCells
@@ -25,6 +29,11 @@ public class BuildableDatabase : MonoBehaviour
         if (spawnPoints.Length > 0 && grid != null)
         {
             SetSpawnPointsOccupied();
+        }
+        if (grid != null)
+        {
+            SetMapOccupiedSpaces();
+            Debug.Log(OccupiedCells.Count);
         }
     }
     /// <summary>
@@ -117,5 +126,34 @@ public class BuildableDatabase : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void SetMapOccupiedSpaces()
+    {
+        Vector3Int minGridBound = grid.WorldToCell(minBuildBound);
+        Vector3Int maxGridBound = grid.WorldToCell(maxBuildBound);
+        Vector3Int spaceDifference = maxGridBound - minGridBound;
+
+        for (int x = 0; x < spaceDifference.x; x++)
+        {
+            for(int y = 0; y < spaceDifference.y; y++)
+            {
+                for (int z = 0; z < spaceDifference.z; z++)
+                {
+                    Vector3Int currentSpace = minGridBound + new Vector3Int(x, y, z);
+                    if (CheckSpace(currentSpace))
+                    {
+                        OccupyCell(currentSpace, 0);
+                        Instantiate(testingCube, grid.GetCellCenterWorld(currentSpace), Quaternion.identity);
+                    }
+                }
+            }
+        }
+    }
+
+    private bool CheckSpace(Vector3Int currentSpace)
+    {
+        Collider[] hitColliders = Physics.OverlapBox(grid.GetCellCenterWorld(currentSpace), new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, occupiedCellsLayerMask);
+        return (hitColliders.Length > 0);
     }
 }

@@ -140399,6 +140399,34 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1448990687}
     - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: testingCube
+      value: 
+      objectReference: {fileID: 3650792617358470648, guid: 5a294ccb54a24714397b739fcbadc5f3, type: 3}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: maxBuildBound.x
+      value: 18.72
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: maxBuildBound.y
+      value: 21.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: maxBuildBound.z
+      value: 42.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: minBuildBound.x
+      value: -25.23
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: minBuildBound.y
+      value: -6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: minBuildBound.z
+      value: -17.11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
       propertyPath: spawnPoints.Array.size
       value: 8
       objectReference: {fileID: 0}
@@ -140434,6 +140462,10 @@ PrefabInstance:
       propertyPath: 'spawnPoints.Array.data[7]'
       value: 
       objectReference: {fileID: 1071753817}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: occupiedCellsLayerMask.m_Bits
+      value: 192
+      objectReference: {fileID: 0}
     - target: {fileID: 5298183500761969963, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
       propertyPath: m_Icon
       value: 
