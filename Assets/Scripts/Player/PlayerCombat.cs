@@ -97,7 +97,7 @@ public class PlayerCombat : MonoBehaviour
         {
             OnPrimaryFire = FireWeapon;
             recoilAmplitude = (data as HitscanData).recoilAmplitude;
-            
+            rightHandWeapon.SetResetTime();
             // Set up Hud stuff
             UpdateWeaponInfo(data.weaponName, $"{c} / {r}");
         }
@@ -105,7 +105,7 @@ public class PlayerCombat : MonoBehaviour
         {
             OnPrimaryFire = SwingWeapon;
             recoilAmplitude = -(data as MeleeData).swingStrength;
-            
+            rightHandWeapon.SetResetTime(data.fireRate);
             // Set up Hud stuff
             UpdateWeaponInfo(data.weaponName, "");
         }

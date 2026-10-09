@@ -10,26 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9627667b21c8ba247a81af9f8bcd00b0, type: 3}
-  m_Name: 2 Test Melee
+  m_Name: 2 Metal Pipe
   m_EditorClassIdentifier: 
-  weaponName: Test Melee
+  weaponName: Metal Pipe
   weaponID: 2
   firingType: 0
   WeaponType: 2
-  damage: 25
-  fireRate: 0.5
+  damage: 50
+  fireRate: 1
   bulletCount: 0
   bulletsPerShot: 0
   magCount: 0
   reloadSpeed: 0
   bulletSpread: 0
   spreadIncreasePerShot: 0.005
-  weaponInHand: {fileID: 393730789072996145, guid: 3c50185d73fd84d46854c3e8fd4da8ef, type: 3}
-  weaponModel: {fileID: 6304313504817503738, guid: 037ab4970451b3f4ba3e1f5acea50924, type: 3}
+  weaponInHand: {fileID: 8074132144200780072, guid: 243eb04bb709c094b850f81993d5b6d4, type: 3}
+  weaponModel: {fileID: 3598609616870455235, guid: 7ec5c70fa0f476c4b85fa4ac9a694b88, type: 3}
   shootingEffect: {fileID: 0}
   fireSound: {fileID: 8300000, guid: b9fd3f93a2be5e84aae63553a2c7cbfe, type: 3}
   attackRange: 3
-  hitBoxHeight: 0.5
-  hitBoxWidth: 0.5
-  swingStrength: 15
+  hitBoxHeight: 1
+  hitBoxWidth: 0.25
+  swingStrength: 250
   damageType: 5

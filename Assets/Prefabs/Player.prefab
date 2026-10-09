@@ -1998,8 +1998,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 5.75
-  groundAccel: 35
-  groundDecel: 45
+  groundAccel: 100
+  groundDecel: 35
   jumpHeight: 3
   gravityScale: 15
   upwardGravMult: 2
@@ -2103,6 +2103,7 @@ MonoBehaviour:
   spreadRecoveryTime: 0.15
   spreadRecoverySpeed: 5
   hasWeapon: 0
+  testSphere: {fileID: 2466890847199373625, guid: 2cfcfcd2ebc663f49a9ed727850f1eff, type: 3}
   debugInfo:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0

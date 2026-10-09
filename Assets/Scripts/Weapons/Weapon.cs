@@ -67,6 +67,7 @@ public class Weapon : NetworkBehaviour
     [SerializeField] private float spreadRecoveryTime = 0.15f;
     [SerializeField] private float spreadRecoverySpeed = 5f;
     public bool hasWeapon;
+    public GameObject testSphere;
 
     public NetworkVariable<FixedString64Bytes> debugInfo = new(
         "",
@@ -174,10 +175,10 @@ public class Weapon : NetworkBehaviour
         float lowestScore = Mathf.Infinity;
 
         Vector3 sourceHit = Vector3.zero;
-        Vector3 movingDir = Vector3.zero;
 
         foreach (RaycastHit hit in hits)
         {
+            if (hit.transform == player.transform) continue;
             Vector3 hitDir = hit.collider.transform.position - player.transform.position;
             float dist = hitDir.magnitude / data.attackRange;
             float angle = Vector3.Angle(player.transform.forward, hitDir) / 180f;
@@ -186,8 +187,7 @@ public class Weapon : NetworkBehaviour
             {
                 closestCollider = hit.collider;
                 lowestScore = score;
-                sourceHit = hit.point;
-                movingDir = hit.normal;
+                sourceHit = Vector3.Lerp(headPos, hit.collider.transform.position, .85f);
             }
         }
 
@@ -205,7 +205,8 @@ public class Weapon : NetworkBehaviour
                         attacker = player,
                         damage = data.damage,
                         sourceHit = sourceHit,
-                        movingDir = movingDir,
+                        movingDir = aimDir,
+                        upwardsModifier = 0f,
                         damageType = (DamageType) data.damageType
                     });
 
@@ -281,6 +282,7 @@ public class Weapon : NetworkBehaviour
                         damage = data.damage,
                         sourceHit = hit.point,
                         movingDir = dir,
+                        upwardsModifier = .5f,
                         damageType = DamageType.Bullet
                     });
 
@@ -345,6 +347,8 @@ public class Weapon : NetworkBehaviour
         else if (data is MeleeData meleeData)
         {
             // idkkkkkk
+            GameObject test = Instantiate(testSphere, hitPoint, Quaternion.identity);
+            Destroy(test, 5f);
         }
 
 

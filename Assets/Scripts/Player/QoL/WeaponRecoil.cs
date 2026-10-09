@@ -7,12 +7,19 @@ public class WeaponRecoil : MonoBehaviour
     public float recoilStep;
     public float initialRecoilTime;
     public float recoilResetTime;
-
+    private float defaultResetTime;
     private Quaternion startingRotation;
     private Coroutine recoilRoutine;
     void Start()
     {
         startingRotation = transform.localRotation;
+        defaultResetTime = recoilResetTime;
+    }
+    public void SetResetTime(float time = 0f)
+    {
+        if (time == 0f)
+            recoilResetTime = defaultResetTime;
+        else recoilResetTime = time;
     }
     public void AddRecoil(float recoilAmplitude)
     {

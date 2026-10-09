@@ -38,7 +38,7 @@ public class PlayerBody : MonoBehaviour
 
             rb.AddExplosionForce(
                 onHitData.damage * 10f, 
-                onHitData.sourceHit, 2f, .5f,
+                onHitData.sourceHit, 2f, onHitData.upwardsModifier,
                 ForceMode.Impulse);
         }
     }

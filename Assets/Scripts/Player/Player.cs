@@ -126,16 +126,18 @@ public class Player : Entity
     /// <param name="damage"></param>
     public override void OnHit(OnHitData onHitData)
     {
-        OnHitClientRpc(onHitData.damage, onHitData.sourceHit);
+        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.upwardsModifier);
         base.OnHit(onHitData);
         UpdateHealthClientRpc(OwnerClientId);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void OnHitClientRpc(int damage, Vector3 sourceHit)
+    private void OnHitClientRpc(int damage, Vector3 sourceHit, float upwardsModifier)
     {
         Body.onHitData.damage = damage;
         Body.onHitData.sourceHit = sourceHit;
+        Body.onHitData.upwardsModifier = upwardsModifier;
+
     }
 
     /// <summary>
