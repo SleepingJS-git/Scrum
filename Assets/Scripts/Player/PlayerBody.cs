@@ -1,13 +1,16 @@
 using Unity.Netcode.Components;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerBody : MonoBehaviour
 {
     public Animator animator;
     public Transform rightHand;
+    public MultiAimConstraint rightArmRig;
     public Renderer bodyRenderer;
     public GameObject accessoryFolder;
     public OnHitData onHitData;
+    [SerializeField] private float blendDampTime;
     public void Init(bool IsOwner)
     {
         ShowBodyRenderer(!IsOwner);
@@ -35,7 +38,7 @@ public class PlayerBody : MonoBehaviour
 
             rb.AddExplosionForce(
                 onHitData.damage * 10f, 
-                onHitData.sourceHit, 2f, .5f,
+                onHitData.sourceHit, 2f, onHitData.upwardsModifier,
                 ForceMode.Impulse);
         }
     }
@@ -67,6 +70,11 @@ public class PlayerBody : MonoBehaviour
     public void Play(string para, float val)
     {
         animator.SetFloat(para, val);
+    }
+
+    public void CrossBlendLocomotion(string para, float val)
+    {
+        animator.SetFloat(para, val, blendDampTime, Time.deltaTime);
     }
 
     public void PlayTrigger(string para)

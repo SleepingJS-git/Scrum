@@ -134,6 +134,47 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 
+    public void OnCrouchOrSlide(CallbackContext ctx)
+    {
+        if (move == null) return;
+
+        if (PlayerManager.PlayerSettings.CrouchingType == PlayerSettings.CrouchType.Toggle)
+        {
+            if (ctx.started)
+                move.CrouchOrSlide();
+        }
+        else
+        {
+            if (ctx.started)
+            {
+                move.CrouchHolding(true);
+            }
+            else
+            {
+                move.CrouchHolding(false);
+            }
+        }
+        
+    }
+
+    public void OnSprint(CallbackContext ctx)
+    {
+        if (ctx.started)
+            move.OnSprint(true);
+        else if (ctx.canceled)
+            move.OnSprint(false);
+    }
+
+    public void OnKick(CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            move.WallKick();
+
+            // Combat Melee Kick Method
+        }
+    }
+
     public void ToBuildTest(CallbackContext ctx)
     {
         if (ctx.started)

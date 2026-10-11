@@ -33,7 +33,12 @@ public class PlayerManager : NetworkBehaviour
     
     // Local Client Events
     public static event Action OnPlayerReset;
-    
+    public static event Action ToBuilding;
+    public static event Action ToCombat;
+
+    // Player Settings
+    public static PlayerSettings PlayerSettings {get; private set;}
+    [SerializeField] private PlayerSettings debugPlayerSettings;
     #endregion
 
     // Debugger
@@ -58,12 +63,18 @@ public class PlayerManager : NetworkBehaviour
     {
         Instance = this;
         Debug.Log("PlayerManager is Awakened");
+
+
+        // Dont rely on this, this is for debugging only and it is also temporary
+        if (debugPlayerSettings != null) SetPlayerSettings(debugPlayerSettings);
+
     }
 
 
     public override void OnNetworkSpawn()
     {
         if (!IsOwner) return;
+
     }
 
     /// <summary>
@@ -89,6 +100,7 @@ public class PlayerManager : NetworkBehaviour
                 OnPlayerDeath += (clientId) =>
                 {
                     Invoke(nameof(ResetPlayer), 1f);
+                    
                 };
             break;
 
@@ -144,6 +156,11 @@ public class PlayerManager : NetworkBehaviour
         ClientPlayerResetRpc();
     }
 
+    public void SetPlayerSettings(PlayerSettings newPlayerSettings)
+    {
+        Debug.Log("Player Settings Set");
+        PlayerSettings = newPlayerSettings;
+    }
     /// <summary>
     /// Invoked by server. Method is subscribed to server's OnAllPlayersReset.
     /// The host will tell all clients to reset their local players.
@@ -286,7 +303,11 @@ public class PlayerManager : NetworkBehaviour
                 }
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
 
+                if (Instance.builderHud) Instance.builderHud.gameObject.SetActive(false);  
+                if (Instance.playerHud) Instance.playerHud.gameObject.SetActive(true);                 
                 TogglePlayerControls(true);
+
+                ToCombat?.Invoke();
             break;
             case PointOfView.Building:
                 Cursor.visible = true;
@@ -298,9 +319,11 @@ public class PlayerManager : NetworkBehaviour
                     LocalPlayer.Body.ShowBodyRenderer(true);
                 } 
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(true);
-
+                if (Instance.builderHud) Instance.builderHud.gameObject.SetActive(true);  
+                if (Instance.playerHud) Instance.playerHud.gameObject.SetActive(false);  
 
                 TogglePlayerControls(false);
+                ToBuilding?.Invoke();
             break;
             case PointOfView.Spectate:
                 Cursor.visible = true;

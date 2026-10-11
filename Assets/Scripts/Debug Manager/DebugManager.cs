@@ -21,16 +21,7 @@ public class DebugManager : MonoBehaviour
         
         // Check if the LobbyManager was created. If yes, then the game was loaded from a Lobby. 
         // If not, the game is being ran in Play Mode directly in the scene.
-
-        // if (LobbyManager.Instance)
-        // {
-
-
-        // }
-        // else
-        // {
-            
-        // }
+        if (LobbyManager.Instance) return;
 
         debugConfig = new DebugConfig();
         ConfigureDebugManager();
