@@ -126,7 +126,7 @@ MonoBehaviour:
   rb: {fileID: 3745850788733270865}
   throwForce: 25
   upForce: 12.5
-  weaponId:
+  weaponID:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
@@ -137,11 +137,6 @@ MonoBehaviour:
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
   reserveBullets:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 0
-  isDropped:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
@@ -206,7 +201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f780f67e629095c459b625301a1efdc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  message: '''E'' to Pick Up'
+  message: '''F'' to Pick Up'
   active: 1
   onInteraction:
     m_PersistentCalls:
