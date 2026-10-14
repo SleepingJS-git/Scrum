@@ -5317,6 +5317,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hostButton: {fileID: 0}
   clientButton: {fileID: 0}
+  debugConfig:
+    IsConfigured: 1
+    debuggingType: 0
 --- !u!4 &1980795647
 Transform:
   m_ObjectHideFlags: 0

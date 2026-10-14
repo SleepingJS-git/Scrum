@@ -26184,7 +26184,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &519250973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65469,12 +65469,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  playerPrefab: {fileID: 7342539564703258927, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
-  spawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!114 &898691616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69655,11 +69649,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1489775184283190570, guid: cd08b75fe2bea1e4f940383e3c96dc2b, type: 3}
   m_PrefabInstance: {fileID: 986781277}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &993446172 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1944087717046124804, guid: f32cb65633f6a9a47abd32aad2359690, type: 3}
-  m_PrefabInstance: {fileID: 307618828}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &990168880
 GameObject:
   m_ObjectHideFlags: 0
@@ -69793,6 +69782,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 990168880}
   m_CullTransparentMesh: 1
+--- !u!4 &993446172 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1944087717046124804, guid: f32cb65633f6a9a47abd32aad2359690, type: 3}
+  m_PrefabInstance: {fileID: 307618828}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &995624663
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -106936,7 +106930,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf0077b4122602946ad43cdca5996b79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerInput: {fileID: 0}
 --- !u!1 &1448990685
 GameObject:
   m_ObjectHideFlags: 0
@@ -137891,6 +137884,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hostButton: {fileID: 1973933322}
   clientButton: {fileID: 2071536366}
+  debugConfig:
+    IsConfigured: 1
+    debuggingType: 4
 --- !u!1001 &2039938813
 PrefabInstance:
   m_ObjectHideFlags: 0
