@@ -24,6 +24,7 @@ public class ExplosiveStructure : BreakableStructureEntity
     private void Start()
     {
         originalPos = transform.position;
+        StartCoroutine(OnRoundStart());
     }
 
     private void Explode()
@@ -103,7 +104,7 @@ public class ExplosiveStructure : BreakableStructureEntity
         StartCoroutine(OnRoundStart());
     }
 
-    private IEnumerator OnRoundStart()
+    public IEnumerator OnRoundStart()
     {
         Debug.Log("Waiting for combat.");
         yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
