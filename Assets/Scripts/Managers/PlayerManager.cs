@@ -210,7 +210,7 @@ public class PlayerManager : NetworkBehaviour
         // Set up hud
         LocalPlayer.SetHud(playerHud);
         playerHud.health.text = LocalPlayer.MaxHealth.ToString();
-
+        LocalPlayer.Look.SetDefaultFOV(PlayerSettings.DefaultPOV);
         OnPlayerReset += OnReset;
 
         if (LocalBuilder) ChangePov(1);

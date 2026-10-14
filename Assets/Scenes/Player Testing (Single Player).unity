@@ -2692,7 +2692,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7342539564703258927, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8297801826074711965, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
       propertyPath: m_IsActive
@@ -4217,6 +4217,7 @@ MonoBehaviour:
   builderHud: {fileID: 0}
   debugPlayerSettings:
     CrouchingType: 0
+    DefaultPOV: 80
   spawnPoints:
   - {fileID: 1638018075}
   - {fileID: 529807757}
