@@ -69,7 +69,25 @@ public class PlayerManager : NetworkBehaviour
         if (debugPlayerSettings != null) SetPlayerSettings(debugPlayerSettings);
 
     }
+    /// <summary>
+    /// Clean up stale RPC events we are subscribed to
+    /// </summary>
+    private void OnDestroy()
+    {
+        if (Instance != this) return;
 
+        OnPlayerDeath = null;
+        OnAllPlayersReset = null;
+        OnPlayerReset = null;
+        ToBuilding = null;
+        ToCombat = null;
+
+        LocalPlayer = null;
+        LocalBuilder = null;
+        LocalClient = null;
+
+        Instance = null;
+    }
 
     public override void OnNetworkSpawn()
     {
@@ -365,6 +383,15 @@ public class PlayerManager : NetworkBehaviour
     {
         if (LocalPlayer) LocalPlayer.ToggleMove(canMove);
         if (LocalBuilder) LocalBuilder.ToggleInput(!canMove);
+    }
+
+    /// <summary>
+    /// Disables control in both modes for when the exit menu panel is open
+    /// </summary>
+    public static void DisableAllPlayerControls()
+    {
+        if (LocalPlayer) LocalPlayer.ToggleMove(false);
+        if (LocalBuilder) LocalBuilder.ToggleInput(false);
     }
 
 

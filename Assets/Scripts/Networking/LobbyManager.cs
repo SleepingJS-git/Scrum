@@ -355,6 +355,10 @@ public class LobbyManager : MonoBehaviour
 
             isLeavingSession = false;
         }
+        finally
+        {
+            isLeavingSession = false;
+        }
     }
 
 }

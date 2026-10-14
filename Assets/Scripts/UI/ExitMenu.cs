@@ -4,17 +4,14 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CanvasGroup))]
 public class ExitMenu : MonoBehaviour
 {
-
     private CanvasGroup _canvasGroup;
     private bool visible;
-    [SerializeField]
-    private PlayerInput playerInput;
+
     public static ExitMenu Instance { get; private set; }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     private void Awake()
     {
         Instance = this;
-        //playerInput = GetComponent<PlayerInput>();
         _canvasGroup = GetComponent<CanvasGroup>();
         SetExitVisible(false);
     }
@@ -31,35 +28,38 @@ public class ExitMenu : MonoBehaviour
         _canvasGroup.blocksRaycasts = visible;
     }
 
-    // Update is called once per frame
     void Update()
     {
+        if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame)
+            return;
+
         if (visible)
-        {
-            //playerInput.actions.FindActionMap("Fps Input").Disable();
-
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-                CloseExitMenu();
-        }
+            CloseExitMenu();
         else
-        {
-            //if(GameManager.GamePhase == GamePhase.Combat)
-                //playerInput.actions.FindActionMap("Fps Input").Enable();
+            OpenExitMenu();
+    }
 
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                visible = true;
-                SetExitVisible(visible);
-                Cursor.visible = true;
-            }
-        }
+    private void OpenExitMenu()
+    {
+        visible = true;
+        SetExitVisible(true);
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        PlayerManager.DisableAllPlayerControls();
     }
 
     public void CloseExitMenu()
     {
         visible = false;
-        SetExitVisible(visible);
-        Cursor.visible = false;
-    }
+        SetExitVisible(false);
 
+        bool isFPS = PlayerManager.POV == PointOfView.FPS;
+
+        Cursor.visible = !isFPS;
+        Cursor.lockState = isFPS ? CursorLockMode.Locked : CursorLockMode.Confined;
+
+        PlayerManager.TogglePlayerControls(isFPS);
+    }
 }
