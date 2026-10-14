@@ -23,8 +23,15 @@ public class Player : Entity
 
     // Random garbage
     public Transform PlayerCam => Look.cam.transform;
+    public Vector2 LookInput {get; private set; }
     public bool CanMove { get; private set; }
     [SerializeField] private bool _initialized = false;
+
+    public NetworkVariable<int> MoveState = new(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
@@ -88,7 +95,9 @@ public class Player : Entity
         // No controls unless all values are true
         if (!_initialized || !isAlive.Value || !CanMove) return;
 
-        Look.Look(Input.LookInput());
+        LookInput = Input.LookInput();
+        Look.Look(LookInput);
+        RotateRigAimRpc(Look.XRot);
     }
 
     /// <summary>
@@ -117,16 +126,18 @@ public class Player : Entity
     /// <param name="damage"></param>
     public override void OnHit(OnHitData onHitData)
     {
-        OnHitClientRpc(onHitData.damage, onHitData.sourceHit);
+        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.upwardsModifier);
         base.OnHit(onHitData);
         UpdateHealthClientRpc(OwnerClientId);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void OnHitClientRpc(int damage, Vector3 sourceHit)
+    private void OnHitClientRpc(int damage, Vector3 sourceHit, float upwardsModifier)
     {
         Body.onHitData.damage = damage;
         Body.onHitData.sourceHit = sourceHit;
+        Body.onHitData.upwardsModifier = upwardsModifier;
+
     }
 
     /// <summary>
@@ -154,5 +165,43 @@ public class Player : Entity
         Body.UnRagdoll();
         Body.Play("IsMoving", false);
         Move.OnDeathCollider(false);
+    }
+
+    [Rpc(SendTo.Server)]
+    public void ChangeMoveStateServerRpc(int newMoveState)
+    {
+        if (MoveState.Value == newMoveState)
+            return;
+
+        int lastMoveState = MoveState.Value;
+        MoveState.Value = newMoveState;
+        ChangeMoveStateClientRpc(newMoveState, lastMoveState);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void ChangeMoveStateClientRpc(int newMoveState, int lastMoveState)
+    {
+        switch((MovementState) newMoveState)
+        {
+            case MovementState.Standing:
+                if (lastMoveState == (int) MovementState.Crouching || 
+                    lastMoveState == (int) MovementState.Sliding)
+                    Move.UnCrouch();
+            break;
+            case MovementState.Crouching:
+                Move.Crouch();
+            break;
+            case MovementState.Sliding:
+                Move.Slide();
+            break;
+            
+        }
+    }
+
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void RotateRigAimRpc(float xRotation)
+    {
+        Look.RotateRigAim(xRotation);
     }
 }

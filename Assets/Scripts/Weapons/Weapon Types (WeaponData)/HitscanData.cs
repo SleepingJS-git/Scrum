@@ -5,4 +5,6 @@ public class HitscanData : WeaponData
 {
     public TrailRenderer trail;     // This is a placeholder
     public GameObject bulletImpact;      // Object that gets left over when it lands
+
+    public float recoilAmplitude;
 }

@@ -21,16 +21,7 @@ public class DebugManager : MonoBehaviour
         
         // Check if the LobbyManager was created. If yes, then the game was loaded from a Lobby. 
         // If not, the game is being ran in Play Mode directly in the scene.
-
-        // if (LobbyManager.Instance)
-        // {
-
-
-        // }
-        // else
-        // {
-            
-        // }
+        if (LobbyManager.Instance) return;
 
         debugConfig = new DebugConfig();
         ConfigureDebugManager();
@@ -111,6 +102,24 @@ public class DebugManager : MonoBehaviour
                 PlayerManager.Instance.ConfigureSpawning(debugConfig);
 
             break;
+
+            case "TheCreek":
+                debugConfig.debuggingType = DebugType.Solo_Fps;
+                PlayerManager.Instance.ConfigureSpawning(debugConfig);
+
+                break;
+
+            case "Office":
+                debugConfig.debuggingType = DebugType.Solo_Fps;
+                PlayerManager.Instance.ConfigureSpawning(debugConfig);
+
+                break;
+
+            case "Rooftop":
+                debugConfig.debuggingType = DebugType.Solo_Fps;
+                PlayerManager.Instance.ConfigureSpawning(debugConfig);
+
+                break;
 
             case "GridBuilding (Single Player)":
                 debugConfig.debuggingType = DebugType.Solo_Building;

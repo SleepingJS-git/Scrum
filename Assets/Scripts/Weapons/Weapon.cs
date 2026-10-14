@@ -67,6 +67,7 @@ public class Weapon : NetworkBehaviour
     [SerializeField] private float spreadRecoveryTime = 0.15f;
     [SerializeField] private float spreadRecoverySpeed = 5f;
     public bool hasWeapon;
+    public GameObject testSphere;
 
     public NetworkVariable<FixedString64Bytes> debugInfo = new(
         "",
@@ -99,10 +100,10 @@ public class Weapon : NetworkBehaviour
         hasWeapon = true;
     }
 
-    private void Update()
+    void Update()
     {
         if (!IsServer) return;
-        
+
         if (currentSpread <= 0f)
             return;
 
@@ -132,21 +133,107 @@ public class Weapon : NetworkBehaviour
         {
             HitscanFireServerRpc(headPos, aimDir);
         }
+        else if (weaponType == WeaponType.Melee)
+        {
+            MeleeSwingServerRpc(headPos, aimDir);
+        }
     }
 
-    /// <summary>
-    /// Get the player object from the sender client ID
-    /// </summary>
-    /// <param name="clientID"></param>
-    /// <returns>The server's copy of the player</returns>
-    public Player GetPlayer(ulong clientID)
+    [Rpc(SendTo.Server)]
+    public void MeleeSwingServerRpc(Vector3 headPos, Vector3 aimDir, RpcParams rpcParams = default)
     {
-        Player player = null;
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
+        if (!IsReady)
+            return;
+
+        // Find out which client sent the request, so we can get the camera transform.
+        Player player = GetPlayer(rpcParams.Receive.SenderClientId);
+        if (!player)
+            return;
+
+        MeleeData data = WeaponDatabase.GetWeapon(weaponID.Value) as MeleeData;
+
+        bool hitPlayer = false;
+
+        Vector3 origin = headPos + (aimDir * (data.attackRange / 2));
+        Vector3 halfExtents = new Vector3(
+            data.hitBoxWidth / 2f,
+            data.hitBoxHeight / 2f,
+            data.attackRange / 2f
+        );
+
+        RaycastHit[] hits = Physics.BoxCastAll(
+            origin,
+            halfExtents,
+            aimDir,
+            player.PlayerCam.rotation,
+            data.attackRange,
+            Layer.BulletSurfaces,
+            QueryTriggerInteraction.Ignore
+        );
+        Collider closestCollider = null;
+
+        float lowestScore = Mathf.Infinity;
+
+        Vector3 sourceHit = Vector3.zero;
+
+        foreach (RaycastHit hit in hits)
         {
-            player = client.PlayerObject.GetComponent<Player>();
+            if (hit.transform == player.transform) continue;
+            Vector3 hitDir = hit.collider.transform.position - player.transform.position;
+            float dist = hitDir.magnitude / data.attackRange;
+            float angle = Vector3.Angle(player.transform.forward, hitDir) / 180f;
+            float score = (dist * 0.5f) + (angle * 0.5f);
+            if (score < lowestScore)
+            {
+                closestCollider = hit.collider;
+                lowestScore = score;
+                sourceHit = Vector3.Lerp(headPos, hit.collider.transform.position, .85f);
+            }
         }
-        return player;
+
+        if (closestCollider)
+        {
+            if (closestCollider.CompareTag("Player") || closestCollider.CompareTag("Buildable"))
+            {
+                Entity e = closestCollider.GetComponent<Entity>();
+                // Check if the entity is alive
+                if (e && e.isAlive.Value)
+                {
+                    hitPlayer = true;
+                    e.OnHit(new OnHitData()
+                    {
+                        attacker = player,
+                        damage = data.damage,
+                        sourceHit = sourceHit,
+                        movingDir = aimDir,
+                        upwardsModifier = 0f,
+                        damageType = (DamageType) data.damageType
+                    });
+
+                    if (!e.isAlive.Value && e is Player)
+                    {
+                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        {
+                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                            stats.AddKill();
+                        }
+                    }
+                }
+            }
+        }
+
+        lastShootTime = Time.time;
+
+        EffectsClientRpc(
+            sourceHit,
+            aimDir,
+            currentBullets.Value,
+            reserveBullets.Value,
+            rpcParams.Receive.SenderClientId,
+            hitPlayer
+        );
+
+        // TODO: MAKE IT SO THAT PLAYER CANT DAMAGE THEMSELVES
     }
 
     /// <summary>
@@ -195,6 +282,7 @@ public class Weapon : NetworkBehaviour
                         damage = data.damage,
                         sourceHit = hit.point,
                         movingDir = dir,
+                        upwardsModifier = .5f,
                         damageType = DamageType.Bullet
                     });
 
@@ -246,13 +334,23 @@ public class Weapon : NetworkBehaviour
         weaponAudioSource.spatialBlend = isLocalShooter ? 0f : 1f;
         weaponAudioSource.PlayOneShot(data.fireSound);
 
-        // Create the bullet trail
-        BulletTrail(
-            data as HitscanData,
-            hitPoint,
-            firingPoint.position,
-            dir
-        );
+        if (data is HitscanData hitscanData)
+        {
+            // Create the bullet trail
+            BulletTrail(
+                hitscanData,
+                hitPoint,
+                firingPoint.position,
+                dir
+            );
+        }
+        else if (data is MeleeData meleeData)
+        {
+            // idkkkkkk
+            GameObject test = Instantiate(testSphere, hitPoint, Quaternion.identity);
+            Destroy(test, 5f);
+        }
+
 
         // If the current client wasn't the client that requested the serverrpc, return
         if (NetworkManager.Singleton.LocalClientId != clientId)
@@ -269,10 +367,13 @@ public class Weapon : NetworkBehaviour
         if (!player)
             return;
 
-        player.Combat.UpdateWeaponInfo(
-            data.weaponName,
-            $"{currentBullets} / {reserveBullets}"
-        );
+        player.Combat.RightHandRecoil();
+
+        if (data is HitscanData)
+            player.Combat.UpdateWeaponInfo(
+                data.weaponName,
+                $"{currentBullets} / {reserveBullets}"
+            );
     }
 
     /// <summary>
@@ -284,7 +385,6 @@ public class Weapon : NetworkBehaviour
     public void BulletTrail(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
     {
         StartCoroutine(BulletTrailRoutine(data, hitPoint, startPos, dir));
-
     }
 
     private IEnumerator BulletTrailRoutine(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
@@ -305,6 +405,21 @@ public class Weapon : NetworkBehaviour
         GameObject bulletImpact = Instantiate(data.bulletImpact, hitPoint, Quaternion.LookRotation(dir));
 
         Destroy(bulletImpact, .5f);
+    }
+
+    /// <summary>
+    /// Get the player object from the sender client ID
+    /// </summary>
+    /// <param name="clientID"></param>
+    /// <returns>The server's copy of the player</returns>
+    public Player GetPlayer(ulong clientID)
+    {
+        Player player = null;
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
+        {
+            player = client.PlayerObject.GetComponent<Player>();
+        }
+        return player;
     }
 
 
@@ -366,15 +481,16 @@ public class Weapon : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void DropClientRpc()
     {
-        PlayerCombat combat = GetComponent<PlayerCombat>();
+        Player player = GetComponent<Player>();
 
         if (IsOwner)
         {
-            combat.EmptyWeapon();
+            player.Combat.EmptyWeapon();
         }
         else
         {
-            Destroy(combat.weaponInHand);
+            Destroy(player.Combat.weaponInHand);
+            player.Body.rightArmRig.weight = 0f;
         }
     }
 
@@ -389,5 +505,5 @@ public class Weapon : NetworkBehaviour
     {
         debugInfo.Value = $@"Weapon Spread: {currentSpread} / {maxSpread}";
     }
-    
+
 }
