@@ -210,15 +210,8 @@ public class GridPlacement : NetworkBehaviour
             // If the cell is occupied
             if (BuildableDatabase.IsCellTaken(cellPos))
             {
-                // Check if the mouse is on the x or y border of the grid space and shift the cell position accordingly
-                if (mousePos.x % 1 == 0)
-                {
-                    cellPos = new Vector3Int(cellPos.x - 1, cellPos.y, cellPos.z);
-                }
-                else
-                {
-                    cellPos = new Vector3Int(cellPos.x, cellPos.y, cellPos.z - 1);
-                }
+                Debug.Log(GetClosestDirection(mousePos, cellPos));
+                cellPos += GetClosestDirection(mousePos, cellPos);
             }
 
             // Set the preview object's position to the grid cell
@@ -383,6 +376,70 @@ public class GridPlacement : NetworkBehaviour
         Preview Object: {previewObject}
         CanPreviewBuildable: {CanPreviewBuildable()}
         ";
+    }
+
+    private Vector3Int GetClosestDirection(Vector3 mousePos, Vector3Int cellPos)
+    {
+        float distToNegX;
+        float distToPosX;
+        float distToNegY;
+        float distToPosY;
+        float distToNegZ;
+        float distToPosZ;
+        if (mousePos.x >= 0)
+        {
+            distToNegX = mousePos.x % 1;
+            distToPosX = 1 - distToNegX;
+        }
+        else
+        {
+            distToPosX = Mathf.Abs(mousePos.x % 1);
+            if (distToPosX == 0)
+            {
+                return Vector3Int.left;
+            }
+            distToNegX = 1 - distToPosX;
+        }
+
+        if (mousePos.y >= 0)
+        {
+            distToNegY = mousePos.y % 1;
+            distToPosY = 1 - distToNegY;
+        }
+        else
+        {
+            distToPosY = Mathf.Abs(mousePos.y) % 1;
+            if (distToPosY == 0)
+            {
+                return Vector3Int.down;
+            }
+            distToNegY = 1 - distToPosY;
+        }
+
+        if (mousePos.z >= 0)
+        {
+            distToNegZ = mousePos.z % 1;
+            distToPosZ = 1 - distToNegZ;
+        }
+        else
+        {
+            distToPosZ = Mathf.Abs(mousePos.z) % 1;
+            if (distToPosZ == 0)
+            {
+                return Vector3Int.back;
+            }
+            distToNegZ = 1 - distToPosZ;
+        }
+        Debug.Log(mousePos);
+        float lowestDist = Mathf.Min(distToNegX, distToPosX, distToNegY, distToPosY, distToNegZ, distToPosZ);
+
+        if (distToNegX == lowestDist) { return Vector3Int.left; }
+        else if (distToPosX == lowestDist) { return Vector3Int.right; }
+        else if (distToNegY == lowestDist) { return Vector3Int.down; }
+        else if (distToPosY == lowestDist) { return Vector3Int.up; }
+        else if (distToNegZ == lowestDist) { return Vector3Int.back; }
+        else if (distToPosZ == lowestDist) { return Vector3Int.forward; }
+        return Vector3Int.zero;
     }
 }
 
