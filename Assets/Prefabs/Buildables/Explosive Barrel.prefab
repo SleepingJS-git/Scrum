@@ -284,7 +284,7 @@ MonoBehaviour:
   explosionForce: 10
   explosionRadius: 3
   upwardsModifier: 0.06
-  damage: 85
+  damage: 20
   breakDelay: 0.4
 --- !u!64 &3784540783021137509
 MeshCollider:

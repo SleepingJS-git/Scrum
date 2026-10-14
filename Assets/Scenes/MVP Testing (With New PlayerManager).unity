@@ -76204,6 +76204,7 @@ MonoBehaviour:
   builderHud: {fileID: 1461990361}
   debugPlayerSettings:
     CrouchingType: 0
+    DefaultPOV: 80
   spawnPoints:
   - {fileID: 1333743144}
   - {fileID: 1289956997}
