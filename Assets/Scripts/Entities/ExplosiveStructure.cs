@@ -25,10 +25,6 @@ public class ExplosiveStructure : BreakableStructureEntity
     {
         originalPos = transform.position;
     }
-    private void Update()
-    {
-        Debug.Log(GameManager.GamePhase);
-    }
 
     private void Explode()
     {
