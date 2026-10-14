@@ -134,6 +134,24 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// fix for certain events not being registered when entering from main menu
+    /// </summary>
+    public void ConfigureGameplayEvents()
+    {
+        if (!IsServer) return;
+
+        OnAllPlayersReset -= ClearSpawnPoints;
+        OnAllPlayersReset -= ServerPlayersReset;
+        OnAllPlayersReset -= ResetAllPlayers;
+        OnPlayerDeath -= GameManager.Instance.PlayerDeath;
+
+        OnAllPlayersReset += ClearSpawnPoints;
+        OnAllPlayersReset += ServerPlayersReset;
+        OnAllPlayersReset += ResetAllPlayers;
+        OnPlayerDeath += GameManager.Instance.PlayerDeath;
+    }
+
     public static void ResetEvent()
     {
         OnAllPlayersReset?.Invoke();

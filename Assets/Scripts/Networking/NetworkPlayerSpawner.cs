@@ -40,6 +40,12 @@ public class NetworkPlayerSpawner : NetworkBehaviour
         if (sceneName != gameObject.scene.name)
             return;
 
+        // Configure gameplay events without registering duplicate spawning callbacks
+        PlayerManager.Instance.ConfigureGameplayEvents();
+
+        // Establish the player count before calling PlayerLoaded
+        GameManager.Instance.SetPlayerCount(clientsCompleted.Count);
+
         foreach (ulong clientId in clientsCompleted)
         {
             // Give this client their FPS Player
@@ -50,14 +56,11 @@ public class NetworkPlayerSpawner : NetworkBehaviour
 
             // Give this client their Builder
             PlayerManager.Instance.SpawnBuilder(clientId);
-
             // Tell GameManager this player finished loading
             GameManager.Instance.PlayerLoaded(clientId);
         }
 
-        // Tell GameManager how many players are here
-        GameManager.Instance.SetPlayerCount(clientsCompleted.Count);
-
+        
         NetworkManager.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
     }
 
