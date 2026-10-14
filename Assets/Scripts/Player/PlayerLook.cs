@@ -14,11 +14,12 @@ public class PlayerLook : MonoBehaviour
     public float crouchCamLevel;
 
     [Header("FOV Controlling")]
-    public float sprintFOV;
+    public float additiveSprintFOV = 20f;
     public float fovChangeTime = .5f;
     private float currentFOV;
     [SerializeField] private float defaultFOV;
     public float XRot { get; private set; }
+    private bool defaultFOVSet = false;
     private Player main;
     private Coroutine fovChangeRoutine;
     public void Init(bool camEnabled)
@@ -58,16 +59,19 @@ public class PlayerLook : MonoBehaviour
     {
         Debug.Log("FOV SET TO " + newFOV);
         defaultFOV = newFOV;
+        defaultFOVSet = true;
         ResetFOV();
     }
     public void ResetFOV()
     {
+        if (!defaultFOVSet) return;
         if (currentFOV == defaultFOV) return;
         AdjustFOV(defaultFOV);
     }
     public void SprintFOV()
     {
-        AdjustFOV(sprintFOV);
+        if (!defaultFOVSet) return;
+        AdjustFOV(defaultFOV + additiveSprintFOV);
     }
     private void AdjustFOV(float newFOV)
     {

@@ -199,7 +199,6 @@ public class Player : Entity
             break;
             case MovementState.Sliding:
                 Move.Slide();
-                Look.ResetFOV();
             break;
             
         }
