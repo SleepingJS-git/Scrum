@@ -33,7 +33,6 @@ public class BuildableDatabase : MonoBehaviour
         if (grid != null)
         {
             SetMapOccupiedSpaces();
-            Debug.Log(OccupiedCells.Count);
         }
     }
     /// <summary>
@@ -85,15 +84,15 @@ public class BuildableDatabase : MonoBehaviour
     /// <param name="objectID"> The object ID for the object being placed </param>
     public static void SetCellsToOccupied(Buildable buildable, Vector3Int originPos, float rotation)
     {
-        Debug.Log("Occupied Cells:");
+        //Debug.Log("Occupied Cells:");
         foreach (Vector3Int pos in OccupiedCells.Keys)
         {
-            Debug.Log(pos);
+            //Debug.Log(pos);
         }
         Debug.Log("New Incoming Cells:");
         for (int i = 0; i < buildable.OccupiedCells.Length; i++)
         {
-            Debug.Log(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]));
+            //Debug.Log(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]));
             OccupyCell(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]), buildable.Id);
         }
     }
