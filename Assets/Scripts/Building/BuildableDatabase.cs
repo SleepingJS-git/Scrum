@@ -12,6 +12,7 @@ public class BuildableDatabase : MonoBehaviour
     [SerializeField] private Vector3 maxBuildBound;
     [SerializeField] private LayerMask occupiedCellsLayerMask;
     [SerializeField] private GameObject testingCube;
+    [SerializeField] private ulong spawnCellID;
     private Dictionary<ulong, Buildable> data;
     public static List<ulong> AvailablePrefabIds => Instance.data.Keys.ToList();
     public static Dictionary<Vector3Int, ulong> OccupiedCells
@@ -43,6 +44,11 @@ public class BuildableDatabase : MonoBehaviour
     public static bool IsCellTaken(Vector3Int position)
     {
         return OccupiedCells.ContainsKey(position);
+    }
+
+    public static ulong GetOccupiedID(Vector3Int position)
+    {
+        return OccupiedCells[position];
     }
 
     /// <summary>
@@ -120,7 +126,7 @@ public class BuildableDatabase : MonoBehaviour
                         float currentOffsetZ = spawnPoints[i].position.z + ((bounds.size.z / 2) - z);
                         Vector3 offsetPos = new Vector3(currentOffsetX, currentOffsetY, currentOffsetZ);
                         Vector3Int cellPos = grid.WorldToCell(offsetPos);
-                        OccupyCell(cellPos, 0);
+                        OccupyCell(cellPos, spawnCellID);
                     }
                 }
             }

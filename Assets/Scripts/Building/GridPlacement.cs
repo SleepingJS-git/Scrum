@@ -24,6 +24,9 @@ public class GridPlacement : NetworkBehaviour
     [SerializeField]
     Camera buildCam;
 
+    [SerializeField]
+    ulong spawnCellID;
+
     // The current rotation of the object
     public NetworkVariable<float> rotation = new(
         0,
@@ -210,8 +213,10 @@ public class GridPlacement : NetworkBehaviour
             // If the cell is occupied
             if (BuildableDatabase.IsCellTaken(cellPos))
             {
-                Debug.Log(GetClosestDirection(mousePos, cellPos));
-                cellPos += GetClosestDirection(mousePos, cellPos);
+                if (BuildableDatabase.GetOccupiedID(cellPos) != spawnCellID)
+                {
+                    cellPos += GetClosestDirection(mousePos, cellPos);
+                }
             }
 
             // Set the preview object's position to the grid cell

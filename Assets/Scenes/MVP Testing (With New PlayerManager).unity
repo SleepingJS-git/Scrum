@@ -140471,6 +140471,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1448990687}
     - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
+      propertyPath: spawnCellID
+      value: 99
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819494851729151378, guid: 5fe7754a035110e4586d1c8effab2466, type: 3}
       propertyPath: testingCube
       value: 
       objectReference: {fileID: 3650792617358470648, guid: 5a294ccb54a24714397b739fcbadc5f3, type: 3}
