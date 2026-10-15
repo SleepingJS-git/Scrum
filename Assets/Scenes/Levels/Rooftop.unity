@@ -20841,7 +20841,7 @@ MonoBehaviour:
   gamePhase: 0
   numOfPlayers: 2
   roundWinnerText: {fileID: 816955703}
-  roundWinnerCanvasGroup: {fileID: 0}
+  roundWinnerCanvasGroup: {fileID: 816955702}
   ReadyCountUI:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -22886,11 +22886,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 827cdc962e11fd945800386d015af87e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hostButton: {fileID: 0}
-  clientButton: {fileID: 0}
+  hostButton: {fileID: 1129401759}
+  clientButton: {fileID: 1842943458}
   debugConfig:
     IsConfigured: 1
-    debuggingType: 0
+    debuggingType: 4
 --- !u!1001 &1860620597
 PrefabInstance:
   m_ObjectHideFlags: 0
