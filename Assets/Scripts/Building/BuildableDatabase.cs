@@ -33,7 +33,7 @@ public class BuildableDatabase : MonoBehaviour
         }
         if (grid != null)
         {
-            SetMapOccupiedSpaces();
+            //SetMapOccupiedSpaces();
         }
     }
     /// <summary>
@@ -149,7 +149,7 @@ public class BuildableDatabase : MonoBehaviour
                     if (CheckSpace(currentSpace))
                     {
                         OccupyCell(currentSpace, 0);
-                        Instantiate(testingCube, grid.GetCellCenterWorld(currentSpace), Quaternion.identity);
+                        //Instantiate(testingCube, grid.GetCellCenterWorld(currentSpace), Quaternion.identity);
                     }
                 }
             }
