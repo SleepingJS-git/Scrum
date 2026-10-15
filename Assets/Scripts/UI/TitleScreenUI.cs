@@ -199,4 +199,9 @@ public class TitleScreen : MonoBehaviour
             LobbyManager.Instance.LobbyChanged -= RefreshStartGameButton;
         }
     }
+
+    public void SetSceneName(string newSceneName)
+    {
+        sceneName = newSceneName;
+    }
 }
