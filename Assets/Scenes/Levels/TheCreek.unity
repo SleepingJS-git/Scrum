@@ -5315,7 +5315,7 @@ GameObject:
   - component: {fileID: 119990733}
   - component: {fileID: 119990732}
   m_Layer: 0
-  m_Name: Cube (2)
+  m_Name: ExplosiveWalls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18681,7 +18681,7 @@ GameObject:
   - component: {fileID: 371552314}
   - component: {fileID: 371552313}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: ExplosiveWalls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56343,7 +56343,7 @@ GameObject:
   - component: {fileID: 993573078}
   - component: {fileID: 993573077}
   m_Layer: 0
-  m_Name: Cube (3)
+  m_Name: ExplosiveWalls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79370,7 +79370,7 @@ GameObject:
   - component: {fileID: 1364780374}
   - component: {fileID: 1364780383}
   m_Layer: 6
-  m_Name: Cube (1)
+  m_Name: ExplosiveWalls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79931,6 +79931,16 @@ MonoBehaviour:
   numOfPlayers: 2
   roundWinnerText: {fileID: 0}
   roundWinnerCanvasGroup: {fileID: 0}
+  ReadyCountUI:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  TotalCountUI:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
   debugInfo:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
