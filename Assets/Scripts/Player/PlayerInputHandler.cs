@@ -179,7 +179,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (ctx.started)
         {
-            GameManager.Instance.ChangeToBuilding();
+            // GameManager.Instance.ChangeToBuilding();
         }
     }
 }

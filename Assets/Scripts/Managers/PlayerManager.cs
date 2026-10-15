@@ -69,7 +69,25 @@ public class PlayerManager : NetworkBehaviour
         if (debugPlayerSettings != null) SetPlayerSettings(debugPlayerSettings);
 
     }
+    /// <summary>
+    /// Clean up stale RPC events we are subscribed to
+    /// </summary>
+    private void OnDestroy()
+    {
+        if (Instance != this) return;
 
+        OnPlayerDeath = null;
+        OnAllPlayersReset = null;
+        OnPlayerReset = null;
+        ToBuilding = null;
+        ToCombat = null;
+
+        LocalPlayer = null;
+        LocalBuilder = null;
+        LocalClient = null;
+
+        Instance = null;
+    }
 
     public override void OnNetworkSpawn()
     {
@@ -134,11 +152,47 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// fix for certain events not being registered when entering from main menu
+    /// </summary>
+    public void ConfigureGameplayEvents()
+    {
+        if (!IsServer) return;
+
+        OnAllPlayersReset -= ClearSpawnPoints;
+        OnAllPlayersReset -= ServerPlayersReset;
+        OnAllPlayersReset -= ResetAllPlayers;
+        OnPlayerDeath -= GameManager.Instance.PlayerDeath;
+
+        OnAllPlayersReset += ClearSpawnPoints;
+        OnAllPlayersReset += ServerPlayersReset;
+        OnAllPlayersReset += ResetAllPlayers;
+        OnPlayerDeath += GameManager.Instance.PlayerDeath;
+    }
+
+    /// <summary>
+    /// Called by Server
+    /// This method invokes an event in which a game-wide reset will occur
+    /// </summary>
     public static void ResetEvent()
     {
         OnAllPlayersReset?.Invoke();
     }
 
+    /// <summary>
+    /// Invoked by OnAllPlayersReset on Server
+    /// The Server will tell all players to reset themselves on their local clients
+    /// </summary>
+    private void ResetAllPlayers()
+    {
+        ClientPlayerResetRpc();
+    }
+
+    
+    /// <summary>
+    /// Called by Server
+    /// Server will reset network variables for each player
+    /// </summary>
     private void ServerPlayersReset()
     {
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
@@ -151,11 +205,11 @@ public class PlayerManager : NetworkBehaviour
             player.Combat.weaponHandler.DropWeapon();
         }
     }
-    private void ResetAllPlayers()
-    {
-        ClientPlayerResetRpc();
-    }
 
+    /// <summary>
+    /// Set the player settings
+    /// </summary>
+    /// <param name="newPlayerSettings"></param>
     public void SetPlayerSettings(PlayerSettings newPlayerSettings)
     {
         Debug.Log("Player Settings Set");
@@ -177,6 +231,7 @@ public class PlayerManager : NetworkBehaviour
 #region Player Setup
     /// <summary>
     /// Called while on the server
+    /// Spawns a player for a client and sets its playerobject
     /// </summary>
     /// <param name="clientId"></param>
     public void SpawnPlayer(ulong clientId)
@@ -199,6 +254,12 @@ public class PlayerManager : NetworkBehaviour
             OnPlayerDeath?.Invoke(clientId);
         });
     }
+
+    /// <summary>
+    /// Called by Client Player Script
+    /// Set the Local Player for the local PlayerManager
+    /// </summary>
+    /// <param name="p"></param>
     public void SetLocalPlayer(Player p)
     {
         // Set up player local-side
@@ -210,7 +271,7 @@ public class PlayerManager : NetworkBehaviour
         // Set up hud
         LocalPlayer.SetHud(playerHud);
         playerHud.health.text = LocalPlayer.MaxHealth.ToString();
-
+        LocalPlayer.Look.SetDefaultFOV(PlayerSettings.DefaultPOV);
         OnPlayerReset += OnReset;
 
         if (LocalBuilder) ChangePov(1);
@@ -237,6 +298,10 @@ public class PlayerManager : NetworkBehaviour
         }
     }
     
+    /// <summary>
+    /// Called by Client
+    /// Tell the Server's GameManager that this player has reset
+    /// </summary>
     private void OnReset()
     {
         GameManager.Instance.PlayerResetServerRpc();
@@ -244,6 +309,12 @@ public class PlayerManager : NetworkBehaviour
 #endregion
 
 #region Builder Setup
+
+    /// <summary>
+    /// Called by Server
+    /// Spawns a builder for a client and sets its ownership to the client
+    /// </summary>
+    /// <param name="clientId"></param>
     public void SpawnBuilder(ulong clientId)
     {
         if (!IsServer) return;
@@ -254,7 +325,11 @@ public class PlayerManager : NetworkBehaviour
         buildCam.NetworkObject.SpawnWithOwnership(clientId, true);
     }
 
-
+    /// <summary>
+    /// Called by Local Client BuilderCamera
+    /// Set the Local Builder for the local PlayerManager
+    /// </summary>
+    /// <param name="cam"></param>
     public void SetLocalBuilder(BuildCamera cam)
     {
         if (!LocalPlayer)
@@ -270,6 +345,10 @@ public class PlayerManager : NetworkBehaviour
         SetUpBuilder();
     }
 
+    /// <summary>
+    /// Called by Client
+    /// Subscribe methods to OnPlayerReset from the LocalBuilder and builderHud 
+    /// </summary>
     private void SetUpBuilder()
     {
         // The manager is the one who handles the resetting stuff.
@@ -347,6 +426,15 @@ public class PlayerManager : NetworkBehaviour
     {
         if (LocalPlayer) LocalPlayer.ToggleMove(canMove);
         if (LocalBuilder) LocalBuilder.ToggleInput(!canMove);
+    }
+
+    /// <summary>
+    /// Disables control in both modes for when the exit menu panel is open
+    /// </summary>
+    public static void DisableAllPlayerControls()
+    {
+        if (LocalPlayer) LocalPlayer.ToggleMove(false);
+        if (LocalBuilder) LocalBuilder.ToggleInput(false);
     }
 
 

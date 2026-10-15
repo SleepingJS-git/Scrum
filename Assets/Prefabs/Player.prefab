@@ -2034,6 +2034,8 @@ MonoBehaviour:
   sensitivity: {x: 0.1, y: 0.06}
   standCamLevel: 0.8
   crouchCamLevel: 0.325
+  sprintFOV: 100
+  fovChangeTime: 0.25
 --- !u!114 &5042190757247243880
 MonoBehaviour:
   m_ObjectHideFlags: 0

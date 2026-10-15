@@ -5,6 +5,9 @@ using UnityEngine;
 using Unity.Services.Core;
 using Unity.Services.Authentication;
 using Unity.Services.Multiplayer;
+using UnityEngine.SceneManagement;
+
+
 
 /// <summary>
 /// Manages Unity Multiplayer Services sessions and gives their state to the rest of the game.
@@ -28,8 +31,10 @@ public class LobbyManager : MonoBehaviour
     public event Action PlayerPropertiesChanged;
 
     private Task initializationTask;
+    public Task InitializationTask => initializationTask;
 
     private const string LobbyReadyKey = "LobbyReady";
+    private bool isLeavingSession = false;
 
 
     /// <summary>
@@ -307,4 +312,54 @@ public class LobbyManager : MonoBehaviour
 
         return false;
     }
+
+    public async void LeaveToMainMenu()
+    {
+        if (isLeavingSession)
+            return;
+
+        isLeavingSession = true;
+
+        if (CurrentSession == null)
+        {
+            SceneManager.LoadScene("!Main Menu");
+            isLeavingSession = false;
+            return;
+        }
+
+       // Currently host can't leave until other people leave first
+        if (CurrentSession.IsHost && CurrentSession.PlayerCount > 1)
+        {
+            Debug.LogWarning(
+                "Host tried to leave while other players are still connected. " +
+                "Host migration / graceful match shutdown is not implemented yet."
+            );
+
+            isLeavingSession = false;
+            return;
+        }
+
+        try
+        {
+            await CurrentSession.LeaveAsync();
+
+            CurrentSession = null;
+
+            Debug.Log("Successfully left session.");
+
+            SceneManager.LoadScene("!Main Menu");
+        }
+        catch (SessionException e)
+        {
+            Debug.LogError($"Failed to leave session: {e}");
+
+            isLeavingSession = false;
+        }
+        finally
+        {
+            isLeavingSession = false;
+        }
+    }
+
 }
+

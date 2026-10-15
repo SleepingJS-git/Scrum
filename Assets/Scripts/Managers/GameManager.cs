@@ -47,7 +47,16 @@ public class GameManager : NetworkBehaviour
     {
         numOfPlayers = count;
     }
-    
+
+    /// <summary>
+    /// Make sure we are not referencing an old game manager when we load into a game after exiting once
+    /// </summary>
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     /// <summary>
     /// Called on Server.
     /// Player is loaded

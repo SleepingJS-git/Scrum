@@ -188,6 +188,7 @@ public class Weapon : NetworkBehaviour
                 closestCollider = hit.collider;
                 lowestScore = score;
                 sourceHit = Vector3.Lerp(headPos, hit.collider.transform.position, .85f);
+                sourceHit.y += .15f;
             }
         }
 
