@@ -9,7 +9,7 @@ public class DebugManager : MonoBehaviour
     public static DebugManager Instance;
     [SerializeField] private Button hostButton;
     [SerializeField] private Button clientButton;
-    private DebugConfig debugConfig;
+    [SerializeField] private DebugConfig debugConfig;
     void Awake()
     {
         Instance = this;
@@ -21,9 +21,12 @@ public class DebugManager : MonoBehaviour
         
         // Check if the LobbyManager was created. If yes, then the game was loaded from a Lobby. 
         // If not, the game is being ran in Play Mode directly in the scene.
-        if (LobbyManager.Instance) return;
+        if (LobbyManager.Instance)
+        {
+            debugConfig = null;
+            return;
+        } 
 
-        debugConfig = new DebugConfig();
         ConfigureDebugManager();
     }
 
@@ -46,12 +49,30 @@ public class DebugManager : MonoBehaviour
                 break;
 
             case DebugType.MVP:
-                Debug.Log("Start MVP");
-                hostButton.gameObject.SetActive(true);
-                clientButton.gameObject.SetActive(true);
-                hostButton.onClick.AddListener(StartHost);
-                clientButton.onClick.AddListener(StartClient);
-                break;
+                {
+                    // Had to add this because I can't test relay/main menu stuff
+                    bool alreadyInSession = LobbyManager.Instance != null && LobbyManager.Instance.IsInLobby;
+                    if (!alreadyInSession)
+                    {
+                        Debug.Log("MVP directly from scene");
+
+                        hostButton.gameObject.SetActive(true);
+                        clientButton.gameObject.SetActive(true);
+
+                        hostButton.onClick.AddListener(StartHost);
+                        clientButton.onClick.AddListener(StartClient);
+                        break;
+                    }
+
+                    Debug.Log("MVP from Main Menu");
+
+                    if (NetworkManager.Singleton.IsServer)
+                    {
+                        PlayerManager.Instance.ConfigureSpawning(debugConfig);
+                    }
+
+                    break;
+                }
         }
 
         // PlayerManager.Instance.GetComponent<NetworkObject>().Spawn();
@@ -76,43 +97,58 @@ public class DebugManager : MonoBehaviour
     /// <param name="config"></param>
     private void ConfigureDebugManager()
     {   
-        // Set up debug config by determining what scene we are in.
-        switch (SceneManager.GetActiveScene().name)
+        if (debugConfig.IsConfigured)
         {
-            case "Player Testing (Single Player)":
-                debugConfig.debuggingType = DebugType.Solo_Fps;
-                PlayerManager.Instance.ConfigureSpawning(debugConfig);
+            switch (debugConfig.debuggingType)
+            {
+                case DebugType.Solo_Fps:
+                case DebugType.Solo_Building:
+                    PlayerManager.Instance.ConfigureSpawning(debugConfig);
+                break;
+            }
+        }
+        else
+        {
+            debugConfig = new DebugConfig();
 
-            break;
-
-            case "TheCreek":
-                debugConfig.debuggingType = DebugType.Solo_Fps;
-                PlayerManager.Instance.ConfigureSpawning(debugConfig);
+            // Set up debug config by determining what scene we are in.
+            switch (SceneManager.GetActiveScene().name)
+            {
+                case "Player Testing (Single Player)":
+                    debugConfig.debuggingType = DebugType.Solo_Fps;
+                    PlayerManager.Instance.ConfigureSpawning(debugConfig);
 
                 break;
 
-            case "Office":
-                debugConfig.debuggingType = DebugType.Solo_Fps;
-                PlayerManager.Instance.ConfigureSpawning(debugConfig);
+                case "TheCreek":
+                    debugConfig.debuggingType = DebugType.Solo_Fps;
+                    PlayerManager.Instance.ConfigureSpawning(debugConfig);
+
+                    break;
+
+                case "Office":
+                    debugConfig.debuggingType = DebugType.Solo_Fps;
+                    PlayerManager.Instance.ConfigureSpawning(debugConfig);
+
+                    break;
+
+                case "Rooftop":
+                    debugConfig.debuggingType = DebugType.Solo_Fps;
+                    PlayerManager.Instance.ConfigureSpawning(debugConfig);
+
+                    break;
+
+                case "GridBuilding (Single Player)":
+                    debugConfig.debuggingType = DebugType.Solo_Building;
+                    PlayerManager.Instance.ConfigureSpawning(debugConfig);
 
                 break;
 
-            case "Rooftop":
-                debugConfig.debuggingType = DebugType.Solo_Fps;
-                PlayerManager.Instance.ConfigureSpawning(debugConfig);
-
+                case "MVP Testing (With New PlayerManager)":
+                    Debug.Log("WE ARE ON MVP????");
+                    debugConfig.debuggingType = DebugType.MVP;
                 break;
-
-            case "GridBuilding (Single Player)":
-                debugConfig.debuggingType = DebugType.Solo_Building;
-                PlayerManager.Instance.ConfigureSpawning(debugConfig);
-
-            break;
-
-            case "MVP Testing (With New PlayerManager)":
-                Debug.Log("WE ARE ON MVP????");
-                debugConfig.debuggingType = DebugType.MVP;
-            break;
+            }
         }
 
         debugConfig.FinishConfiguration();
@@ -122,9 +158,8 @@ public class DebugManager : MonoBehaviour
 [Serializable]
 public class DebugConfig
 {
-    public bool IsConfigured{ get; private set; }
+    public bool IsConfigured;
     public DebugType debuggingType;
-    public bool IsHost;
     public DebugConfig()
     {
         IsConfigured = false;

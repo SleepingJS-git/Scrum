@@ -969,6 +969,9 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   playerHud: {fileID: 878488797}
   builderHud: {fileID: 0}
+  debugPlayerSettings:
+    CrouchingType: 0
+    DefaultPOV: 80
   spawnPoints:
   - {fileID: 998218085}
   playerPrefab: {fileID: 6448125735744906079, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
@@ -3727,9 +3730,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  playerPrefab: {fileID: 7342539564703258927, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
-  spawnPoints:
-  - {fileID: 998218085}
 --- !u!114 &414923791
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22564,6 +22564,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hostButton: {fileID: 0}
   clientButton: {fileID: 0}
+  debugConfig:
+    IsConfigured: 1
+    debuggingType: 0
 --- !u!1001 &1860620597
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -185,11 +185,17 @@ public class Player : Entity
         {
             case MovementState.Standing:
                 if (lastMoveState == (int) MovementState.Crouching || 
-                    lastMoveState == (int) MovementState.Sliding)
+                    lastMoveState == (int)MovementState.Sliding)
                     Move.UnCrouch();
+                
+                Look.ResetFOV();
             break;
             case MovementState.Crouching:
                 Move.Crouch();
+                Look.ResetFOV();
+            break;
+            case MovementState.Sprinting:
+                Look.SprintFOV();
             break;
             case MovementState.Sliding:
                 Move.Slide();
