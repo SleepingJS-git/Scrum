@@ -7,6 +7,7 @@ using UnityEngine;
 public class ExplosiveStructure : BreakableStructureEntity
 {
     public int damage;
+    private Vector3 originalPos;
     private AudioSource explosionAudioSource;
     [Tooltip("The amount of time the explosive waits before exploding.")]
     [SerializeField] private float breakDelay;
@@ -19,6 +20,11 @@ public class ExplosiveStructure : BreakableStructureEntity
         fractureApart = new Action(FractureApartClientRpc);
         AddDeathEvent(fractureApart);
         //AddDeathEvent(Explode);
+    }
+    private void Start()
+    {
+        originalPos = transform.position;
+        StartCoroutine(OnRoundStart());
     }
 
     private void Explode()
@@ -89,6 +95,21 @@ public class ExplosiveStructure : BreakableStructureEntity
         yield return new WaitForSeconds(breakDelay);
         Explode();
         Fracture();
+    }
+
+    public override void ResetBreakable()
+    {
+        base.ResetBreakable();
+        transform.position = originalPos;
+        StartCoroutine(OnRoundStart());
+    }
+
+    public IEnumerator OnRoundStart()
+    {
+        Debug.Log("Waiting for combat.");
+        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
+        GetComponent<Rigidbody>().isKinematic = false;
+        Debug.Log("Rigidbody physics enabled");
     }
     
     private IEnumerator Despawn()
