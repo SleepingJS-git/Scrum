@@ -11316,7 +11316,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 134020091}
-    PlayerPrefab: {fileID: 7342539564703258927, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
+    PlayerPrefab: {fileID: 0}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 1b20ed4f5056f5547ad271035c63712a, type: 2}
@@ -32318,7 +32318,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &872961854
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32347,7 +32347,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 1883690415
   InScenePlacedSourceGlobalObjectIdHash: 0
-  m_InScenePlacedDisabledByDefault: 0
+  m_InScenePlacedDisabledByDefault: 1
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -76007,8 +76007,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd92f44fdba397b4cb25c7f0f80fa782, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hostButton: {fileID: 1680482613}
-  clientButton: {fileID: 371109859}
+  hostButton: {fileID: 0}
+  clientButton: {fileID: 0}
   readyButton: {fileID: 1814000529}
 --- !u!114 &1651448803
 MonoBehaviour:
@@ -98286,13 +98286,13 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 2001466894}
+  - {fileID: 1437508787}
+  - {fileID: 134020093}
+  - {fileID: 536396568}
+  - {fileID: 1651448806}
+  - {fileID: 2012041533}
   - {fileID: 13742018}
   - {fileID: 1179969365}
-  - {fileID: 134020093}
-  - {fileID: 1437508787}
   - {fileID: 1070660519}
-  - {fileID: 2012041533}
   - {fileID: 872961858}
-  - {fileID: 1651448806}
-  - {fileID: 536396568}
   - {fileID: 2114549123}
