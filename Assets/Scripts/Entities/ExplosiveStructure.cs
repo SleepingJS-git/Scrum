@@ -23,7 +23,6 @@ public class ExplosiveStructure : BreakableStructureEntity
 
     private void Explode()
     {
-        PlayExplosionSoundRpc();
 
         Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius, Layer.ExplosionEffected);
         OnHitData onHitData = new()
@@ -52,14 +51,6 @@ public class ExplosiveStructure : BreakableStructureEntity
     [Rpc(SendTo.Everyone)]
     private void PlayExplosionSoundRpc()
     {
-        StartCoroutine(PlayExplosionSoundDelayed());
-    }
-
-    //very temp fix, do not want barrels all playing on top of each other too loud
-    private IEnumerator PlayExplosionSoundDelayed()
-    {
-        float delay = UnityEngine.Random.Range(0f, 0.5f);
-        yield return new WaitForSeconds(delay);
         explosionAudioSource.Play();
     }
 
@@ -86,6 +77,7 @@ public class ExplosiveStructure : BreakableStructureEntity
 
     private IEnumerator DelayExplosion()
     {
+        PlayExplosionSoundRpc();
         yield return new WaitForSeconds(breakDelay);
         Explode();
         Fracture();

@@ -76,8 +76,11 @@ MonoBehaviour:
 
     Place Buildable - Left Mouse Button
 
-    Hold Tab -
     View Scoreboard
+    - Hold Tab
+
+    Open Exit Menu - ESC
+
 
 
 '

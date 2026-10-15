@@ -20,6 +20,8 @@ public class GameManager : NetworkBehaviour
     private int _deadPlayers;
     private int _readyPlayers;
     private int _resetPlayers;
+    public NetworkVariable<int> ReadyCountUI = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> TotalCountUI = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<FixedString512Bytes> debugInfo = new(
         "",
         NetworkVariableReadPermission.Everyone,
@@ -46,6 +48,7 @@ public class GameManager : NetworkBehaviour
     public void SetPlayerCount(int count)
     {
         numOfPlayers = count;
+        TotalCountUI.Value = numOfPlayers;
     }
 
     /// <summary>
@@ -121,6 +124,7 @@ public class GameManager : NetworkBehaviour
     public void PlayerReadyServerRpc()
     {
         _readyPlayers++;
+        ReadyCountUI.Value = _readyPlayers;
 
         Debug.Log($"Players Ready: {_loadedPlayers} / {numOfPlayers}");
 
@@ -150,6 +154,7 @@ public class GameManager : NetworkBehaviour
         {
             case GamePhase.Combat:
                 _readyPlayers = 0;
+                ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 PlayerControllerRpc((int) gamePhase);
@@ -157,6 +162,7 @@ public class GameManager : NetworkBehaviour
 
             case GamePhase.Building:
                 _readyPlayers = 0;
+                ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 PlayerControllerRpc((int) gamePhase);
@@ -164,6 +170,7 @@ public class GameManager : NetworkBehaviour
 
             case GamePhase.EndOfCombat:
                 _readyPlayers = 0;
+                ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 ShowRoundWinner();

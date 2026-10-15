@@ -273,14 +273,24 @@ MonoBehaviour:
 
     Jump - Space
 
+    Sprint - Hold Shift
+
+    Crouch - Hold
+    Ctrl
+
+    Slide - Sprint and Crouch
+
     Shoot - Left Mouse Button
 
     Pick
-    Up - E
+    Up - F
 
     Throw - Q
 
-    Hold Tab - View Scoreboard
+    View Scoreboard - Hold Tab
+
+    Open Exit Menu - ESC
+
 
 
 '
