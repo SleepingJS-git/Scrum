@@ -1248,6 +1248,9 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   playerHud: {fileID: 0}
   builderHud: {fileID: 519229281}
+  debugPlayerSettings:
+    CrouchingType: 0
+    DefaultPOV: 80
   spawnPoints: []
   playerPrefab: {fileID: 0}
   builderPrefab: {fileID: 1513123767215250648, guid: 214932880ed5356449811c972f34cd5e, type: 3}
@@ -2159,6 +2162,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hostButton: {fileID: 0}
   clientButton: {fileID: 0}
+  debugConfig:
+    IsConfigured: 1
+    debuggingType: 1
 --- !u!4 &1707391176
 Transform:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -11,8 +12,16 @@ public class PlayerLook : MonoBehaviour
     [Header("Crouching")]
     public float standCamLevel;
     public float crouchCamLevel;
+
+    [Header("FOV Controlling")]
+    public float additiveSprintFOV = 20f;
+    public float fovChangeTime = .5f;
+    private float currentFOV;
+    [SerializeField] private float defaultFOV;
     public float XRot { get; private set; }
+    private bool defaultFOVSet = false;
     private Player main;
+    private Coroutine fovChangeRoutine;
     public void Init(bool camEnabled)
     {
         main = GetComponent<Player>();
@@ -20,6 +29,8 @@ public class PlayerLook : MonoBehaviour
 
         cam.gameObject.SetActive(camEnabled);
     }
+
+
 
     /// <summary>
     /// Makes the player look by rotating the camera and the player transform.
@@ -42,5 +53,48 @@ public class PlayerLook : MonoBehaviour
     public void RotateRigAim(float xRotation)
     {
         rigAim.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+    }
+
+    public void SetDefaultFOV(float newFOV)
+    {
+        Debug.Log("FOV SET TO " + newFOV);
+        defaultFOV = newFOV;
+        defaultFOVSet = true;
+        ResetFOV();
+    }
+    public void ResetFOV()
+    {
+        if (!defaultFOVSet) return;
+        if (currentFOV == defaultFOV) return;
+        AdjustFOV(defaultFOV);
+    }
+    public void SprintFOV()
+    {
+        if (!defaultFOVSet) return;
+        AdjustFOV(defaultFOV + additiveSprintFOV);
+    }
+    private void AdjustFOV(float newFOV)
+    {
+        if (fovChangeRoutine != null) StopCoroutine(fovChangeRoutine);
+        fovChangeRoutine = StartCoroutine(FOVRoutine(newFOV));
+    }
+
+    private IEnumerator FOVRoutine(float newFOV)
+    {
+        float targetPOV = newFOV;
+        float startPOV = currentFOV;
+
+        float t = 0f;
+        while (t < 1)
+        {
+            currentFOV = Mathf.Lerp(startPOV, targetPOV, t);
+            cam.fieldOfView = currentFOV;
+            t += Time.deltaTime / fovChangeTime;
+
+            yield return null;
+        }
+
+        currentFOV = targetPOV;
+        cam.fieldOfView = currentFOV;
     }
 }

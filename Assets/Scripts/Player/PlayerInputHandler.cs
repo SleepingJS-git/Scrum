@@ -44,6 +44,7 @@ public class PlayerInputHandler : MonoBehaviour
     /// <param name="ctx"></param>
     public void OnMove(CallbackContext ctx)
     {
+        // if (!_main.CanMove) return; <- Commented out for this playtest lmao
         _moveInput = ctx.ReadValue<Vector2>();
     }
 
@@ -179,7 +180,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (ctx.started)
         {
-            GameManager.Instance.ChangeToBuilding();
+            // GameManager.Instance.ChangeToBuilding();
         }
     }
 }

@@ -18,7 +18,7 @@ public class BreakableStructureEntity: Entity
         AddDeathEvent(fractureApart);
     }
 
-    public void ResetBreakable()
+    public virtual void ResetBreakable()
     {
         GetComponent<Collider>().enabled = true;
         GetComponent<MeshRenderer>().enabled = true;
@@ -26,7 +26,7 @@ public class BreakableStructureEntity: Entity
         this.isAlive.Value = true;
     }
 
-    private void Explode()
+    protected void Explode()
     {
         foreach(Rigidbody rb in fracture.FragmentRoot.GetComponentsInChildren<Rigidbody>())
         {

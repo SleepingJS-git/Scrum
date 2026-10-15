@@ -8,6 +8,11 @@ public class BuildableDatabase : MonoBehaviour
     [SerializeField] private Buildable[] buildablePrefabs;
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private Grid grid;
+    [SerializeField] private Vector3 minBuildBound;
+    [SerializeField] private Vector3 maxBuildBound;
+    [SerializeField] private LayerMask occupiedCellsLayerMask;
+    [SerializeField] private GameObject testingCube;
+    [SerializeField] private ulong spawnCellID;
     private Dictionary<ulong, Buildable> data;
     public static List<ulong> AvailablePrefabIds => Instance.data.Keys.ToList();
     public static Dictionary<Vector3Int, ulong> OccupiedCells
@@ -26,6 +31,10 @@ public class BuildableDatabase : MonoBehaviour
         {
             SetSpawnPointsOccupied();
         }
+        if (grid != null)
+        {
+            //SetMapOccupiedSpaces();
+        }
     }
     /// <summary>
     /// Check whether a cell on the grid is occupied
@@ -35,6 +44,11 @@ public class BuildableDatabase : MonoBehaviour
     public static bool IsCellTaken(Vector3Int position)
     {
         return OccupiedCells.ContainsKey(position);
+    }
+
+    public static ulong GetOccupiedID(Vector3Int position)
+    {
+        return OccupiedCells[position];
     }
 
     /// <summary>
@@ -76,15 +90,15 @@ public class BuildableDatabase : MonoBehaviour
     /// <param name="objectID"> The object ID for the object being placed </param>
     public static void SetCellsToOccupied(Buildable buildable, Vector3Int originPos, float rotation)
     {
-        Debug.Log("Occupied Cells:");
+        //Debug.Log("Occupied Cells:");
         foreach (Vector3Int pos in OccupiedCells.Keys)
         {
-            Debug.Log(pos);
+            //Debug.Log(pos);
         }
         Debug.Log("New Incoming Cells:");
         for (int i = 0; i < buildable.OccupiedCells.Length; i++)
         {
-            Debug.Log(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]));
+            //Debug.Log(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]));
             OccupyCell(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]), buildable.Id);
         }
     }
@@ -112,10 +126,39 @@ public class BuildableDatabase : MonoBehaviour
                         float currentOffsetZ = spawnPoints[i].position.z + ((bounds.size.z / 2) - z);
                         Vector3 offsetPos = new Vector3(currentOffsetX, currentOffsetY, currentOffsetZ);
                         Vector3Int cellPos = grid.WorldToCell(offsetPos);
-                        OccupyCell(cellPos, 0);
+                        OccupyCell(cellPos, spawnCellID);
                     }
                 }
             }
         }
+    }
+
+    private void SetMapOccupiedSpaces()
+    {
+        Vector3Int minGridBound = grid.WorldToCell(minBuildBound);
+        Vector3Int maxGridBound = grid.WorldToCell(maxBuildBound);
+        Vector3Int spaceDifference = maxGridBound - minGridBound;
+
+        for (int x = 0; x < spaceDifference.x; x++)
+        {
+            for(int y = 0; y < spaceDifference.y; y++)
+            {
+                for (int z = 0; z < spaceDifference.z; z++)
+                {
+                    Vector3Int currentSpace = minGridBound + new Vector3Int(x, y, z);
+                    if (CheckSpace(currentSpace))
+                    {
+                        OccupyCell(currentSpace, 0);
+                        //Instantiate(testingCube, grid.GetCellCenterWorld(currentSpace), Quaternion.identity);
+                    }
+                }
+            }
+        }
+    }
+
+    private bool CheckSpace(Vector3Int currentSpace)
+    {
+        Collider[] hitColliders = Physics.OverlapBox(grid.GetCellCenterWorld(currentSpace), new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, occupiedCellsLayerMask);
+        return (hitColliders.Length > 0);
     }
 }

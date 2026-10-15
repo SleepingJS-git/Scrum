@@ -96,7 +96,10 @@ public class PlayerMovement : MonoBehaviour
 
         isMoving = moveInput.sqrMagnitude > 0.0001f;
         if (isMoving) Sprint();
-
+        if (moveState == MovementState.Sprinting)
+        {
+            if (!isMoving) Sprint();
+        }
         // The actual direction relative to the way the player is facing
         moveDir = transform.right * moveInput.x + transform.forward * moveInput.z;
         moveDir.Normalize();

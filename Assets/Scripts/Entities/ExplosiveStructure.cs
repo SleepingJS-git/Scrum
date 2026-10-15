@@ -7,22 +7,32 @@ using UnityEngine;
 public class ExplosiveStructure : BreakableStructureEntity
 {
     public int damage;
+    private Vector3 originalPos;
     private AudioSource explosionAudioSource;
+    [SerializeField] private ParticleSystem[] explosionParticles;
     [Tooltip("The amount of time the explosive waits before exploding.")]
     [SerializeField] private float breakDelay;
 
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();
-        fracture = GetComponent<Fracture>();
         explosionAudioSource = GetComponent<AudioSource>();
-        fractureApart = new Action(FractureApartClientRpc);
+
+        fracture = GetComponent<Fracture>();
+        fractureApart = new Action(DelayExplosionRpc);
         AddDeathEvent(fractureApart);
         //AddDeathEvent(Explode);
     }
-
-    private void Explode()
+    private void Start()
     {
+        originalPos = transform.position;
+        StartCoroutine(OnRoundStart());
+    }
+
+    private void ExplodeDamage()
+    {
+
+        foreach(ParticleSystem p in explosionParticles)
+            p.Play();
 
         Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius, Layer.ExplosionEffected);
         OnHitData onHitData = new()
@@ -67,10 +77,10 @@ public class ExplosiveStructure : BreakableStructureEntity
 
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void FractureApartClientRpc()
+    private void DelayExplosionRpc()
     {
         StartCoroutine(DelayExplosion());
-        //fracture.CauseFracture();
+        fracture.CauseFracture();
         //Fracture();
         StartCoroutine(Despawn());
     }
@@ -79,8 +89,23 @@ public class ExplosiveStructure : BreakableStructureEntity
     {
         PlayExplosionSoundRpc();
         yield return new WaitForSeconds(breakDelay);
-        Explode();
+        ExplodeDamage();
         Fracture();
+    }
+
+    public override void ResetBreakable()
+    {
+        base.ResetBreakable();
+        transform.position = originalPos;
+        StartCoroutine(OnRoundStart());
+    }
+
+    public IEnumerator OnRoundStart()
+    {
+        Debug.Log("Waiting for combat.");
+        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
+        GetComponent<Rigidbody>().isKinematic = false;
+        Debug.Log("Rigidbody physics enabled");
     }
     
     private IEnumerator Despawn()
