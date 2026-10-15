@@ -201,8 +201,6 @@ public class GridPlacement : NetworkBehaviour
         // Check that conditions allow for previewing the buildable
         bool isObjectVisible = CanPreviewBuildable();
 
-        if (buildable) canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value);
-        else canPlace.Value = isObjectVisible;
 
         if (isObjectVisible)
         {
@@ -225,6 +223,8 @@ public class GridPlacement : NetworkBehaviour
             // Offset the object's position based on its rotation
             previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
         }
+        if (buildable) canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value);
+        else canPlace.Value = isObjectVisible;
 
         // If any of the cells of the object are taken, change color to red
         SetColorClientRpc(isObjectVisible);
