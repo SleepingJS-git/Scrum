@@ -1461,7 +1461,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6605199360369126838}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1799,7 +1799,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 2508019869
   InScenePlacedSourceGlobalObjectIdHash: 2508019869
-  m_InScenePlacedDisabledByDefault: 0
+  m_InScenePlacedDisabledByDefault: 1
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -2009,13 +2009,18 @@ MonoBehaviour:
   sprintSpeed: 9
   slideSpeed: 5
   slideDeceleration: 8
-  slideMinSpeed: 2
-  slideDuration: 0.4
-  slideCooldown: 0.25
+  slideMinSpeed: 1
+  slideDuration: 3
+  slideCooldown: 0.5
+  slideCancelDelay: 0.3
+  slideInputDrag: 1.5
   kickReach: 4
   kickUpForce: 3
   kickHorizForce: 2.75
   wallKickCooldown: 0.65
+  mass: 0.25
+  isCrouchHeld: 0
+  holdToCrouchInput: 0
 --- !u!114 &5570463379167910784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2034,8 +2039,9 @@ MonoBehaviour:
   sensitivity: {x: 0.1, y: 0.06}
   standCamLevel: 0.8
   crouchCamLevel: 0.325
-  sprintFOV: 100
+  additiveSprintFOV: 20
   fovChangeTime: 0.25
+  defaultFOV: 0
 --- !u!114 &5042190757247243880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2408,11 +2414,11 @@ MonoBehaviour:
   _cameraHolder: {fileID: 7987162703804155532}
   main: {fileID: 6448125735744906079}
   cc: {fileID: 3390551297032513119}
-  _walkAmplitude: 0.003
+  _walkAmplitude: 0.001
   _walkFrequency: 14
-  _crouchAmplitude: 0.0015
+  _crouchAmplitude: 0.0005
   _crouchFrequency: 8
-  _sprintAmplitude: 0.005
+  _sprintAmplitude: 0.0015
   _sprintFrequency: 18
   bobMotion: {x: 0, y: 0, z: 0}
 --- !u!1 &7460554458888241820

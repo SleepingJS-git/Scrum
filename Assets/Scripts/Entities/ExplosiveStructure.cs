@@ -8,11 +8,12 @@ public class ExplosiveStructure : BreakableStructureEntity
 {
     public int damage;
     private Vector3 originalPos;
+    private Quaternion originalRot;
     private AudioSource explosionAudioSource;
     [SerializeField] private ParticleSystem[] explosionParticles;
     [Tooltip("The amount of time the explosive waits before exploding.")]
     [SerializeField] private float breakDelay;
-
+    private Rigidbody rb;
     public override void OnNetworkSpawn()
     {
         explosionAudioSource = GetComponent<AudioSource>();
@@ -24,16 +25,23 @@ public class ExplosiveStructure : BreakableStructureEntity
     }
     private void Start()
     {
+        rb = GetComponent<Rigidbody>();
         originalPos = transform.position;
-        StartCoroutine(OnRoundStart());
+        originalRot = transform.rotation;
+
+        if (GameManager.Instance)
+            StartCoroutine(OnRoundStart());
+        else
+        {
+            rb.isKinematic = false;
+        }
     }
 
+    /// <summary>
+    /// Only the server should call this because OnHit() logic exits only on server
+    /// </summary>
     private void ExplodeDamage()
     {
-
-        foreach(ParticleSystem p in explosionParticles)
-            p.Play();
-
         Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius, Layer.ExplosionEffected);
         OnHitData onHitData = new()
         {
@@ -44,7 +52,7 @@ public class ExplosiveStructure : BreakableStructureEntity
         foreach (Collider h in hits)
         {
             if (h == null || h.gameObject == gameObject) continue;
-            if (h.attachedRigidbody)
+            if (h.attachedRigidbody && !h.attachedRigidbody.isKinematic)
             {
                 h.attachedRigidbody.AddExplosionForce(
                     onHitData.damage * 10f, 
@@ -54,7 +62,33 @@ public class ExplosiveStructure : BreakableStructureEntity
 
             Entity e = h.GetComponent<Entity>();
             if (e && e.isAlive.Value)
+            {
                 e.OnHit(onHitData);
+                
+                if (e is Player p)
+                {
+                    Debug.Log("Player Detected");
+                    Vector3 explodingForce = PhysicsHelper.ExplosionForce(
+                        transform.position,
+                        p.transform.position,
+                        explosionForce,
+                        explosionRadius,
+                        upwardsModifier
+                    );
+
+                    Debug.Log("Exploding Force Magnitude: " + explodingForce.magnitude);
+
+                    if (explodingForce != Vector3.zero)
+                    {
+                        p.AddForceRpc(
+                            explodingForce.normalized,
+                            explodingForce.magnitude,
+                            (int) ForceMode.Impulse,
+                            RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp)
+                        );
+                    }
+                }
+            }
         }
     }
 
@@ -82,14 +116,24 @@ public class ExplosiveStructure : BreakableStructureEntity
         StartCoroutine(DelayExplosion());
         fracture.CauseFracture();
         //Fracture();
-        StartCoroutine(Despawn());
+
+        if (GameManager.Instance)
+            StartCoroutine(Despawn());
+        else
+            Invoke("ResetBreakable", 3f);
     }
 
     private IEnumerator DelayExplosion()
     {
-        PlayExplosionSoundRpc();
         yield return new WaitForSeconds(breakDelay);
-        ExplodeDamage();
+
+        PlayExplosionSoundRpc();
+
+        if (IsServer)
+            ExplodeDamage();
+
+        foreach(ParticleSystem p in explosionParticles)
+            p.Play();
         Fracture();
     }
 
@@ -97,14 +141,22 @@ public class ExplosiveStructure : BreakableStructureEntity
     {
         base.ResetBreakable();
         transform.position = originalPos;
-        StartCoroutine(OnRoundStart());
+        transform.rotation = originalRot;
+
+        if (GameManager.Instance)
+            StartCoroutine(OnRoundStart());
+        else
+        {
+            rb.isKinematic = false;
+            Destroy(fracture.FragmentRoot);
+        }
     }
 
     public IEnumerator OnRoundStart()
     {
         Debug.Log("Waiting for combat.");
         yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
-        GetComponent<Rigidbody>().isKinematic = false;
+        rb.isKinematic = false;
         Debug.Log("Rigidbody physics enabled");
     }
     

@@ -58,6 +58,7 @@ public class PlayerManager : NetworkBehaviour
     // Server-side events - Subscribe methods to these depending on what the config says
     public static event Action<ulong> OnPlayerDeath;   // What happens when the player dies.
     public static event Action OnAllPlayersReset;
+    private static int DefaultPov;
 
     void Awake()
     {
@@ -108,21 +109,26 @@ public class PlayerManager : NetworkBehaviour
         switch (debugConfig.debuggingType)
         {
             case DebugType.Solo_Fps:
+                DefaultPov = 0;
+
                 // Host is controlling themselves so this is ok, but dont copy this for multiplayer
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayer;
                 NetworkManager.Singleton.OnClientConnectedCallback += (clientId) =>
                 {
-                    ChangePov(0);
+                    ChangePov(DefaultPov);
                 };
                 // Host Respawn the player immediately (the host is respawning themselves so its ok)
                 OnPlayerDeath += (clientId) =>
                 {
-                    Invoke(nameof(ResetPlayer), 1f);
-                    
+                    Invoke(nameof(ServerPlayersReset), 1f);
+                    Invoke(nameof(ResetPlayer), 1.01f);
+                    Invoke(nameof(ToDefaultPov), 1.02f);
                 };
             break;
 
             case DebugType.Solo_Building:
+                DefaultPov = 1;
+
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
                 NetworkManager.Singleton.OnClientConnectedCallback += (clientId) =>
                 {
@@ -131,7 +137,8 @@ public class PlayerManager : NetworkBehaviour
             break;
 
             case DebugType.MVP:
-                Debug.Log("Are we running MVP???");
+                DefaultPov = 3; // 3 means there is no default pov, because the players will be swapping between player, builder, and spectator
+
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayer;
 
@@ -304,7 +311,8 @@ public class PlayerManager : NetworkBehaviour
     /// </summary>
     private void OnReset()
     {
-        GameManager.Instance.PlayerResetServerRpc();
+        if(GameManager.Instance)
+            GameManager.Instance.PlayerResetServerRpc();
     }
 #endregion
 
@@ -360,12 +368,13 @@ public class PlayerManager : NetworkBehaviour
 #endregion
 
 #region Player Managing
+
     /// <summary>
     /// Needs to be called by Client or ClientRpc
     /// Changes the POV and controls of LOCAL Client
     /// </summary>
     /// <param name="newPov"></param>
-    public static void ChangePov(int newPov)
+    public void ChangePov(int newPov)
     {
         POV = (PointOfView) newPov;
 
@@ -382,8 +391,8 @@ public class PlayerManager : NetworkBehaviour
                 }
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
 
-                if (Instance.builderHud) Instance.builderHud.gameObject.SetActive(false);  
-                if (Instance.playerHud) Instance.playerHud.gameObject.SetActive(true);                 
+                if (builderHud) builderHud.gameObject.SetActive(false);  
+                if (playerHud) playerHud.gameObject.SetActive(true);                 
                 TogglePlayerControls(true);
 
                 ToCombat?.Invoke();
@@ -398,8 +407,8 @@ public class PlayerManager : NetworkBehaviour
                     LocalPlayer.Body.ShowBodyRenderer(true);
                 } 
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(true);
-                if (Instance.builderHud) Instance.builderHud.gameObject.SetActive(true);  
-                if (Instance.playerHud) Instance.playerHud.gameObject.SetActive(false);  
+                if (builderHud) builderHud.gameObject.SetActive(true);  
+                if (playerHud) playerHud.gameObject.SetActive(false);  
 
                 TogglePlayerControls(false);
                 ToBuilding?.Invoke();
@@ -417,7 +426,14 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-
+    /// <summary>
+    /// This is for debugging. It forces the pov to be the default. DO NOT use this for the actual game.
+    /// </summary>
+    private void ToDefaultPov()
+    {
+        if (DefaultPov == -1) return;
+        ChangePov(DefaultPov);
+    }
     /// <summary>
     /// Swaps the LOCAL Player Controls.
     /// </summary>

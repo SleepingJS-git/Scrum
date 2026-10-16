@@ -61,7 +61,7 @@ public abstract class Entity : NetworkBehaviour
     }
 
     /// <summary>
-    /// [Invoked by ServerRpc] Subscribe events for OnDeath from client
+    /// [Invoked by ServerRpc] Subscribe events for OnDeath from server or client.
     /// </summary>
     public virtual void AddDeathEvent(Action action)
     {

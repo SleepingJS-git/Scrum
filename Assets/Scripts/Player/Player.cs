@@ -127,10 +127,18 @@ public class Player : Entity
     public override void OnHit(OnHitData onHitData)
     {
         OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.upwardsModifier);
+        
+        
         base.OnHit(onHitData);
         UpdateHealthClientRpc(OwnerClientId);
     }
 
+    /// <summary>
+    /// Temporary rpc that makes it so ragdolls get pushed when dying for all clients.
+    /// </summary>
+    /// <param name="damage"></param>
+    /// <param name="sourceHit"></param>
+    /// <param name="upwardsModifier"></param>
     [Rpc(SendTo.ClientsAndHost)]
     private void OnHitClientRpc(int damage, Vector3 sourceHit, float upwardsModifier)
     {
@@ -155,6 +163,7 @@ public class Player : Entity
     {
         CanMove = canMove;
         Input.ToggleInput(canMove);
+        Body.Play("IsMoving", false);
     }
 
     public void Revive()
@@ -165,6 +174,7 @@ public class Player : Entity
         Body.UnRagdoll();
         Body.Play("IsMoving", false);
         Move.OnDeathCollider(false);
+        Move.StopVelocity();
     }
 
     [Rpc(SendTo.Server)]
@@ -210,4 +220,32 @@ public class Player : Entity
     {
         Look.RotateRigAim(xRotation);
     }
+    
+    /// <summary>
+    /// [Called by Server]
+    /// Simulate an applied force to the player.
+    /// CharacterController does not have AddForce(), and movement is determined by CharacterController.Move().
+    /// </summary>
+    /// <param name="dir">Direction of the force</param>
+    /// <param name="force">Amount of Force</param>
+    /// <param name="forceMode">The Force Mode -> See note at the bottom of script</param>
+    /// <param name="rpcParams">This should be sent only to the client that is affected by the force</param>
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void AddForceRpc(Vector3 dir, float force, int forceMode, RpcParams rpcParams = default)
+    {
+        Debug.Log("AddForceRPC IsOwner?: " + IsOwner);
+        Debug.Log("OwnerID: " + OwnerClientId);
+        if (!IsOwner) return; // just in case
+        Move.AddForce(dir, force, (ForceMode) forceMode);
+    }
 }
+
+/*
+    For some reason the enums are like this. So when calling AddForceRPC, you must send in the integer
+    Force = 0,
+    Acceleration = 5,
+    Impulse = 1,
+    VelocityChange = 2
+
+    or alternatively you can just do (int) ForceMode.Acceleration for example.
+*/
