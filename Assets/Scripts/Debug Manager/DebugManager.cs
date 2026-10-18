@@ -130,6 +130,11 @@ public class DebugManager : MonoBehaviour
                     Debug.Log("WE ARE ON MVP????");
                     debugConfig.debuggingType = DebugType.MVP;
                 break;
+
+                case "Office":
+                    Debug.Log("WE ARE ON Office????");
+                    debugConfig.debuggingType = DebugType.MVP;
+                break;
             }
         }
 
