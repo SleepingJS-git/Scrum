@@ -20,7 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SceneConnectionTest.unity
     guid: d5fb6ebce6850dd40a78a2fc27ff071d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MVP Testing.unity
     guid: 2808a64f2b3ce5844afaf17d04f3b4d2
   - enabled: 1
@@ -50,7 +50,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Levels/Rooftop.unity
     guid: 930235d32f0f2f24abcaf0ccda4d4d4f
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TheOfficeMVP.unity
     guid: 1f9aba819f1d23047b51e002994bcd43
   m_configObjects:
