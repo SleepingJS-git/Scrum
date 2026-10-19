@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
 [RequireComponent(typeof(Fracture))]
@@ -8,6 +9,7 @@ public class ExplosiveStructure : BreakableStructureEntity
 {
     public int damage;
     private Vector3 originalPos;
+    private Quaternion originalRotation;
     private AudioSource explosionAudioSource;
     [SerializeField] private ParticleSystem[] explosionParticles;
     [Tooltip("The amount of time the explosive waits before exploding.")]
@@ -25,6 +27,7 @@ public class ExplosiveStructure : BreakableStructureEntity
     private void Start()
     {
         originalPos = transform.position;
+        originalRotation = transform.rotation;
         StartCoroutine(OnRoundStart());
     }
 
@@ -97,6 +100,7 @@ public class ExplosiveStructure : BreakableStructureEntity
     {
         base.ResetBreakable();
         transform.position = originalPos;
+        transform.rotation = originalRotation;
         StartCoroutine(OnRoundStart());
     }
 
