@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
@@ -17,21 +18,38 @@ public class LevelSelector : MonoBehaviour
     [SerializeField] private Color selectedColor = Color.white;
     [SerializeField] private Color unselectedColor = new Color(0.6f, 0.6f, 0.6f, 1f);
 
+    private bool? previousHostState;
+
     private void Start()
     {
-        bool isHost = NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost;
-
-        gameObject.SetActive(isHost);
-
-        if (!isHost) return;
-
         for (int i = 0; i < levels.Length; i++)
         {
             int index = i;
             levels[i].button.onClick.AddListener(() => SelectLevel(index));
         }
+    }
 
-        SelectLevel(0);
+    private void OnEnable()
+    {
+        previousHostState = null;
+    }
+
+    //Fixed the stuff with buttons not appearing sometimes because the buttons would completely disable themselves based on the host async timings
+    private void Update()
+    {
+        bool isHost = NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost;
+
+        if (previousHostState == isHost) return;
+
+        bool wasHost = previousHostState == true;
+        previousHostState = isHost;
+
+        for (int i = 0; i < levels.Length; i++)
+        {
+            levels[i].button.gameObject.SetActive(isHost);
+        }
+
+        if (isHost && !wasHost) SelectLevel(0);
     }
 
     private void SelectLevel(int index)

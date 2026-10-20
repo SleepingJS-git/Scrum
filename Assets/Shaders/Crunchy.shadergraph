@@ -67,9 +67,6 @@
             "m_Id": "0d593b1c3a0843b9b42993dbc169b368"
         },
         {
-            "m_Id": "6a46db566c2447e99ca44308fc6fd285"
-        },
-        {
             "m_Id": "0b4efc0405284049a6f896fe2f018810"
         },
         {
@@ -288,9 +285,6 @@
             },
             {
                 "m_Id": "402ae487f70242b6b3a8cddb9b9c0b13"
-            },
-            {
-                "m_Id": "6a46db566c2447e99ca44308fc6fd285"
             },
             {
                 "m_Id": "2d4d3a490b2a4aaf9e661abc5f66ec27"
@@ -1245,40 +1239,6 @@
 {
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.BlockNode",
-    "m_ObjectId": "6a46db566c2447e99ca44308fc6fd285",
-    "m_Group": {
-        "m_Id": ""
-    },
-    "m_Name": "SurfaceDescription.Alpha",
-    "m_DrawState": {
-        "m_Expanded": true,
-        "m_Position": {
-            "serializedVersion": "2",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 0.0,
-            "height": 0.0
-        }
-    },
-    "m_Slots": [
-        {
-            "m_Id": "a4386a71d59a4586a7bb1ca6a1bfb03b"
-        }
-    ],
-    "synonyms": [],
-    "m_Precision": 0,
-    "m_PreviewExpanded": true,
-    "m_DismissedVersion": 0,
-    "m_PreviewMode": 0,
-    "m_CustomColors": {
-        "m_SerializableColors": []
-    },
-    "m_SerializedDescriptor": "SurfaceDescription.Alpha"
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.BlockNode",
     "m_ObjectId": "7654d0e0f2a14aacb75d6b3bd370745d",
     "m_Group": {
         "m_Id": ""
@@ -1791,21 +1751,6 @@
 {
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
-    "m_ObjectId": "a4386a71d59a4586a7bb1ca6a1bfb03b",
-    "m_Id": 0,
-    "m_DisplayName": "Alpha",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "Alpha",
-    "m_StageCapability": 2,
-    "m_Value": 1.0,
-    "m_DefaultValue": 1.0,
-    "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "a71a7f54c455417cb25f3264103e72af",
     "m_Id": 3,
     "m_DisplayName": "Opacity",
@@ -2061,7 +2006,7 @@
         "m_Id": "282fa4c043784520bdf2785304530607"
     },
     "m_AllowMaterialOverride": false,
-    "m_SurfaceType": 1,
+    "m_SurfaceType": 0,
     "m_ZTestMode": 4,
     "m_ZWriteControl": 0,
     "m_AlphaMode": 0,
