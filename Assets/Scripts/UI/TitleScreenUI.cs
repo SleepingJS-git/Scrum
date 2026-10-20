@@ -35,6 +35,15 @@ public class TitleScreen : MonoBehaviour
 
     [SerializeField] private string sceneName = "SceneConnectionTest";
 
+    /// <summary>
+    /// Sets the scene that the Start Game button will send to after pressing
+    /// </summary>
+    /// <param name="newSceneName"></param>
+    public void SetSceneName(string newSceneName)
+    {
+        sceneName = newSceneName;
+    }
+
 
     /// <summary>
     /// Shows the requested menu panel and hides the others
@@ -198,10 +207,5 @@ public class TitleScreen : MonoBehaviour
         {
             LobbyManager.Instance.LobbyChanged -= RefreshStartGameButton;
         }
-    }
-
-    public void SetSceneName(string newSceneName)
-    {
-        sceneName = newSceneName;
     }
 }
