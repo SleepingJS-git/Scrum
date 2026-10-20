@@ -32,6 +32,7 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] private GameObject settingsScreen;
     [SerializeField] private Button startGameButton;
     [SerializeField] private CanvasGroup startGameCanvasGroup;
+    [SerializeField] private MusicManager musicManager;
 
     [SerializeField] private string sceneName = "SceneConnectionTest";
 
@@ -174,6 +175,8 @@ public class TitleScreen : MonoBehaviour
             );
             return;
         }
+
+        musicManager.StopMusic();
 
         NetworkManager.Singleton.SceneManager.LoadScene(
             sceneName,
