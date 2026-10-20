@@ -25,5 +25,6 @@ public enum DamageType
     Falling = 4,        // Fall Damage - Fall on yo feet
     Blunt = 5,          // Blunt Force Damage - Melee Hammers, or thrown blunt objects
     Slice = 6,          // Slicing Damage - Knives, Buzzsaws
+    DeathZone = 7,
 }
 

@@ -57,7 +57,7 @@ public abstract class Entity : NetworkBehaviour
             OnDeathEffectsClientRpc(OwnerClientId);
         }
 
-        Debug.Log($"{gameObject.name} was damaged by {onHitData.attacker.name} ({onHitData.damage} - {onHitData.damageType})");
+        // Debug.Log($"{gameObject.name} was damaged by {onHitData.attacker.name} ({onHitData.damage} - {onHitData.damageType})");
     }
 
     /// <summary>

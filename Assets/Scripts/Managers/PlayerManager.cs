@@ -120,9 +120,10 @@ public class PlayerManager : NetworkBehaviour
                 // Host Respawn the player immediately (the host is respawning themselves so its ok)
                 OnPlayerDeath += (clientId) =>
                 {
+                    Invoke(nameof(ClearSpawnPoints), 1f);
                     Invoke(nameof(ServerPlayersReset), 1f);
-                    Invoke(nameof(ResetPlayer), 1.01f);
-                    Invoke(nameof(ToDefaultPov), 1.02f);
+                    Invoke(nameof(ResetPlayer), 1f);
+                    Invoke(nameof(ToDefaultPov), 1f);
                 };
             break;
 
@@ -459,8 +460,8 @@ public class PlayerManager : NetworkBehaviour
     /// </summary>
     private void ResetPlayer()
     {
-        LocalPlayer.Revive();
         TeleportPlayer(GetRandomSpawnPoint().position);
+        LocalPlayer.Revive();
     }
 
     private void TeleportPlayer(Vector3 pos)
@@ -504,7 +505,7 @@ public class PlayerManager : NetworkBehaviour
     }
 
 
-    public static void ClearSpawnPoints()
+    public void ClearSpawnPoints()
     {
         Instance.takenSpawns.Clear();
     }

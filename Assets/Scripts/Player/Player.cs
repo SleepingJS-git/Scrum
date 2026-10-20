@@ -126,7 +126,7 @@ public class Player : Entity
     /// <param name="damage"></param>
     public override void OnHit(OnHitData onHitData)
     {
-        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.upwardsModifier);
+        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.explosionForce, onHitData.upwardsModifier);
         
         
         base.OnHit(onHitData);
@@ -140,9 +140,9 @@ public class Player : Entity
     /// <param name="sourceHit"></param>
     /// <param name="upwardsModifier"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    private void OnHitClientRpc(int damage, Vector3 sourceHit, float upwardsModifier)
+    private void OnHitClientRpc(int damage, Vector3 sourceHit, float explosionForce, float upwardsModifier)
     {
-        Body.onHitData.damage = damage;
+        Body.onHitData.explosionForce = explosionForce;
         Body.onHitData.sourceHit = sourceHit;
         Body.onHitData.upwardsModifier = upwardsModifier;
 
