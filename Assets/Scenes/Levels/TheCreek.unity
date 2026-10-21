@@ -109479,10 +109479,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7596439779275913557, guid: 8d74f245d9474a745b423b88faee1d79, type: 3}
-      propertyPath: fractureOptions.insideMaterial
-      value: 
-      objectReference: {fileID: 2100000, guid: 74b0c9a2e347df84395626a70a1ea1f3, type: 2}
     - target: {fileID: 8091135308391369094, guid: 8d74f245d9474a745b423b88faee1d79, type: 3}
       propertyPath: m_Name
       value: Explosive Barrel (1)

@@ -16,6 +16,7 @@ public class Player : Entity
     public PlayerBody Body { get; private set; }
     public PlayerStats Stats { get; private set; }
     [SerializeField] private AudioSource playerAudioSource;
+    public DeathCamera deathCamera;
 
     // Player Hud - Gets set by PlayerManager
     private PlayerHud hud;
@@ -63,6 +64,7 @@ public class Player : Entity
         if (IsOwner)
         {
             PlayerManager.Instance.SetLocalPlayer(this);
+            deathCamera.Init();
 
             Interaction.Init(Look.cam.transform, hud);
         }
@@ -70,7 +72,7 @@ public class Player : Entity
         Combat.Init(IsOwner, hud);
 
         
-
+        deathCamera.Toggle(false);
         _initialized = true;
     }
 
@@ -126,15 +128,23 @@ public class Player : Entity
     /// <param name="damage"></param>
     public override void OnHit(OnHitData onHitData)
     {
-        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.upwardsModifier);
+        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.explosionForce, onHitData.upwardsModifier);
+        
+        
         base.OnHit(onHitData);
         UpdateHealthClientRpc(OwnerClientId);
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    private void OnHitClientRpc(int damage, Vector3 sourceHit, float upwardsModifier)
+    /// <summary>
+    /// Temporary rpc that makes it so ragdolls get pushed when dying for all clients.
+    /// </summary>
+    /// <param name="damage"></param>
+    /// <param name="sourceHit"></param>
+    /// <param name="upwardsModifier"></param>
+    [Rpc(SendTo.Everyone)]
+    private void OnHitClientRpc(int damage, Vector3 sourceHit, float explosionForce, float upwardsModifier)
     {
-        Body.onHitData.damage = damage;
+        Body.onHitData.explosionForce = explosionForce;
         Body.onHitData.sourceHit = sourceHit;
         Body.onHitData.upwardsModifier = upwardsModifier;
 
@@ -148,23 +158,30 @@ public class Player : Entity
     public void UpdateHealthClientRpc(ulong clientId)
     {
         if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
             hud.health.SetText(health.Value.ToString());
+            
+            if (!isAlive.Value) hud.health.SetText("0");
+        }
     }
 
     public void ToggleMove(bool canMove)
     {
         CanMove = canMove;
         Input.ToggleInput(canMove);
+        Body.Play("IsMoving", false);
     }
 
     public void Revive()
     {
+        deathCamera.Toggle(false);
         hud.health.text = health.Value.ToString();
         Combat.EmptyWeapon();
         ToggleDeathHud(false);
         Body.UnRagdoll();
         Body.Play("IsMoving", false);
         Move.OnDeathCollider(false);
+        Move.StopVelocity();
     }
 
     [Rpc(SendTo.Server)]
@@ -210,4 +227,38 @@ public class Player : Entity
     {
         Look.RotateRigAim(xRotation);
     }
+
+    public void StartDeathCam()
+    {
+        
+    }
+
+    
+    /// <summary>
+    /// [Called by Server]
+    /// Simulate an applied force to the player.
+    /// CharacterController does not have AddForce(), and movement is determined by CharacterController.Move().
+    /// </summary>
+    /// <param name="dir">Direction of the force</param>
+    /// <param name="force">Amount of Force</param>
+    /// <param name="forceMode">The Force Mode -> See note at the bottom of script</param>
+    /// <param name="rpcParams">This should be sent only to the client that is affected by the force</param>
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void AddForceRpc(Vector3 dir, float force, int forceMode, RpcParams rpcParams = default)
+    {
+        Debug.Log("AddForceRPC IsOwner?: " + IsOwner);
+        Debug.Log("OwnerID: " + OwnerClientId);
+        if (!IsOwner) return; // just in case
+        Move.AddForce(dir, force, (ForceMode) forceMode);
+    }
 }
+
+/*
+    For some reason the enums are like this. So when calling AddForceRPC, you must send in the integer
+    Force = 0,
+    Acceleration = 5,
+    Impulse = 1,
+    VelocityChange = 2
+
+    or alternatively you can just do (int) ForceMode.Acceleration for example.
+*/

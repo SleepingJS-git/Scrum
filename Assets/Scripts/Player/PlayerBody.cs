@@ -29,7 +29,8 @@ public class PlayerBody : MonoBehaviour
 
         // Turn off the renderer to hide the dead player's actual renderer
         // bodyRenderer.gameObject.SetActive(false);
-
+        Debug.Log("OnHitData Force: " + onHitData.explosionForce);
+        Debug.Log("OnHitData Upwards Modifier: " + onHitData.upwardsModifier);
         foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
         {
             rb.useGravity = true;
@@ -37,7 +38,7 @@ public class PlayerBody : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
 
             rb.AddExplosionForce(
-                onHitData.damage * 10f, 
+                onHitData.explosionForce * 10f, 
                 onHitData.sourceHit, 2f, onHitData.upwardsModifier,
                 ForceMode.Impulse);
         }
