@@ -6,11 +6,10 @@ public class DeathZone : NetworkBehaviour
 {
     private OnHitData onHitData;
     [SerializeField] private float explosionForce;
-    private List<Entity> cachedEntities;
+    private bool _enabled = true;
+    private Dictionary<Collider, float> kvp;
     public override void OnNetworkSpawn()
     {
-        if (!IsServer) return;
-        cachedEntities = new List<Entity>();
         onHitData = new OnHitData()
         {
             damage = 9999,
@@ -20,39 +19,66 @@ public class DeathZone : NetworkBehaviour
             upwardsModifier = 2f,
             movingDir = Vector3.up
         };
+        if (!IsServer) return;
+        kvp = new Dictionary<Collider, float>();
 
-        PlayerManager.OnAllPlayersReset += RemoveCachedPlayers;
+        PlayerManager.ToBuilding += () =>
+        {
+            _enabled = false;
+            kvp.Clear();
+        };
+        PlayerManager.ToCombat += () =>
+        {
+            _enabled = true;
+            kvp.Clear();
+        };
     }
 
-    private void RemoveCachedPlayers()
+    void OnTriggerStay(Collider collider)
     {
-        cachedEntities.Clear();
-    }
-    void OnTriggerEnter(Collider collider)
-    {
+        if (!IsServer) return;
+        if (!_enabled) return;
         if (collider)
         {
-            Entity e = collider.GetComponent<Entity>();
-            if (e) DeathZoneRpc(e.NetworkObjectId);
+            if (!kvp.ContainsKey(collider))
+            {
+                kvp[collider] = 0f;
+                return;
+            }
+
+            if (kvp[collider] < 0f)
+                return;
+
+            kvp[collider] += Time.deltaTime;
+
+            if (kvp[collider] >= .2f)
+            {
+                ProcessDeath(collider.GetComponent<Entity>());
+                kvp[collider] = -1f;
+            }
         }
     }
 
-    [Rpc(SendTo.Server)]
-    private void DeathZoneRpc(ulong networkObjectId)
+    void OnTriggerExit(Collider collider)
     {
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject obj))
+        if (!IsServer) return;
+        if (collider)
         {
-            Entity e = obj.GetComponent<Entity>();
-            
-            if (e && e.isAlive.Value)
+            if (kvp.ContainsKey(collider))
             {
-                Vector3 pos = e.transform.position; pos.y += -1.5f;
-                onHitData.sourceHit = pos;
-
-                e.OnHit(onHitData);
-                
-                cachedEntities.Add(e);
+                kvp.Remove(collider);
             }
+        }
+    }
+
+    private void ProcessDeath(Entity e)
+    {
+        if (e && e.isAlive.Value)
+        {
+            Vector3 pos = e.transform.position; pos.y += -1.5f;
+            onHitData.sourceHit = pos;
+
+            e.OnHit(onHitData);
         }
     }
 }

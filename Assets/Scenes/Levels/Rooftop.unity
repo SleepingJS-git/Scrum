@@ -16041,7 +16041,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  explosionForce: 1
+  explosionForce: 50
 --- !u!114 &1063407113
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16079,7 +16079,7 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1792
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0

@@ -16,6 +16,7 @@ public class Player : Entity
     public PlayerBody Body { get; private set; }
     public PlayerStats Stats { get; private set; }
     [SerializeField] private AudioSource playerAudioSource;
+    public DeathCamera deathCamera;
 
     // Player Hud - Gets set by PlayerManager
     private PlayerHud hud;
@@ -63,6 +64,7 @@ public class Player : Entity
         if (IsOwner)
         {
             PlayerManager.Instance.SetLocalPlayer(this);
+            deathCamera.Init();
 
             Interaction.Init(Look.cam.transform, hud);
         }
@@ -70,7 +72,7 @@ public class Player : Entity
         Combat.Init(IsOwner, hud);
 
         
-
+        deathCamera.Toggle(false);
         _initialized = true;
     }
 
@@ -139,7 +141,7 @@ public class Player : Entity
     /// <param name="damage"></param>
     /// <param name="sourceHit"></param>
     /// <param name="upwardsModifier"></param>
-    [Rpc(SendTo.ClientsAndHost)]
+    [Rpc(SendTo.Everyone)]
     private void OnHitClientRpc(int damage, Vector3 sourceHit, float explosionForce, float upwardsModifier)
     {
         Body.onHitData.explosionForce = explosionForce;
@@ -168,6 +170,7 @@ public class Player : Entity
 
     public void Revive()
     {
+        deathCamera.Toggle(false);
         hud.health.text = health.Value.ToString();
         Combat.EmptyWeapon();
         ToggleDeathHud(false);
@@ -220,6 +223,12 @@ public class Player : Entity
     {
         Look.RotateRigAim(xRotation);
     }
+
+    public void StartDeathCam()
+    {
+        
+    }
+
     
     /// <summary>
     /// [Called by Server]

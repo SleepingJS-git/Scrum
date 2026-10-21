@@ -389,6 +389,7 @@ public class PlayerManager : NetworkBehaviour
                 { 
                     LocalPlayer.Look.cam.gameObject.SetActive(true);
                     LocalPlayer.Body.ShowBodyRenderer(false);
+                    LocalPlayer.deathCamera.Toggle(false);
                 }
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
 
@@ -406,6 +407,7 @@ public class PlayerManager : NetworkBehaviour
                 {
                     LocalPlayer.Look.cam.gameObject.SetActive(false);
                     LocalPlayer.Body.ShowBodyRenderer(true);
+                    LocalPlayer.deathCamera.Toggle(false);
                 } 
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(true);
                 if (builderHud) builderHud.gameObject.SetActive(true);  
