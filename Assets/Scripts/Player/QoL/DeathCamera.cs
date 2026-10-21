@@ -28,7 +28,8 @@ public class DeathCamera : MonoBehaviour
 
     public void SwapToBuildCamTimer()
     {
-        StartCoroutine(SwapToBuildCamRoutine());
+        if (PlayerManager.BuildingUI)
+            StartCoroutine(SwapToBuildCamRoutine());
     }
 
     private IEnumerator SwapToBuildCamRoutine()

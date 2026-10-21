@@ -158,7 +158,11 @@ public class Player : Entity
     public void UpdateHealthClientRpc(ulong clientId)
     {
         if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
             hud.health.SetText(health.Value.ToString());
+            
+            if (!isAlive.Value) hud.health.SetText("0");
+        }
     }
 
     public void ToggleMove(bool canMove)
