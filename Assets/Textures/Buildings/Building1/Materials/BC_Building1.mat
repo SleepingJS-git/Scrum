@@ -121,7 +121,7 @@ Material:
     - _NoiseAmount: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.005
-    - _PosterizeAmount: 5.98
+    - _PosterizeAmount: 4.03
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1

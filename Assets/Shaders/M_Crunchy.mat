@@ -43,7 +43,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _NoiseAmount: 2
-    - _PosterizeAmount: 3.26
+    - _PosterizeAmount: 3.86
     - _QueueControl: 0
     - _QueueOffset: 0
     - _UseTexture: 1
