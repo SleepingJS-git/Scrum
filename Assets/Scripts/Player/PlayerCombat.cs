@@ -109,6 +109,8 @@ public class PlayerCombat : MonoBehaviour
             // Set up Hud stuff
             UpdateWeaponInfo(data.weaponName, "");
         }
+
+        rightHandWeapon.AddRecoil(-300);
     }
 
     /// <summary>

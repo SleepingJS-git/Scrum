@@ -30,6 +30,11 @@ public class PlayerLook : MonoBehaviour
         cam.gameObject.SetActive(camEnabled);
     }
 
+    public void Toggle(bool isOn)
+    {
+        cam.gameObject.SetActive(isOn);
+    }
+
 
 
     /// <summary>

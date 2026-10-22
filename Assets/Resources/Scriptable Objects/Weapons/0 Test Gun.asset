@@ -17,12 +17,12 @@ MonoBehaviour:
   firingType: 0
   WeaponType: 0
   damage: 15
-  fireRate: 0.202
+  fireRate: 0.12
   bulletCount: 16
   bulletsPerShot: 1
   magCount: 2
   reloadSpeed: 1.5
-  bulletSpread: 0.075
+  bulletSpread: 0.045
   spreadIncreasePerShot: 0.02
   weaponInHand: {fileID: 393730789072996145, guid: 3c50185d73fd84d46854c3e8fd4da8ef, type: 3}
   weaponModel: {fileID: 6304313504817503738, guid: 037ab4970451b3f4ba3e1f5acea50924, type: 3}
