@@ -19,3 +19,5 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 77522231cf4d6144da789bde29d4fa2f, type: 3}
   - {fileID: 8300000, guid: 8f336add378f4374d827327e42f11bac, type: 3}
   - {fileID: 8300000, guid: 946e782cc31826f44a48a12885a5f8f2, type: 3}
+  menuMusic:
+  - {fileID: 8300000, guid: aa8f36356a3ee5642bcb5f6540ee98ff, type: 3}
