@@ -43,7 +43,7 @@ public class PlayerManager : NetworkBehaviour
 
     // Debugger
     private DebugConfig debugConfig;
-
+    public static ConfigType ConfigType => Instance.debugConfig.debuggingType;
 
     // Spawnpoint transforms
     public Transform[] spawnPoints;
@@ -108,7 +108,7 @@ public class PlayerManager : NetworkBehaviour
 
         switch (debugConfig.debuggingType)
         {
-            case DebugType.Solo_Fps:
+            case ConfigType.Solo_Fps:
                 DefaultPov = 0;
 
                 // Host is controlling themselves so this is ok, but dont copy this for multiplayer
@@ -127,7 +127,7 @@ public class PlayerManager : NetworkBehaviour
                 };
             break;
 
-            case DebugType.Solo_Building:
+            case ConfigType.Solo_Building:
                 DefaultPov = 1;
 
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
@@ -137,12 +137,13 @@ public class PlayerManager : NetworkBehaviour
                 };
             break;
 
-            case DebugType.MVP:
+            case ConfigType.Full_Game:
                 DefaultPov = 3; // 3 means there is no default pov, because the players will be swapping between player, builder, and spectator
 
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
                 NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayer;
 
+                // Everything below is to set up the Server-side PlayerManager
                 // Tell the gamemanager that the player is spawned and loaded.
                 NetworkManager.Singleton.OnClientConnectedCallback += GameManager.Instance.PlayerLoaded;
 
@@ -155,6 +156,29 @@ public class PlayerManager : NetworkBehaviour
 
                 // Tell gamemanager that a player had died
                 OnPlayerDeath += GameManager.Instance.PlayerDeath;
+
+            break;
+
+            case ConfigType.Single_Player_Full:
+                DefaultPov = 1; // Default POV is builder
+
+                NetworkManager.Singleton.OnClientConnectedCallback += SpawnBuilder;
+                NetworkManager.Singleton.OnClientConnectedCallback += SpawnPlayer;
+                
+                NetworkManager.Singleton.OnClientConnectedCallback += GameManager.Instance.PlayerLoaded;
+
+                NetworkManager.Singleton.OnClientConnectedCallback += (clientId) =>
+                {
+                    ChangePov(1);
+                };
+
+                // Host Respawn the player immediately (the host is respawning themselves so its ok)
+                OnPlayerDeath += (clientId) =>
+                {
+                    Invoke(nameof(ClearSpawnPoints), 2f);
+                    Invoke(nameof(ServerPlayersReset), 2f);
+                    Invoke(nameof(ClientPlayerResetRpc), 2f);
+                };
 
             break;
         }

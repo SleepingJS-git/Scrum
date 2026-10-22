@@ -2590,6 +2590,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2032461095849471320, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6362116157266495296, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.858675
@@ -4309,6 +4313,7 @@ MonoBehaviour:
   debugPlayerSettings:
     CrouchingType: 0
     DefaultPOV: 80
+    DevMode: 0
   spawnPoints:
   - {fileID: 1638018075}
   - {fileID: 529807757}
