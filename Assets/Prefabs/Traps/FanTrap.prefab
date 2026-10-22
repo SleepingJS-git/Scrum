@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 8300945179025206172}
   - component: {fileID: 7297363727321103640}
   - component: {fileID: 9156082375254171933}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: FanParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}

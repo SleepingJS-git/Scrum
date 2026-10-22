@@ -27,6 +27,9 @@ public class GridPlacement : NetworkBehaviour
     [SerializeField]
     ulong spawnCellID;
 
+    [SerializeField]
+    LayerMask buildableLayerMask;
+
     // The current rotation of the object
     public NetworkVariable<float> rotation = new(
         0,
@@ -281,7 +284,7 @@ public class GridPlacement : NetworkBehaviour
         Ray ray = buildCam.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 100f))
+        if (Physics.Raycast(ray, out hit, 100f, buildableLayerMask))
         {
             Vector3 targetPos = hit.point;
             return targetPos;
