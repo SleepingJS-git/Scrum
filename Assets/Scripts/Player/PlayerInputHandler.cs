@@ -44,7 +44,7 @@ public class PlayerInputHandler : MonoBehaviour
     /// <param name="ctx"></param>
     public void OnMove(CallbackContext ctx)
     {
-        // if (!_main.CanMove) return; <- Commented out for this playtest lmao
+        if (!_main.CanMove) return;
         _moveInput = ctx.ReadValue<Vector2>();
     }
 
@@ -150,7 +150,7 @@ public class PlayerInputHandler : MonoBehaviour
             {
                 move.CrouchHolding(true);
             }
-            else
+            else if (ctx.canceled)
             {
                 move.CrouchHolding(false);
             }

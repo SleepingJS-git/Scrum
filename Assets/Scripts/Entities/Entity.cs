@@ -57,11 +57,11 @@ public abstract class Entity : NetworkBehaviour
             OnDeathEffectsClientRpc(OwnerClientId);
         }
 
-        Debug.Log($"{gameObject.name} was damaged by {onHitData.attacker.name} ({onHitData.damage} - {onHitData.damageType})");
+        // Debug.Log($"{gameObject.name} was damaged by {onHitData.attacker.name} ({onHitData.damage} - {onHitData.damageType})");
     }
 
     /// <summary>
-    /// [Invoked by ServerRpc] Subscribe events for OnDeath from client
+    /// [Invoked by ServerRpc] Subscribe events for OnDeath from server or client.
     /// </summary>
     public virtual void AddDeathEvent(Action action)
     {

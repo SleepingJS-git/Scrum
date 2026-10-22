@@ -31,7 +31,7 @@ public class HeadBobbing : MonoBehaviour
 
     void Update()
     {
-        if (!_enabled) return;
+        if (!main.CanMove) return;
         EvaluateMotion();
         CheckMotion();
         ResetPosition();

@@ -205,6 +205,7 @@ public class Weapon : NetworkBehaviour
                     {
                         attacker = player,
                         damage = data.damage,
+                        explosionForce = data.damage,
                         sourceHit = sourceHit,
                         movingDir = aimDir,
                         upwardsModifier = 0f,
@@ -281,6 +282,7 @@ public class Weapon : NetworkBehaviour
                     {
                         attacker = player,
                         damage = data.damage,
+                        explosionForce = data.damage,
                         sourceHit = hit.point,
                         movingDir = dir,
                         upwardsModifier = .5f,

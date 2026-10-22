@@ -327,6 +327,17 @@
                 },
                 {
                     "name": "",
+                    "id": "507e3446-d2ac-46fc-9f60-57b376accebb",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard & Mouse",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "41c588d0-2615-49ee-beec-7eb65819b236",
                     "path": "<Keyboard>/shift",
                     "interactions": "",

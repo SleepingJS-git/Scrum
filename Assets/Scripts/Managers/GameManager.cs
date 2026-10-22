@@ -191,13 +191,13 @@ public class GameManager : NetworkBehaviour
 
         if (gamePhase == GamePhase.Building)
         {
-            PlayerManager.ChangePov(1);
+            PlayerManager.Instance.ChangePov(1);
             roundWinnerCanvasGroup.alpha = 0f;
             connectUI.ResetReadyButton();
         }
         else if (gamePhase == GamePhase.Combat)
         {
-            PlayerManager.ChangePov(0);
+            PlayerManager.Instance.ChangePov(0);
         }
     }
 
