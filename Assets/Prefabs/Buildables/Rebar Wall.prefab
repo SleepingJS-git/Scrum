@@ -241,7 +241,7 @@ MonoBehaviour:
     zAxis: 1
     detectFloatingFragments: 0
     asynchronous: 0
-    insideMaterial: {fileID: 0}
+    insideMaterial: {fileID: 2100000, guid: eaf04e53092518346960500aeb4d60bf, type: 2}
     textureScale: {x: 1, y: 1}
     textureOffset: {x: 0, y: 0}
   refractureOptions:
@@ -269,7 +269,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  maxHealth: 25
+  maxHealth: 75
   onDeathEffects:
     m_PersistentCalls:
       m_Calls: []
@@ -280,7 +280,7 @@ MonoBehaviour:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 25
+    m_InternalValue: 75
   isAlive:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
