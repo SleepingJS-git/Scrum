@@ -5,54 +5,60 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/!Main Menu.unity
     guid: 60b53cf9f2249e442942d277ae0bae23
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Player Networking.unity
     guid: b0cfdc570e1181f4ea97a48bf7ca7a7f
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/LevelGrayboxing.unity
     guid: 7a69aafc724c7554dbc523c610bb5482
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SceneConnectionTest.unity
     guid: d5fb6ebce6850dd40a78a2fc27ff071d
   - enabled: 0
     path: Assets/Scenes/MVP Testing.unity
     guid: 2808a64f2b3ce5844afaf17d04f3b4d2
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/GridBuilding (Single Player).unity
     guid: a7df09fd3e1f1654586c5b6f4eea943a
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/GridBuildingNetworking.unity
     guid: f42b482cc0927f64d83270473e27f26c
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Player Testing (Single Player).unity
     guid: d00415997ef5fae4690b9fe16987f7cb
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/FractureTesting.unity
     guid: cfe319f653e7d4249a7086d13b3dfc33
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/3D Asset Library.unity
     guid: 177ae0b61e6a4fc41bfcbf6a2e37f466
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MVP Testing (With New PlayerManager).unity
     guid: 229d244c3804cf745844d1274e9e8cd5
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/TheCreek.unity
     guid: 94adb9573a1ab374e8b64db6316887f6
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Office.unity
     guid: cd06e3abbc77cac4e904f8463dcec0a9
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Rooftop.unity
     guid: 930235d32f0f2f24abcaf0ccda4d4d4f
   - enabled: 0
     path: Assets/Scenes/TheOfficeMVP.unity
     guid: 1f9aba819f1d23047b51e002994bcd43
+  - enabled: 1
+    path: Assets/Scenes/MAGIC/MAGIC_MainMenu.unity
+    guid: 3968d33fd12224d4da2d4cbc35584714
+  - enabled: 1
+    path: Assets/Scenes/MAGIC/MAGIC_Office.unity
+    guid: 9c47eac4cf5b6c44e99a51e5a429183e
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
