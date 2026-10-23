@@ -127,4 +127,4 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 1}
   - {x: 0, y: 0, z: 2}
   mesh: {fileID: 0}
-  Id: 7
+  Id: 6

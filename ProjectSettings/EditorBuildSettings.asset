@@ -53,7 +53,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/TheOfficeMVP.unity
     guid: 1f9aba819f1d23047b51e002994bcd43
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MAGIC/MAGIC_MainMenu.unity
     guid: 3968d33fd12224d4da2d4cbc35584714
   - enabled: 1
