@@ -48,7 +48,7 @@ public class GridPlacement : NetworkBehaviour
     private Vector3 offset;
 
     // The default color of the placed object
-    private Color defaultColor;
+    private List<Color> defaultColors = new List<Color>();
 
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
@@ -241,10 +241,14 @@ public class GridPlacement : NetworkBehaviour
             previewObject.gameObject.SetActive(false);
             return;
         }
-        if (!canPlace.Value)
-            previewRenderer.material.color = new Color(2f, defaultColor.g, defaultColor.b, 0.1f);
-        else
-            previewRenderer.material.color = new Color(defaultColor.r, 2f, defaultColor.b, 0.1f);
+
+        for (int i = 0; i < previewRenderer.materials.Length; i++)
+        {
+            if (!canPlace.Value)
+                previewRenderer.materials[i].color = new Color(2f, defaultColors[i].g, defaultColors[i].b, 0.1f);
+            else
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.1f);
+        }
     }
 
     [Rpc(SendTo.Server)]
@@ -326,9 +330,12 @@ public class GridPlacement : NetworkBehaviour
             previewRenderer = previewObject.ObjectRenderer;
             previewRenderer.gameObject.layer = 2;
 
-            defaultColor = previewRenderer.material.color;
-            previewRenderer.material.color = new Color(defaultColor.r, defaultColor.g, defaultColor.b, 0.1f);
-            defaultColor = previewRenderer.material.color;
+            for (int i = 0; i < previewRenderer.materials.Length; i++)
+            {
+                defaultColors.Add(previewRenderer.materials[i].color);
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, defaultColors[i].g, defaultColors[i].b, 0.1f);
+                defaultColors[i] = previewRenderer.materials[i].color;
+            }
         }
     }
 
@@ -436,7 +443,6 @@ public class GridPlacement : NetworkBehaviour
             }
             distToNegZ = 1 - distToPosZ;
         }
-        Debug.Log(mousePos);
         float lowestDist = Mathf.Min(distToNegX, distToPosX, distToNegY, distToPosY, distToNegZ, distToPosZ);
 
         if (distToNegX == lowestDist) { return Vector3Int.left; }
