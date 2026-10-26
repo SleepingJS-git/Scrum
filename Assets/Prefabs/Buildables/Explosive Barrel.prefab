@@ -14729,14 +14729,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 755669403
+  GlobalObjectIdHash: 3169086801
   InScenePlacedSourceGlobalObjectIdHash: 3169086801
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -14806,7 +14806,7 @@ MonoBehaviour:
   occupiedCells:
   - {x: 0, y: 0, z: 0}
   mesh: {fileID: 5047416908333565366}
-  Id: 0
+  Id: 1
 --- !u!33 &3143865495374475159
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -14997,9 +14997,9 @@ AudioSource:
   m_GameObject: {fileID: 8091135308391369094}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -3731577092880171068, guid: f017803528eb05c4a93c1dff50e1a58a, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 64c5cc3315aa6f444b9a70cc482b0193, type: 3}
+  m_Resource: {fileID: 8300000, guid: 1f809fa3a85f7a942b10c900b107fc09, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1

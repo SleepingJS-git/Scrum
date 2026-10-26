@@ -7,6 +7,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private GameAudioData audioData;
     [SerializeField] private AudioSource uiAudioSource;
 
+
     private void Awake()
     {
         // If another AudioManager already exists, destroy this duplicate
@@ -34,4 +35,6 @@ public class AudioManager : MonoBehaviour
     {
         return audioData.deathSounds[index];
     }
+
+    
 }

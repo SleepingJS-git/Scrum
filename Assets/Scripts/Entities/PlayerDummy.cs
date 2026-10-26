@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerDummy : Entity
 {
-    [SerializeField]  private PlayerBody _body;
+    [SerializeField] private PlayerBody _body;
     [SerializeField] private Collider _collider;
     [SerializeField] private AudioSource audioSource;
     public override void OnNetworkSpawn()
@@ -19,15 +19,14 @@ public class PlayerDummy : Entity
     }
     public override void OnHit(OnHitData onHitData)
     {
-        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.upwardsModifier);
+        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.explosionForce, onHitData.upwardsModifier);
         base.OnHit(onHitData);
         // audioSource. play hurt noise
     }
-
-    [Rpc(SendTo.ClientsAndHost)]
-    private void OnHitClientRpc(int damage, Vector3 sourceHit, float upwardsModifier)
+    [Rpc(SendTo.Everyone)]
+    private void OnHitClientRpc(int damage, Vector3 sourceHit, float explosionForce, float upwardsModifier)
     {
-        _body.onHitData.damage = damage;
+        _body.onHitData.explosionForce = explosionForce;
         _body.onHitData.sourceHit = sourceHit;
         _body.onHitData.upwardsModifier = upwardsModifier;
     }

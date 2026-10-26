@@ -108,7 +108,7 @@ MonoBehaviour:
   UseHalfFloatPrecision: 0
   InLocalSpace: 0
   SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
+  Interpolate: 0
   SlerpPosition: 0
 --- !u!114 &1026980750256354395
 MonoBehaviour:
@@ -134,7 +134,7 @@ MonoBehaviour:
   - {x: 2, y: 1, z: 0}
   - {x: 2, y: 2, z: 0}
   mesh: {fileID: 8755468180394624992}
-  Id: 6
+  Id: 8
 --- !u!33 &6249034917241201286
 MeshFilter:
   m_ObjectHideFlags: 0

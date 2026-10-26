@@ -368,6 +368,17 @@
                     "action": "Kick",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8e2404b2-91f7-4c02-932f-1c656fc1e9b6",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard & Mouse",
+                    "action": "ToBuilding (Test)",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

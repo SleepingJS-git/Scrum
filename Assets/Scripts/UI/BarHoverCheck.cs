@@ -1,19 +1,29 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
-public class BarHoverCheck : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class BarHoverCheck : MonoBehaviour
 {
-    public bool IsHoveringBuildableBar { get; private set; }
+    [Tooltip("A fixed rectangle covering the whole bar, including gaps between slots. Defaults to this object's Rect Transform.")]
+    [SerializeField] private RectTransform interactionArea;
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public bool IsHoveringBuildableBar
     {
-        IsHoveringBuildableBar = true;
-    }
+        get
+        {
+            if (!isActiveAndEnabled || Mouse.current == null) return false;
 
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        IsHoveringBuildableBar = false;
-    }
+            if (!interactionArea) interactionArea = transform as RectTransform;
 
-    // Rest of your BuildingUI code...
+            if (!interactionArea || !interactionArea.gameObject.activeInHierarchy) return false;
+
+            Canvas canvas = interactionArea.GetComponentInParent<Canvas>();
+
+            if (!canvas) return false;
+
+            Canvas rootCanvas = canvas.rootCanvas;
+            Camera eventCamera = rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : rootCanvas.worldCamera;
+
+            return RectTransformUtility.RectangleContainsScreenPoint(interactionArea, Mouse.current.position.ReadValue(), eventCamera);
+        }
+    }
 }

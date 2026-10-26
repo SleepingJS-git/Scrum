@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hitmarkerSound: {fileID: 8300000, guid: d7e861ed15f1c74449703275159d2493, type: 3}
   deathSounds:
-  - {fileID: 8300000, guid: 985d18b0469117b4180c221aa12b0939, type: 3}
-  - {fileID: 8300000, guid: 3fbec024093997c4087623ae4e4340eb, type: 3}
-  - {fileID: 8300000, guid: 77522231cf4d6144da789bde29d4fa2f, type: 3}
-  - {fileID: 8300000, guid: 8f336add378f4374d827327e42f11bac, type: 3}
-  - {fileID: 8300000, guid: 946e782cc31826f44a48a12885a5f8f2, type: 3}
+  - {fileID: 8300000, guid: dce0b2cb485994248aadc62cbe463cd6, type: 3}
+  - {fileID: 8300000, guid: 1ca75a70b07410b41b8dbcc8f12beb11, type: 3}
+  - {fileID: 8300000, guid: bc2f298426d00ea4090d3417a84e5547, type: 3}
+  - {fileID: 8300000, guid: 43230bae80e46dc478c0926d8dcc42be, type: 3}
+  - {fileID: 8300000, guid: 6f9b7c21e16746f478a1720c9ad821e9, type: 3}
+  menuMusic:
+  - {fileID: 8300000, guid: aa8f36356a3ee5642bcb5f6540ee98ff, type: 3}

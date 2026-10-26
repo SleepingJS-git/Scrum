@@ -40,15 +40,13 @@ public class DebugManager : MonoBehaviour
         // }
         switch (debugConfig.debuggingType)
         {
-            case DebugType.Solo_Fps:
+            case ConfigType.Solo_Fps:
+            case ConfigType.Solo_Building:
+            case ConfigType.Single_Player_Full:
                 NetworkManager.Singleton.StartHost();
                 break;
 
-            case DebugType.Solo_Building:
-                NetworkManager.Singleton.StartHost();
-                break;
-
-            case DebugType.MVP:
+            case ConfigType.Full_Game:
                 {
                     // Had to add this because I can't test relay/main menu stuff
                     bool alreadyInSession = LobbyManager.Instance != null && LobbyManager.Instance.IsInLobby;
@@ -101,8 +99,9 @@ public class DebugManager : MonoBehaviour
         {
             switch (debugConfig.debuggingType)
             {
-                case DebugType.Solo_Fps:
-                case DebugType.Solo_Building:
+                case ConfigType.Solo_Fps:
+                case ConfigType.Solo_Building:
+                case ConfigType.Single_Player_Full:
                     PlayerManager.Instance.ConfigureSpawning(debugConfig);
                 break;
             }
@@ -115,25 +114,25 @@ public class DebugManager : MonoBehaviour
             switch (SceneManager.GetActiveScene().name)
             {
                 case "Player Testing (Single Player)":
-                    debugConfig.debuggingType = DebugType.Solo_Fps;
+                    debugConfig.debuggingType = ConfigType.Solo_Fps;
                     PlayerManager.Instance.ConfigureSpawning(debugConfig);
 
                 break;
 
                 case "GridBuilding (Single Player)":
-                    debugConfig.debuggingType = DebugType.Solo_Building;
+                    debugConfig.debuggingType = ConfigType.Solo_Building;
                     PlayerManager.Instance.ConfigureSpawning(debugConfig);
 
                 break;
 
                 case "MVP Testing (With New PlayerManager)":
                     Debug.Log("WE ARE ON MVP????");
-                    debugConfig.debuggingType = DebugType.MVP;
+                    debugConfig.debuggingType = ConfigType.Full_Game;
                 break;
 
                 case "Office":
                     Debug.Log("WE ARE ON Office????");
-                    debugConfig.debuggingType = DebugType.MVP;
+                    debugConfig.debuggingType = ConfigType.Full_Game;
                 break;
             }
         }
@@ -146,7 +145,7 @@ public class DebugManager : MonoBehaviour
 public class DebugConfig
 {
     public bool IsConfigured;
-    public DebugType debuggingType;
+    public ConfigType debuggingType;
     public DebugConfig()
     {
         IsConfigured = false;
@@ -158,11 +157,12 @@ public class DebugConfig
     }
 }
 
-public enum DebugType
+public enum ConfigType
 {
     Solo_Fps,
     Solo_Building,
     Networked_Fps,
     Networked_Building, // Add more in the future
-    MVP,
+    Full_Game,
+    Single_Player_Full
 }
