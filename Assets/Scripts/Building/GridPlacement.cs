@@ -73,6 +73,8 @@ public class GridPlacement : NetworkBehaviour
         NetworkVariableWritePermission.Server
     );
 
+    public static bool IsBuildingPhase => GameManager.Instance == null || GameManager.GamePhase == GamePhase.Building;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
@@ -452,6 +454,34 @@ public class GridPlacement : NetworkBehaviour
         else if (distToNegZ == lowestDist) { return Vector3Int.back; }
         else if (distToPosZ == lowestDist) { return Vector3Int.forward; }
         return Vector3Int.zero;
+    }
+    public void ClearBuildable()
+    {
+        if (!IsSpawned || !IsOwner) return;
+
+        ClearBuildableServerRpc();
+    }
+
+    [Rpc(SendTo.Server, RequireOwnership = true)]
+    private void ClearBuildableServerRpc()
+    {
+        buildable = null;
+        canPlace.Value = false;
+
+        if (previewObject != null)
+        {
+            if (previewObject.NetworkObject.IsSpawned)
+            {
+                previewObject.NetworkObject.Despawn(true);
+            }
+            else
+            {
+                Destroy(previewObject.gameObject);
+            }
+        }
+
+        previewObject = null;
+        previewRenderer = null;
     }
 }
 
