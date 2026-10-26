@@ -130,7 +130,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 1, y: 0, z: 0}
   mesh: {fileID: 2164922561723401530}
-  Id: 4
+  Id: 5
 --- !u!33 &6198814009120328262
 MeshFilter:
   m_ObjectHideFlags: 0
