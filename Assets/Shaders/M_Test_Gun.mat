@@ -43,11 +43,13 @@ Material:
     m_Ints: []
     m_Floats:
     - _NoiseAmount: 3
+    - _PosterizeAmount: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     - _UseTexture: 0
     m_Colors:
     - _Tiling: {r: 1, g: 1, b: 0, a: 0}
+    - _Tint: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &4211385967292950903
