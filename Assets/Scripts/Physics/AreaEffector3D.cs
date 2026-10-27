@@ -29,8 +29,11 @@ public class AreaEffector3D : NetworkBehaviour
         if (!IsServer) return;
 
         Vector3 dir = useForwardTransform ? transform.forward : forceDir;
+        
+        if (Physics.Linecast(other.transform.position, transform.position, Layer.Buildable | Layer.Wall | Layer.Ground)) return;
 
         Vector3 toFanDir = transform.position - other.transform.position;
+
         float dist = toFanDir.magnitude;
 
         if (dist > maxDist) return;
