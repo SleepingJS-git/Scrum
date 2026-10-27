@@ -34,12 +34,15 @@ public class MusicManager : MonoBehaviour
     public void PlayMusic()
     {
         audioSource.clip = audioData.menuMusic[0];
-        FadeCouroutine(fadeDuration, true);
+        audioSource.Play();
+        //FadeCouroutine(fadeDuration, true);
     }
 
     public void StopMusic()
     {
-        FadeCouroutine(fadeDuration, false);
+        audioSource.Pause();
+        //FadeCouroutine(fadeDuration, false);
+
     }
 
     /// <summary>

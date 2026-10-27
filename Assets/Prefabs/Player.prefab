@@ -3158,6 +3158,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 042248d841392724986eff9241e4933a, type: 3}
   - {fileID: 8300000, guid: 6ededfb9fb7093d43947a3f1e1039e4b, type: 3}
   - {fileID: 8300000, guid: 26445ccacfc68a14e97afc2abd9120d0, type: 3}
+  - {fileID: 8300000, guid: f34b4198bb1743b4eaa802ad716b0b6c, type: 3}
+  - {fileID: 8300000, guid: 9326786bbbab97e408ef0d2e63c72311, type: 3}
   distancePerStep: 1.8
   ownFootstepVolume: 0.35
   otherFootstepVolume: 0.8
