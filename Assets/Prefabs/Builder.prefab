@@ -50,6 +50,9 @@ MonoBehaviour:
   grid: {fileID: 0}
   buildCam: {fileID: 5508748084804875149}
   spawnCellID: 99
+  buildableLayerMask:
+    serializedVersion: 2
+    m_Bits: 1216
   rotation:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0

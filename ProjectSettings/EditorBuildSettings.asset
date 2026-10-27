@@ -56,7 +56,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/MAGIC/MAGIC_MainMenu.unity
     guid: 3968d33fd12224d4da2d4cbc35584714
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MAGIC/MAGIC_Office.unity
     guid: 9c47eac4cf5b6c44e99a51e5a429183e
   m_configObjects:
