@@ -138,6 +138,7 @@ public class TitleScreen : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
+        
         if (LobbyManager.Instance == null ||
             LobbyManager.Instance.CurrentSession == null)
         {
@@ -176,8 +177,6 @@ public class TitleScreen : MonoBehaviour
             return;
         }
 
-        musicManager.StopMusic();
-
         NetworkManager.Singleton.SceneManager.LoadScene(
             sceneName,
             LoadSceneMode.Single
@@ -210,5 +209,17 @@ public class TitleScreen : MonoBehaviour
         {
             LobbyManager.Instance.LobbyChanged -= RefreshStartGameButton;
         }
+    }
+
+    /// <summary>
+    /// Exit the game completely
+    /// </summary>
+    public void ExitGame()
+    {
+    #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+    #else
+        Application.Quit();
+    #endif
     }
 }

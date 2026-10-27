@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections;
+using Unity.Netcode;
+using UnityEngine;
 
 
 public class MusicManager : MonoBehaviour
@@ -33,13 +34,20 @@ public class MusicManager : MonoBehaviour
 
     public void PlayMusic()
     {
-        audioSource.clip = audioData.menuMusic[0];
-        FadeCouroutine(fadeDuration, true);
+        if (audioSource != null)
+        {
+            audioSource.clip = audioData.menuMusic[0];
+            audioSource.Play();
+        }
+        //FadeCouroutine(fadeDuration, true);
     }
 
     public void StopMusic()
     {
-        FadeCouroutine(fadeDuration, false);
+        if(audioSource != null)
+            audioSource.Pause();
+        //FadeCouroutine(fadeDuration, false);
+
     }
 
     /// <summary>
