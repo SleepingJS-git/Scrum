@@ -138,6 +138,7 @@ public class TitleScreen : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
+        
         if (LobbyManager.Instance == null ||
             LobbyManager.Instance.CurrentSession == null)
         {
@@ -175,8 +176,6 @@ public class TitleScreen : MonoBehaviour
             );
             return;
         }
-
-        musicManager.StopMusic();
 
         NetworkManager.Singleton.SceneManager.LoadScene(
             sceneName,
