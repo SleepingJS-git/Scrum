@@ -27,6 +27,9 @@ public class GridPlacement : NetworkBehaviour
     [SerializeField]
     ulong spawnCellID;
 
+    [SerializeField]
+    LayerMask buildableLayerMask;
+
     // The current rotation of the object
     public NetworkVariable<float> rotation = new(
         0,
@@ -48,7 +51,7 @@ public class GridPlacement : NetworkBehaviour
     private Vector3 offset;
 
     // The default color of the placed object
-    private Color defaultColor;
+    private List<Color> defaultColors = new List<Color>();
 
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
@@ -72,6 +75,8 @@ public class GridPlacement : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+
+    public static bool IsBuildingPhase => GameManager.Instance == null || GameManager.GamePhase == GamePhase.Building;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
@@ -241,10 +246,14 @@ public class GridPlacement : NetworkBehaviour
             previewObject.gameObject.SetActive(false);
             return;
         }
-        if (!canPlace.Value)
-            previewRenderer.material.color = new Color(2f, defaultColor.g, defaultColor.b, 0.1f);
-        else
-            previewRenderer.material.color = new Color(defaultColor.r, 2f, defaultColor.b, 0.1f);
+
+        for (int i = 0; i < previewRenderer.materials.Length; i++)
+        {
+            if (!canPlace.Value)
+                previewRenderer.materials[i].color = new Color(2f, defaultColors[i].g, defaultColors[i].b, 0.1f);
+            else
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.1f);
+        }
     }
 
     [Rpc(SendTo.Server)]
@@ -277,7 +286,7 @@ public class GridPlacement : NetworkBehaviour
         Ray ray = buildCam.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 100f))
+        if (Physics.Raycast(ray, out hit, 100f, buildableLayerMask))
         {
             Vector3 targetPos = hit.point;
             return targetPos;
@@ -326,9 +335,12 @@ public class GridPlacement : NetworkBehaviour
             previewRenderer = previewObject.ObjectRenderer;
             previewRenderer.gameObject.layer = 2;
 
-            defaultColor = previewRenderer.material.color;
-            previewRenderer.material.color = new Color(defaultColor.r, defaultColor.g, defaultColor.b, 0.1f);
-            defaultColor = previewRenderer.material.color;
+            for (int i = 0; i < previewRenderer.materials.Length; i++)
+            {
+                defaultColors.Add(previewRenderer.materials[i].color);
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, defaultColors[i].g, defaultColors[i].b, 0.1f);
+                defaultColors[i] = previewRenderer.materials[i].color;
+            }
         }
     }
 
@@ -436,7 +448,6 @@ public class GridPlacement : NetworkBehaviour
             }
             distToNegZ = 1 - distToPosZ;
         }
-        Debug.Log(mousePos);
         float lowestDist = Mathf.Min(distToNegX, distToPosX, distToNegY, distToPosY, distToNegZ, distToPosZ);
 
         if (distToNegX == lowestDist) { return Vector3Int.left; }
@@ -446,6 +457,34 @@ public class GridPlacement : NetworkBehaviour
         else if (distToNegZ == lowestDist) { return Vector3Int.back; }
         else if (distToPosZ == lowestDist) { return Vector3Int.forward; }
         return Vector3Int.zero;
+    }
+    public void ClearBuildable()
+    {
+        if (!IsSpawned || !IsOwner) return;
+
+        ClearBuildableServerRpc();
+    }
+
+    [Rpc(SendTo.Server, RequireOwnership = true)]
+    private void ClearBuildableServerRpc()
+    {
+        buildable = null;
+        canPlace.Value = false;
+
+        if (previewObject != null)
+        {
+            if (previewObject.NetworkObject.IsSpawned)
+            {
+                previewObject.NetworkObject.Despawn(true);
+            }
+            else
+            {
+                Destroy(previewObject.gameObject);
+            }
+        }
+
+        previewObject = null;
+        previewRenderer = null;
     }
 }
 

@@ -5,4 +5,5 @@ public class GameAudioData : ScriptableObject
 {
     public AudioClip hitmarkerSound;
     public AudioClip[] deathSounds;
+    public AudioClip[] menuMusic;
 }

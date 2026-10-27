@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpHeight;        // How high the player jumps
     public float gravityScale;      // Gravity
     public float upwardGravMult;    // How fast the player jumps
+    [SerializeField] private JumpAudio jumpAudio; // Audio source that plays when jumping
 
     [Header("Crouching")]
     public float crouchSpeed;       // Movespeed of player while crouching
@@ -86,6 +87,7 @@ public class PlayerMovement : MonoBehaviour
             TargetCamLevel = main.Look.standCamLevel;
         }
     }
+
 
     #region Basic Movement
     /// <summary>
@@ -353,12 +355,14 @@ public class PlayerMovement : MonoBehaviour
                 body.Play("IsSliding", false);
                 main.ChangeMoveStateServerRpc((int)MovementState.Standing);
                 velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+                jumpAudio.PlayJump();
             }
 
             // If the player is standing or sprinting, do a normal jump
             else
             {
                 velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+                jumpAudio.PlayJump();
             }
         }
     }

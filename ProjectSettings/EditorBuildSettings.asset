@@ -53,6 +53,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/TheOfficeMVP.unity
     guid: 1f9aba819f1d23047b51e002994bcd43
+  - enabled: 0
+    path: Assets/Scenes/MAGIC/MAGIC_MainMenu.unity
+    guid: 3968d33fd12224d4da2d4cbc35584714
+  - enabled: 0
+    path: Assets/Scenes/MAGIC/MAGIC_Office.unity
+    guid: 9c47eac4cf5b6c44e99a51e5a429183e
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

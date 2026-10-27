@@ -32,6 +32,7 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] private GameObject settingsScreen;
     [SerializeField] private Button startGameButton;
     [SerializeField] private CanvasGroup startGameCanvasGroup;
+    [SerializeField] private MusicManager musicManager;
 
     [SerializeField] private string sceneName = "SceneConnectionTest";
 
@@ -137,6 +138,7 @@ public class TitleScreen : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
+        
         if (LobbyManager.Instance == null ||
             LobbyManager.Instance.CurrentSession == null)
         {
@@ -207,5 +209,17 @@ public class TitleScreen : MonoBehaviour
         {
             LobbyManager.Instance.LobbyChanged -= RefreshStartGameButton;
         }
+    }
+
+    /// <summary>
+    /// Exit the game completely
+    /// </summary>
+    public void ExitGame()
+    {
+    #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+    #else
+        Application.Quit();
+    #endif
     }
 }
