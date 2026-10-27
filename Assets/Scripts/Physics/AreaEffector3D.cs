@@ -1,15 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Unity.Netcode;
 using UnityEngine;
 
 
-public class AreaEffector3D : MonoBehaviour
+public class AreaEffector3D : NetworkBehaviour
 {   
     [Tooltip("Direction the force is applied in.")]
     [SerializeField] private Vector3 forceDir;
     [Tooltip("Amount of force to apply.")]
     [SerializeField] private float force;
+    [SerializeField] private float maxForce;
+    [SerializeField] private float maxDist;
     [Tooltip("The collider that will apply the force, will make the selected collider a trigger.")]
     [SerializeField] private Collider effectArea;
     [Tooltip("Whether or not to use this objects forward transform as the force direction.")]
@@ -23,30 +26,28 @@ public class AreaEffector3D : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        Rigidbody areaEffectee;
-        CharacterController characterEffected;
+        if (!IsServer) return;
 
-        if (useForwardTransform)
+        Vector3 dir = useForwardTransform ? transform.forward : forceDir;
+
+        Vector3 toFanDir = transform.position - other.transform.position;
+        float dist = toFanDir.magnitude;
+
+        if (dist > maxDist) return;
+        float norm = dist / maxDist;
+
+        float newForce = Mathf.Lerp(maxForce, force, norm);
+
+        if (other.CompareTag("Player"))
         {
-            if (other.gameObject.TryGetComponent<Rigidbody>(out areaEffectee))
-            {
-                areaEffectee.AddForceAtPosition(transform.forward * force, other.ClosestPoint(this.transform.position));
-            }
-            else if (other.gameObject.TryGetComponent<CharacterController>(out characterEffected))
-            {
-                characterEffected.SimpleMove(transform.forward * force);
-            }
+            Player p = other.GetComponent<Player>();
+            p.AddForceRpc(dir, newForce, 0, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
         }
         else
         {
-            if (other.gameObject.TryGetComponent<Rigidbody>(out areaEffectee))
-            {
-                areaEffectee.AddForceAtPosition(forceDir * force, other.ClosestPoint(this.transform.position));
-            }
-            else if (other.gameObject.TryGetComponent<CharacterController>(out characterEffected))
-            {
-                characterEffected.SimpleMove(forceDir * force);
-            }
+            Rigidbody rb = other.attachedRigidbody;
+            if (!rb) return;
+            rb.AddForceAtPosition(dir * newForce, other.ClosestPoint(transform.position));
         }
     }
 }

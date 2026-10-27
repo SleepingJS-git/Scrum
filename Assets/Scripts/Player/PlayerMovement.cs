@@ -296,6 +296,9 @@ public class PlayerMovement : MonoBehaviour
             case ForceMode.Impulse:
                 velocity += PhysicsHelper.Impulse(dir, force, mass);
             break;
+            case ForceMode.Force:
+                velocity += PhysicsHelper.ContinuousForce(dir, force, mass, Time.deltaTime);
+            break;
         }
     }
     
