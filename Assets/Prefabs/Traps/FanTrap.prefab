@@ -111,8 +111,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2, y: 2, z: 5.7477894}
-  m_Center: {x: 0, y: 0, z: 2.4654522}
+  m_Size: {x: 2, y: 2, z: 4.088772}
+  m_Center: {x: 0, y: 0, z: 1.6359434}
 --- !u!114 &8153981842411107113
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,8 +128,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   forceDir: {x: 1, y: 0, z: 0}
   force: 5
-  maxForce: 55
-  maxDist: 6.5
+  maxForce: 45
+  maxDist: 4
   effectArea: {fileID: 219647716128583633}
   useForwardTransform: 1
 --- !u!114 &9084300534224724575
