@@ -4623,18 +4623,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 219647716128583633, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
-      propertyPath: m_Size.z
-      value: 4.088772
-      objectReference: {fileID: 0}
-    - target: {fileID: 219647716128583633, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
-      propertyPath: m_Center.z
-      value: 1.6359434
-      objectReference: {fileID: 0}
-    - target: {fileID: 219647716128583633, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
-      propertyPath: m_IncludeLayers.m_Bits
-      value: 42496
-      objectReference: {fileID: 0}
     - target: {fileID: 2150596850046145573, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.2204726
@@ -4678,18 +4666,6 @@ PrefabInstance:
     - target: {fileID: 2280038106137970603, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
       propertyPath: m_Name
       value: FanTrap
-      objectReference: {fileID: 0}
-    - target: {fileID: 8153981842411107113, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
-      propertyPath: force
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8153981842411107113, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
-      propertyPath: maxDist
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 8153981842411107113, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
-      propertyPath: maxForce
-      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 9084300534224724575, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
       propertyPath: GlobalObjectIdHash
