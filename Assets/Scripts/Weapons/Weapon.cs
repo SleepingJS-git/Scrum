@@ -60,7 +60,11 @@ public class Weapon : NetworkBehaviour
     private float lastShootTime;
 
     // Weapon Spread
-    private float currentSpread;
+    public NetworkVariable<float> net_currentSpread = new(
+        0f,
+        NetworkVariableReadPermission.Owner,
+        NetworkVariableWritePermission.Server
+    );
     private float lastSpreadTime;
     private float maxSpread;
     private float spreadIncrease;
@@ -104,20 +108,21 @@ public class Weapon : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        if (currentSpread <= 0f)
+        if (net_currentSpread.Value <= 0f)
             return;
 
         if (Time.time < lastSpreadTime + spreadRecoveryTime)
             return;
 
-        currentSpread = Mathf.Lerp(
-            currentSpread,
+        net_currentSpread.Value = Mathf.Lerp(
+            net_currentSpread.Value,
             0f,
             spreadRecoverySpeed * Time.deltaTime
         );
 
-        if (currentSpread < 0.001f)
-            currentSpread = 0f;
+        if (net_currentSpread.Value < 0.001f)
+            net_currentSpread.Value = 0f;
+            
     }
 
     /// <summary>
@@ -153,6 +158,7 @@ public class Weapon : NetworkBehaviour
         MeleeData data = WeaponDatabase.GetWeapon(weaponID.Value) as MeleeData;
 
         bool hitPlayer = false;
+        bool killedPlayer = false;
 
         Vector3 origin = headPos + (aimDir * (data.attackRange / 2));
         Vector3 halfExtents = new Vector3(
@@ -212,12 +218,13 @@ public class Weapon : NetworkBehaviour
                         damageType = (DamageType) data.damageType
                     });
 
-                    if (!e.isAlive.Value && e is Player)
+                    if (!e.isAlive.Value && e.CompareTag("Player"))
                     {
                         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
                         {
                             PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
                             stats.AddKill();
+                            killedPlayer = true;
                         }
                     }
                 }
@@ -232,10 +239,10 @@ public class Weapon : NetworkBehaviour
             currentBullets.Value,
             reserveBullets.Value,
             rpcParams.Receive.SenderClientId,
-            hitPlayer
+            hitPlayer,
+            killedPlayer
         );
 
-        // TODO: MAKE IT SO THAT PLAYER CANT DAMAGE THEMSELVES
     }
 
     /// <summary>
@@ -248,21 +255,19 @@ public class Weapon : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void HitscanFireServerRpc(Vector3 headPos, Vector3 aimDir, RpcParams rpcParams = default)
     {
-        if (!IsReady)
-            return;
+        if (!IsReady || NeedsReload) return;
 
-        if (NeedsReload)
-            return;
         // Find out which client sent the request, so we can get the camera transform.
         Player player = GetPlayer(rpcParams.Receive.SenderClientId);
-        if (!player)
-            return;
+        if (!player) return;
+
         // Get the weapon data from the sender client
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
-        Vector3 dir = SpreadRandomizer(aimDir, currentSpread);
+        Vector3 dir = SpreadRandomizer(aimDir, net_currentSpread.Value);
         Vector3 adjustedHeadPos = headPos + (dir * .65f);
         Vector3 hitPoint = adjustedHeadPos + (dir * 25f);
         bool hitPlayer = false;
+        bool killedPlayer = false;
         Debug.DrawLine(adjustedHeadPos, hitPoint, Color.red, 4f);
         // Send a raycast from the head to the new dirction within 100 units on only specific layers, and ignoring triggers
         if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, 100f, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
@@ -289,12 +294,13 @@ public class Weapon : NetworkBehaviour
                         damageType = DamageType.Bullet
                     });
 
-                    if (!e.isAlive.Value && e is Player)
+                    if (!e.isAlive.Value && e.CompareTag("Player"))
                     {
                         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
                         {
                             PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
                             stats.AddKill();
+                            killedPlayer = true;
                         }
                     }
                 }
@@ -304,8 +310,8 @@ public class Weapon : NetworkBehaviour
 
         currentBullets.Value--;
         lastShootTime = Time.time;
-        currentSpread += spreadIncrease;
-        currentSpread = Mathf.Min(currentSpread, maxSpread);
+        net_currentSpread.Value += spreadIncrease;
+        net_currentSpread.Value = Mathf.Min(net_currentSpread.Value, maxSpread);
         lastSpreadTime = Time.time;
         EffectsClientRpc(
             hitPoint,
@@ -313,7 +319,8 @@ public class Weapon : NetworkBehaviour
             currentBullets.Value,
             reserveBullets.Value,
             rpcParams.Receive.SenderClientId,
-            hitPlayer
+            hitPlayer,
+            killedPlayer
         );
     }
 
@@ -325,7 +332,7 @@ public class Weapon : NetworkBehaviour
     /// <param name="reserveBullets"></param>
     /// <param name="clientId"></param>
     [Rpc(SendTo.ClientsAndHost)]
-    public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId, bool hitPlayer)
+    public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId, bool hitPlayer, bool killedPlayer)
     {
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
 
@@ -359,17 +366,18 @@ public class Weapon : NetworkBehaviour
         if (NetworkManager.Singleton.LocalClientId != clientId)
             return;
 
-        if (hitPlayer)
-        {
-            AudioManager.Instance.PlayHitmarker();
-        }
-
         // Update the hud for the client that shot the weapon
         Player player = GetPlayer(clientId);
 
-        if (!player)
-            return;
+        if (!player) return;
 
+        if (hitPlayer)
+        {
+            AudioManager.Instance.PlayHitmarker();
+            
+            if (killedPlayer) player.Hud.Deathmarker();
+            else player.Hud.Hitmarker();
+        }
         player.Combat.RightHandRecoil();
 
         if (data is HitscanData)
@@ -506,7 +514,7 @@ public class Weapon : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void DebugInfoServerRpc()
     {
-        debugInfo.Value = $@"Weapon Spread: {currentSpread} / {maxSpread}";
+        debugInfo.Value = $@"Weapon Spread: {net_currentSpread} / {maxSpread}";
     }
 
 }

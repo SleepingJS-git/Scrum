@@ -19,8 +19,8 @@ public class Player : Entity
     public DeathCamera deathCamera;
 
     // Player Hud - Gets set by PlayerManager
-    private PlayerHud hud;
-    public void SetHud(PlayerHud h) => this.hud = h; 
+    public PlayerHud Hud { get; private set; }
+    public void SetHud(PlayerHud h) => Hud = h; 
 
     // Random garbage
     public Transform PlayerCam => Look.cam.transform;
@@ -66,10 +66,10 @@ public class Player : Entity
             PlayerManager.Instance.SetLocalPlayer(this);
             deathCamera.Init();
 
-            Interaction.Init(Look.cam.transform, hud);
+            Interaction.Init(Look.cam.transform, Hud);
         }
 
-        Combat.Init(IsOwner, hud);
+        Combat.Init(IsOwner, Hud);
 
         
         deathCamera.Toggle(false);
@@ -94,6 +94,7 @@ public class Player : Entity
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
 
+        Hud.CrosshairSpread(Combat.weaponHandler.net_currentSpread.Value);
         // No controls unless all values are true
         if (!_initialized || !isAlive.Value || !CanMove) return;
 
@@ -118,7 +119,7 @@ public class Player : Entity
     public void ToggleDeathHud(bool isDead)
     {
         if (!IsOwner) return;
-        hud.youAreDeadObj.SetActive(isDead);
+        Hud.youAreDeadObj.SetActive(isDead);
     }
 
     /// <summary>
@@ -159,9 +160,9 @@ public class Player : Entity
     {
         if (NetworkManager.Singleton.LocalClientId == clientId)
         {
-            hud.health.SetText(health.Value.ToString());
+            Hud.health.SetText(health.Value.ToString());
             
-            if (!isAlive.Value) hud.health.SetText("0");
+            if (!isAlive.Value) Hud.health.SetText("0");
         }
     }
 
@@ -175,7 +176,7 @@ public class Player : Entity
     public void Revive()
     {
         deathCamera.Toggle(false);
-        hud.health.text = health.Value.ToString();
+        Hud.health.text = health.Value.ToString();
         Combat.EmptyWeapon();
         ToggleDeathHud(false);
         Body.UnRagdoll();
