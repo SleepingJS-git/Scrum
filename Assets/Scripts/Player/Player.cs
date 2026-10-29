@@ -81,8 +81,11 @@ public class Player : Entity
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
 
+        if (!_initialized) return;
+
+        
         // No controls unless all values are true
-        if (!_initialized || !isAlive.Value || !CanMove) return;
+        if (!isAlive.Value || !CanMove) return;
 
         Move.Move(Input.MoveInput);
         Combat.PrimaryInput(Input.PrimaryInput);
@@ -94,12 +97,16 @@ public class Player : Entity
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
 
+        if (!_initialized) return;
+
         Hud.CrosshairSpread(Combat.weaponHandler.net_currentSpread.Value);
+
         // No controls unless all values are true
-        if (!_initialized || !isAlive.Value || !CanMove) return;
+        if (!isAlive.Value || !CanMove) return;
 
         LookInput = Input.LookInput();
         Look.Look(LookInput);
+        Combat.CheckAimOnTarget();
         RotateRigAimRpc(Look.XRot);
     }
 

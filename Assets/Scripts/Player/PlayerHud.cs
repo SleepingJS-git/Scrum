@@ -14,60 +14,44 @@ public class PlayerHud : MonoBehaviour
     
     [Header("Crosshair")]
     public RectTransform crosshair;
-    public RectTransform topRect;
-    public RectTransform bottomRect;
-    public RectTransform leftRect;
-    public RectTransform rightRect;
+    public CrosshairRect topRect;
+    public CrosshairRect bottomRect;
+    public CrosshairRect leftRect;
+    public CrosshairRect rightRect;
     public float maxCrosshairSpread = 50f;
     public float spreadLerpSpeed = 12f;
+    public CrosshairColor CurrentCrosshairColor { get; private set; }
+
+    public Color crosshairRedColor;
+    public Color crosshairWhiteColor;
 
     [Header("Hit Marker")]
     public Image hitmarker;
     public Image killmarker;
 
     private float _cursorSize;
-    private float targetSpread;
+    private float _targetSpread;
 
-    private Vector2 topStartPos;
-    private Vector2 bottomStartPos;
-    private Vector2 leftStartPos;
-    private Vector2 rightStartPos;
     private Coroutine hitmarkerRoutine;
     private Coroutine deathMarkerRoutine;
+    private List<CrosshairRect> crosshairRects;
 
     private void Awake()
     {
-        topStartPos = topRect.anchoredPosition;
-        bottomStartPos = bottomRect.anchoredPosition;
-        leftStartPos = leftRect.anchoredPosition;
-        rightStartPos = rightRect.anchoredPosition;
+        crosshairRects = new List<CrosshairRect>()
+        {
+            topRect, bottomRect, leftRect, rightRect
+        };
+        topRect.Init(Vector2.up);
+        bottomRect.Init(Vector2.down);
+        leftRect.Init(Vector2.left);
+        rightRect.Init(Vector2.right);
     }
 
     private void Update()
     {
-        topRect.anchoredPosition = Vector2.Lerp(
-            topRect.anchoredPosition,
-            topStartPos + Vector2.up * targetSpread,
-            spreadLerpSpeed * Time.deltaTime
-        );
-
-        bottomRect.anchoredPosition = Vector2.Lerp(
-            bottomRect.anchoredPosition,
-            bottomStartPos + Vector2.down * targetSpread,
-            spreadLerpSpeed * Time.deltaTime
-        );
-
-        leftRect.anchoredPosition = Vector2.Lerp(
-            leftRect.anchoredPosition,
-            leftStartPos + Vector2.left * targetSpread,
-            spreadLerpSpeed * Time.deltaTime
-        );
-
-        rightRect.anchoredPosition = Vector2.Lerp(
-            rightRect.anchoredPosition,
-            rightStartPos + Vector2.right * targetSpread,
-            spreadLerpSpeed * Time.deltaTime
-        );
+        foreach (CrosshairRect crosshairRect in crosshairRects)
+            crosshairRect.Update(_targetSpread, spreadLerpSpeed);
     }
     public void SetCursorSize(float size)
     {
@@ -77,7 +61,7 @@ public class PlayerHud : MonoBehaviour
     {
         float t = Mathf.InverseLerp(0f, .05f, spread);
         // Base cursor size + how much spread increases it
-        targetSpread = Mathf.Lerp(0f, maxCrosshairSpread, t);
+        _targetSpread = Mathf.Lerp(0f, maxCrosshairSpread, t);
     }
 
     public void Hitmarker()
@@ -108,4 +92,47 @@ public class PlayerHud : MonoBehaviour
 
         img.color = new Color(1f, 1f, 1f, 0f);
     }
+
+    /// <summary>
+    /// Set the cross hair color
+    /// </summary>
+    /// <param name="colorInt">0 = white, 1 = red</param>
+    public void SetCrosshairColor(CrosshairColor desiredColor)
+    {
+        Color color = (int) desiredColor == 0 ? crosshairWhiteColor : crosshairRedColor;
+        CurrentCrosshairColor = desiredColor;
+        foreach (CrosshairRect crosshairRect in crosshairRects)
+            crosshairRect.image.color = color;
+    }
 }
+
+public enum CrosshairColor
+{
+    White = 0,
+    Red = 1
+}
+
+[System.Serializable]
+public class CrosshairRect
+{
+    public RectTransform rect;
+    public Image image;
+    private Vector2 startingPos;
+    private Vector2 assignedVector;
+
+    public void Init(Vector2 vec)
+    {
+        startingPos = rect.anchoredPosition;
+        assignedVector = vec;
+    }
+
+    public void Update(float targetSpread, float spreadLerpSpeed)
+    {
+        rect.anchoredPosition = Vector2.Lerp(
+            rect.anchoredPosition,
+            startingPos + assignedVector * targetSpread,
+            spreadLerpSpeed * Time.deltaTime
+        );
+    }
+
+} 

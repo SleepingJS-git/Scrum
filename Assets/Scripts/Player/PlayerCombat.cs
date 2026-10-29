@@ -41,6 +41,25 @@ public class PlayerCombat : MonoBehaviour
 
     /// <summary>
     /// [Called by Client]
+    /// Handles if the player is looking at a viable target
+    /// </summary>
+    public void CheckAimOnTarget()
+    {
+        Vector3 adjustedHeadPos = _cam.position + (_cam.forward * .65f);
+        if (Physics.Raycast(adjustedHeadPos, _cam.forward, 100f, Layer.Player, QueryTriggerInteraction.Ignore))
+        {
+            if (_hud.CurrentCrosshairColor != CrosshairColor.Red)
+                _hud.SetCrosshairColor(CrosshairColor.Red);
+        }
+        else
+        {
+            if (_hud.CurrentCrosshairColor != CrosshairColor.White)
+                _hud.SetCrosshairColor(CrosshairColor.White);
+        } 
+    }
+
+    /// <summary>
+    /// [Called by Client]
     /// This handles the left click or right trigger input.
     /// </summary>
     /// <param name="isFiring"></param>

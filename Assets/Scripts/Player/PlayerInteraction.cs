@@ -21,6 +21,7 @@ public class PlayerInteraction : MonoBehaviour
             Unselect();
         }
     }
+
     public void Interaction()
     {
         if (Physics.Raycast(_cam.position, _cam.forward, out RaycastHit hit, reach, Layer.Interactable, QueryTriggerInteraction.Ignore))
