@@ -1,69 +1,150 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class BuildingUI : MonoBehaviour
 {
     [Header("UI Slots")]
     [SerializeField] private BuildSelectionSlot[] slots;
     [SerializeField] private BarHoverCheck barHoverCheck;
+    [SerializeField] private GridPlacement gridPlacement;
+    [SerializeField] private TMP_Text placementInfo;
 
     public GameObject SelectedPrefab { get; private set; }
 
     public event Action<GameObject> OnSelectedPrefabChanged;
 
-    [SerializeField] private GridPlacement gridPlacement;
+    private bool choicesGenerated;
+    private bool wasBuilding;
 
-    [SerializeField] private TMP_Text placementInfo;
+    private void OnEnable()
+    {
+        ClearSelection();
+        wasBuilding = GridPlacement.IsBuildingPhase;
+    }
 
     private void Start()
     {
-        GenerateRandomChoices();
+        // PlayerManager might generate choices before Start runs.
+        if (!choicesGenerated) GenerateRandomChoices();
+    }
+
+    private void OnDisable()
+    {
+        ClearSelection();
     }
 
     public void SetGridPlacement(GridPlacement gp)
     {
+        if (gridPlacement && gridPlacement != gp) gridPlacement.ClearBuildable();
+
         gridPlacement = gp;
-        gridPlacement.barCheck = barHoverCheck;
+
+        if (gridPlacement) gridPlacement.barCheck = barHoverCheck;
+
+        ClearSelection();
     }
 
-    // always check for change in current placements for the text obj (public field in gridplacement)
     private void Update()
     {
-        if (!gridPlacement) return;
-        placementInfo.text = String.Format($"{gridPlacement.currentPlacements.Value}/{gridPlacement.maxPlacements}");
+        bool isBuilding = GridPlacement.IsBuildingPhase;
+
+        if (wasBuilding && !isBuilding) ClearSelection();
+
+        wasBuilding = isBuilding;
+
+        if (placementInfo) placementInfo.text = gridPlacement ? $"{gridPlacement.currentPlacements.Value}/{gridPlacement.maxPlacements}" : "";
+
+        if (!isBuilding || !gridPlacement || !gridPlacement.IsSpawned || !gridPlacement.IsOwner) return;
+
+        Keyboard keyboard = Keyboard.current;
+
+        if (keyboard == null) return;
+
+        if (keyboard.digit1Key.wasPressedThisFrame) SelectIndex(0);
+        else if (keyboard.digit2Key.wasPressedThisFrame) SelectIndex(1);
+        else if (keyboard.digit3Key.wasPressedThisFrame) SelectIndex(2);
+        else if (keyboard.digit4Key.wasPressedThisFrame) SelectIndex(3);
     }
 
     public void GenerateRandomChoices()
     {
-        
+        // Clears both the UI selection and the actual placement selection.
+        ClearSelection();
+
         List<ulong> available = new List<ulong>(BuildableDatabase.AvailablePrefabIds);
 
-        for (int i = 0; i < slots.Length; i++)
+        foreach (BuildSelectionSlot slot in slots)
         {
+            if (!slot) continue;
+
             if (available.Count == 0)
-                break;
+            {
+                slot.Clear();
+                continue;
+            }
 
             int randomIndex = UnityEngine.Random.Range(0, available.Count);
-
-            //don't have duplicate buildables at certain slots
             ulong chosenPrefabId = available[randomIndex];
+
             available.RemoveAt(randomIndex);
 
-            // adds the select slot method and prefab generated to each buildable button in the bar
-            slots[i].Setup(chosenPrefabId, SelectSlot);
+            slot.Setup(chosenPrefabId, SelectSlot);
         }
+
+        choicesGenerated = true;
     }
 
-    //
+    public void ClearSelection()
+    {
+        if (slots != null)
+        {
+            foreach (BuildSelectionSlot slot in slots)
+            {
+                if (slot) slot.SetHighlighted(false);
+            }
+        }
+
+        SelectedPrefab = null;
+
+        if (gridPlacement) gridPlacement.ClearBuildable();
+
+        OnSelectedPrefabChanged?.Invoke(null);
+    }
+
+    private void SelectIndex(int index)
+    {
+        if (index < slots.Length && slots[index]) slots[index].Select();
+    }
+
     private void SelectSlot(BuildSelectionSlot selectedSlot)
+    {
+        if (!isActiveAndEnabled || !GridPlacement.IsBuildingPhase || !selectedSlot.HasChoice) return;
+        if (!gridPlacement || !gridPlacement.IsSpawned || !gridPlacement.IsOwner) return;
+
+        foreach (BuildSelectionSlot slot in slots)
+        {
+            if (slot) slot.SetHighlighted(slot == selectedSlot);
+        }
+
+        Buildable prefab = BuildableDatabase.GetBuildable(selectedSlot.BuildPrefabID);
+
+        SelectedPrefab = prefab ? prefab.gameObject : null;
+
+        gridPlacement.SetBuildable(selectedSlot.BuildPrefabID);
+
+        OnSelectedPrefabChanged?.Invoke(SelectedPrefab);
+    }
+
+    public bool IsAnySlotHovered()
     {
         foreach (BuildSelectionSlot slot in slots)
         {
-            slot.SetHighlighted(slot == selectedSlot);
+            if (slot && slot.IsHovered) return true;
         }
 
-        gridPlacement.SetBuildable(selectedSlot.BuildPrefabID);
+        return false;
     }
 }

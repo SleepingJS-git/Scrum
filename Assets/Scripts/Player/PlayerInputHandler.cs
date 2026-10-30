@@ -180,7 +180,20 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (ctx.started)
         {
-            // GameManager.Instance.ChangeToBuilding();
+            if (PlayerManager.PlayerSettings.DevMode)
+            {
+                OnHitData bruh = new OnHitData()
+                {
+                    damage = 9999,
+                    sourceHit = transform.position,
+                    movingDir = Vector3.up,
+                    radius = 1f,
+                    explosionForce = 15f,
+                    upwardsModifier = .5f,
+                    damageType = DamageType.DeathZone
+                };
+                _main.OnHit(bruh);
+            }
         }
     }
 }

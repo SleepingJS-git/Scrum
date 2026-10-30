@@ -28,7 +28,14 @@ public class DeathCamera : MonoBehaviour
 
     public void SwapToBuildCamTimer()
     {
-        if (PlayerManager.BuildingUI)
+        if (!PlayerManager.BuildingUI) return;
+
+        if (PlayerManager.IsHostClient)
+        {
+            if (PlayerManager.ConfigType == ConfigType.Full_Game)
+                StartCoroutine(SwapToBuildCamRoutine());
+        }
+        else
             StartCoroutine(SwapToBuildCamRoutine());
     }
 
