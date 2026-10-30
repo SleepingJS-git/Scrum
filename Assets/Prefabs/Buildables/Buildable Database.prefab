@@ -45,7 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildablePrefabs:
-  - {fileID: 1026980750256354395, guid: 7a9c4e0681314a04fa855e08e47505ab, type: 3}
   - {fileID: 1026980750256354395, guid: 1b5b61e16aaf0244c9ec584c438e379b, type: 3}
   - {fileID: 4162687332162800258, guid: 8d74f245d9474a745b423b88faee1d79, type: 3}
   - {fileID: 4980473174890129493, guid: 22f9df5eaf9465145a934af50722b298, type: 3}
