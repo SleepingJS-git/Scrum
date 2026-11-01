@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Net;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -29,8 +30,8 @@ public class AreaEffector3D : NetworkBehaviour
         if (!IsServer) return;
 
         Vector3 dir = useForwardTransform ? transform.forward : forceDir;
-        
-        if (Physics.Linecast(other.transform.position, transform.position, Layer.Buildable | Layer.Wall | Layer.Ground)) return;
+
+        if (Physics.Linecast(other.transform.position, transform.position + transform.forward * 0.3f, Layer.Buildable | Layer.Wall | Layer.Ground, QueryTriggerInteraction.Ignore)) return;
 
         Vector3 toFanDir = transform.position - other.transform.position;
 
@@ -43,6 +44,7 @@ public class AreaEffector3D : NetworkBehaviour
 
         if (other.CompareTag("Player"))
         {
+            Debug.Log("Pushing Player");
             Player p = other.GetComponent<Player>();
             p.AddForceRpc(dir, newForce, 0, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
         }
