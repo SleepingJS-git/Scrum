@@ -33,11 +33,25 @@ public class PlayerHud : MonoBehaviour
     public Transform indicatorFolder;
     public DamageIndicator indicatorPrefab;
 
+    [Header("Bleeding Hud")]
+    public Image bleedingHud;
+    public float hitFadeTimeIn, hitFadeTimeOut;
+    public float beatingRate;   // When low
+
+    [Header("Bleeding Hud Alpha Vals")]
+    public float hitAlphaMin = 65f;
+    public float hitAlphaMax = 128f, additiveAlpha = 25f, lowAlphaMin = 128f, lowAlphaMax = 168f;
+
+    [Header("Health Bar")]
+    public Image healthBar;
+    public Color fullHealthColor, medHealthColor, lowHealthColor;
+
     private float _cursorSize;
     private float _targetSpread;
-
+    private float currentAlpha;
     private Coroutine hitmarkerRoutine;
     private Coroutine deathMarkerRoutine;
+    private Coroutine hitFeedbackRoutine;
     private List<CrosshairRect> crosshairRects;
 
     private void Awake()
@@ -50,6 +64,8 @@ public class PlayerHud : MonoBehaviour
         bottomRect.Init(Vector2.down);
         leftRect.Init(Vector2.left);
         rightRect.Init(Vector2.right);
+
+        currentAlpha = 0f;
     }
 
     private void Update()
@@ -114,6 +130,74 @@ public class PlayerHud : MonoBehaviour
     {
         DamageIndicator i = Instantiate(indicatorPrefab, indicatorFolder);
         i.Init(s, p);
+    }
+
+    public void HitFeedback()
+    {
+        if (hitFeedbackRoutine != null) 
+            StopCoroutine(hitFeedbackRoutine);
+
+        float nextAlpha = currentAlpha <= 0f ? hitAlphaMin :
+            Mathf.Min(currentAlpha * 255f + additiveAlpha, hitAlphaMax);
+
+        hitFeedbackRoutine = StartCoroutine(HitFeedbackRoutine(nextAlpha));
+    }
+
+    private IEnumerator HitFeedbackRoutine(float targetAlpha)
+    {
+        float startAlpha = bleedingHud.color.a;
+        float t = 0f;
+        Color color = bleedingHud.color;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / hitFadeTimeIn;
+
+            currentAlpha = Mathf.Lerp(startAlpha, targetAlpha / 255f, t);
+            color = bleedingHud.color;
+            color.a = currentAlpha;
+            bleedingHud.color = color;
+            yield return null;
+        }
+
+        currentAlpha = hitAlphaMax / 255f;
+
+        color = bleedingHud.color;
+        color.a = currentAlpha;
+        bleedingHud.color = color;
+
+        t = 0f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / hitFadeTimeOut;
+
+            currentAlpha = Mathf.Lerp(targetAlpha  / 255f, 0f, t);
+            
+            color = bleedingHud.color;
+            color.a = currentAlpha;
+            bleedingHud.color = color;
+
+            yield return null;
+        }
+
+        currentAlpha = 0f;
+
+        color = bleedingHud.color;
+        color.a = currentAlpha;
+        bleedingHud.color = color;
+    }
+
+    public void UpdateHealth(int currentHealth, int maxHealth)
+    {
+        health.SetText(currentHealth.ToString());
+
+        float perc = (float) currentHealth / maxHealth;
+
+        healthBar.fillAmount = perc;
+
+        if (currentHealth > 75) healthBar.color = fullHealthColor;
+        else if (currentHealth > 25) healthBar.color = medHealthColor;
+        else healthBar.color = lowHealthColor;
     }
 }
 

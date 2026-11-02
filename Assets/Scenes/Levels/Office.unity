@@ -28535,6 +28535,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3345661794966301860, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
+      propertyPath: hitAlphaMax
+      value: 111
+      objectReference: {fileID: 0}
+    - target: {fileID: 3345661794966301860, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
+      propertyPath: hitAlphaMin
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 3345661794966301860, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
+      propertyPath: additiveAlpha
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 4833997908172416288, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -98348,7 +98360,6 @@ SceneRoots:
   - {fileID: 2001466894}
   - {fileID: 1437508787}
   - {fileID: 134020093}
-  - {fileID: 536396568}
   - {fileID: 1651448806}
   - {fileID: 2012041533}
   - {fileID: 13742018}
@@ -98362,3 +98373,4 @@ SceneRoots:
   - {fileID: 677727393}
   - {fileID: 2043545163}
   - {fileID: 1083845391}
+  - {fileID: 536396568}

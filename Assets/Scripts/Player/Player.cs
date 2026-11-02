@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -18,6 +19,12 @@ public class Player : Entity
     [SerializeField] private AudioSource playerAudioSource;
     public DeathCamera deathCamera;
 
+    // Regeneration
+    public float regenRate;
+    public float regenDelay;
+    public int regenAmount;
+    public int maxRegen;
+
     // Player Hud - Gets set by PlayerManager
     public PlayerHud Hud { get; private set; }
     public void SetHud(PlayerHud h) => Hud = h; 
@@ -33,6 +40,9 @@ public class Player : Entity
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+
+    private Coroutine regenRoutine;
+    private float actualHealth;
 
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
@@ -83,7 +93,7 @@ public class Player : Entity
 
         if (!_initialized) return;
 
-        
+        UpdateHealth();
         // No controls unless all values are true
         if (!isAlive.Value || !CanMove) return;
 
@@ -91,6 +101,8 @@ public class Player : Entity
         Combat.PrimaryInput(Input.PrimaryInput);
         Interaction.Interaction();
     }
+
+
 
     void LateUpdate()
     {
@@ -145,7 +157,38 @@ public class Player : Entity
         
         
         base.OnHit(onHitData);
-        UpdateHealthClientRpc(OwnerClientId);
+
+        if (isAlive.Value)
+        {
+            if (regenRoutine != null) StopCoroutine(regenRoutine);
+
+            regenRoutine = StartCoroutine(RegenRoutine());
+        }
+        else
+            if (regenRoutine != null) StopCoroutine(regenRoutine);
+    }
+
+
+    private IEnumerator RegenRoutine()
+    {
+        yield return new WaitForSeconds(regenDelay - regenRate);
+
+        while (health.Value <= maxRegen)
+        {
+            yield return new WaitForSeconds(regenRate);
+
+            health.Value += regenAmount;
+        }
+
+        health.Value = maxRegen;
+    }
+
+    private void UpdateHealth()
+    {
+        if (health.Value == actualHealth) return;
+        actualHealth = health.Value;
+
+        Hud.UpdateHealth(health.Value, maxHealth);
     }
 
     /// <summary>
@@ -171,21 +214,8 @@ public class Player : Entity
 
         if (sourcePos != Vector3.zero)
             Hud.CreateIndicator(sourceHit, transform);
-    }
 
-    /// <summary>
-    /// [Called by Server]
-    /// Updates the client who got damaged.
-    /// </summary>
-    [Rpc(SendTo.ClientsAndHost)]
-    public void UpdateHealthClientRpc(ulong clientId)
-    {
-        if (NetworkManager.Singleton.LocalClientId == clientId)
-        {
-            Hud.health.SetText(health.Value.ToString());
-            
-            if (!isAlive.Value) Hud.health.SetText("0");
-        }
+        Hud.HitFeedback();
     }
 
     public void ToggleMove(bool canMove)

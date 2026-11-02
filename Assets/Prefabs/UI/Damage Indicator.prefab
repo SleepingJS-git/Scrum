@@ -126,6 +126,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   indicatorImg: {fileID: 5560282267196666677}
   color: {r: 0.5647059, g: 0.14117648, b: 0.14117648, a: 1}
-  delayedTime: 0.75
-  fadeTime: 0.75
+  delayedTime: 1
+  fadeTime: 1
   maxAlpha: 1
