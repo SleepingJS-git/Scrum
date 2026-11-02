@@ -14806,7 +14806,7 @@ MonoBehaviour:
   occupiedCells:
   - {x: 0, y: 0, z: 0}
   mesh: {fileID: 5047416908333565366}
-  Id: 1
+  Id: 11
 --- !u!33 &3143865495374475159
 MeshFilter:
   m_ObjectHideFlags: 0
