@@ -44,7 +44,6 @@ public class AreaEffector3D : NetworkBehaviour
 
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Pushing Player");
             Player p = other.GetComponent<Player>();
             p.AddForceRpc(dir, newForce, 0, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
         }
