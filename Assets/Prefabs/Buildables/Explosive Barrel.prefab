@@ -14965,7 +14965,8 @@ MonoBehaviour:
   - {fileID: 1968398663482894880}
   - {fileID: 4954875207698188092}
   - {fileID: 4238067623277504783}
-  breakDelay: 0.4
+  breakDelayShort: 0.18
+  breakDelayLong: 0.4
 --- !u!64 &3784540783021137509
 MeshCollider:
   m_ObjectHideFlags: 0

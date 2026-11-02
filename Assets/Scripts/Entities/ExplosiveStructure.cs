@@ -13,7 +13,8 @@ public class ExplosiveStructure : BreakableStructureEntity
     private AudioSource explosionAudioSource;
     [SerializeField] private ParticleSystem[] explosionParticles;
     [Tooltip("The amount of time the explosive waits before exploding.")]
-    [SerializeField] private float breakDelay;
+    [SerializeField] private float breakDelayShort;
+    [SerializeField] private float breakDelayLong;
     private Rigidbody rb;
     public override void OnNetworkSpawn()
     {
@@ -126,7 +127,7 @@ public class ExplosiveStructure : BreakableStructureEntity
 
     private IEnumerator DelayExplosion()
     {
-        yield return new WaitForSeconds(breakDelay);
+        yield return new WaitForSeconds(UnityEngine.Random.Range(breakDelayShort, breakDelayLong));
 
         PlayExplosionSoundRpc();
 

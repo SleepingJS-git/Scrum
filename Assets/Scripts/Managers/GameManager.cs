@@ -38,6 +38,8 @@ public class GameManager : NetworkBehaviour
         // Test, eventually there needs to be code to check if all
         // players spawned in.
 
+        MusicManager.Instance?.StopMusic();
+
         if (!IsServer) return;
         ChangeGamePhaseServerRpc(GamePhase.Loading);
     }    
