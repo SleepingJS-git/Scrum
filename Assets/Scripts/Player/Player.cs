@@ -136,7 +136,12 @@ public class Player : Entity
     /// <param name="damage"></param>
     public override void OnHit(OnHitData onHitData)
     {
-        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.explosionForce, onHitData.upwardsModifier);
+        OnHitClientRpc(
+            onHitData.damage, 
+            onHitData.sourceHit, 
+            onHitData.explosionForce, 
+            onHitData.upwardsModifier,
+            onHitData.attacker.transform.position);
         
         
         base.OnHit(onHitData);
@@ -150,12 +155,22 @@ public class Player : Entity
     /// <param name="sourceHit"></param>
     /// <param name="upwardsModifier"></param>
     [Rpc(SendTo.Everyone)]
-    private void OnHitClientRpc(int damage, Vector3 sourceHit, float explosionForce, float upwardsModifier)
+    private void OnHitClientRpc(
+        int damage, 
+        Vector3 sourceHit, 
+        float explosionForce, 
+        float upwardsModifier, 
+        Vector3 sourcePos)
     {
         Body.onHitData.explosionForce = explosionForce;
         Body.onHitData.sourceHit = sourceHit;
         Body.onHitData.upwardsModifier = upwardsModifier;
 
+
+        if (!IsOwner) return;
+
+        if (sourcePos != Vector3.zero)
+            Hud.CreateIndicator(sourceHit, transform);
     }
 
     /// <summary>

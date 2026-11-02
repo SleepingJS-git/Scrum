@@ -29,6 +29,10 @@ public class PlayerHud : MonoBehaviour
     public Image hitmarker;
     public Image killmarker;
 
+    [Header("Damage Indicator")]
+    public Transform indicatorFolder;
+    public DamageIndicator indicatorPrefab;
+
     private float _cursorSize;
     private float _targetSpread;
 
@@ -103,6 +107,13 @@ public class PlayerHud : MonoBehaviour
         CurrentCrosshairColor = desiredColor;
         foreach (CrosshairRect crosshairRect in crosshairRects)
             crosshairRect.image.color = color;
+    }
+
+
+    public void CreateIndicator(Vector3 s, Transform p)
+    {
+        DamageIndicator i = Instantiate(indicatorPrefab, indicatorFolder);
+        i.Init(s, p);
     }
 }
 
