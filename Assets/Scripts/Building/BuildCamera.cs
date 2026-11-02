@@ -15,6 +15,8 @@ public class BuildCamera : NetworkBehaviour
     private InputAction drag;
     private InputAction speed;
 
+    [SerializeField] bool freeCam = true;
+
     // Speed for the camera pan
     [SerializeField] private float panSpeed = 20f;
     [SerializeField] private float speedMultiplier = 2f;
@@ -33,6 +35,7 @@ public class BuildCamera : NetworkBehaviour
     // Pitch constraints
     private float minPitch = 10f;
     private float maxPitch = 90f;
+    private float minFreePitch = -90f;
 
     private float currentX = 0f;
     private float currentY = 0f;
@@ -89,9 +92,9 @@ public class BuildCamera : NetworkBehaviour
         // Find the direction to pan
         Vector3 panVector = pan.ReadValue<Vector3>().normalized;
 
+
         // Find the value of the scroll
         float scrollValue = zoom.ReadValue<float>() * zoomSensitivity;
-
         // If panning, call pan function
         if (panVector != Vector3.zero)
         {
@@ -111,6 +114,11 @@ public class BuildCamera : NetworkBehaviour
         if (scrollValue != 0)
         {
             zoomDistance = Mathf.Clamp(zoomDistance - scrollValue, minZoom, maxZoom);
+        }
+
+        if (freeCam)
+        {
+            zoomDistance = 0;
         }
 
         transform.position = Vector3.Lerp(transform.position, targetPosition, lerpDampening * Time.deltaTime);
@@ -184,7 +192,15 @@ public class BuildCamera : NetworkBehaviour
     {
         Vector2 mouseDelta = Mouse.current.delta.ReadValue() * orbitSensitivity;
         currentX += mouseDelta.x;
-        currentY = Mathf.Clamp(currentY - mouseDelta.y, minPitch, maxPitch);
+
+        if (freeCam)
+        {
+            currentY = Mathf.Clamp(currentY - mouseDelta.y, minFreePitch, maxPitch);
+        }
+        else
+        {
+            currentY = Mathf.Clamp(currentY - mouseDelta.y, minPitch, maxPitch);
+        }
 
         targetRotation = Quaternion.Euler(currentY, currentX, 0);
     }
