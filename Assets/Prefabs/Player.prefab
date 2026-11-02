@@ -2023,6 +2023,10 @@ MonoBehaviour:
     m_InternalValue: 1
   playerAudioSource: {fileID: 2221025895430290969}
   deathCamera: {fileID: 8073839104316362123}
+  regenRate: 0.45
+  regenDelay: 2.5
+  regenAmount: 6
+  maxRegen: 80
   _initialized: 0
   MoveState:
     UpdateTraits:
@@ -2183,6 +2187,11 @@ MonoBehaviour:
     m_InternalValue: 0
   firingPoint: {fileID: 0}
   weaponAudioSource: {fileID: 2221025895430290969}
+  net_currentSpread:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
   spreadRecoveryTime: 0.15
   spreadRecoverySpeed: 5
   hasWeapon: 0

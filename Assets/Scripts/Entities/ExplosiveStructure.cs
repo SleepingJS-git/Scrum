@@ -16,6 +16,8 @@ public class ExplosiveStructure : BreakableStructureEntity
     [SerializeField] private float breakDelayShort;
     [SerializeField] private float breakDelayLong;
     private Rigidbody rb;
+    [HideInInspector] public Entity attacker;
+    private bool attackerIsPlayer;
     public override void OnNetworkSpawn()
     {
         explosionAudioSource = GetComponent<AudioSource>();
@@ -39,6 +41,17 @@ public class ExplosiveStructure : BreakableStructureEntity
         }
     }
 
+    public override void OnHit(OnHitData onHitData)
+    {
+        if (onHitData.attacker is Player)
+        {
+            attacker = onHitData.attacker;
+        }
+
+        base.OnHit(onHitData);
+
+    }
+
     /// <summary>
     /// Only the server should call this because OnHit() logic exits only on server
     /// </summary>
@@ -47,7 +60,7 @@ public class ExplosiveStructure : BreakableStructureEntity
         Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius, Layer.ExplosionEffected);
         OnHitData onHitData = new()
         {
-            attacker = this, damage = damage, sourceHit = transform.position,
+            attacker = attacker, damage = damage, sourceHit = transform.position,
             radius = explosionRadius, explosionForce = explosionForce,
             upwardsModifier = upwardsModifier, damageType = DamageType.Explosion
         };

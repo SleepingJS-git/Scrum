@@ -41,6 +41,25 @@ public class PlayerCombat : MonoBehaviour
 
     /// <summary>
     /// [Called by Client]
+    /// Handles if the player is looking at a viable target
+    /// </summary>
+    public void CheckAimOnTarget()
+    {
+        Vector3 adjustedHeadPos = _cam.position + (_cam.forward * .65f);
+        if (Physics.Raycast(adjustedHeadPos, _cam.forward, 100f, Layer.Player, QueryTriggerInteraction.Ignore))
+        {
+            if (_hud.CurrentCrosshairColor != CrosshairColor.Red)
+                _hud.SetCrosshairColor(CrosshairColor.Red);
+        }
+        else
+        {
+            if (_hud.CurrentCrosshairColor != CrosshairColor.White)
+                _hud.SetCrosshairColor(CrosshairColor.White);
+        } 
+    }
+
+    /// <summary>
+    /// [Called by Client]
     /// This handles the left click or right trigger input.
     /// </summary>
     /// <param name="isFiring"></param>
@@ -64,7 +83,11 @@ public class PlayerCombat : MonoBehaviour
         _main.Body.Play("HasWeapon", false);
         // Reset Hud Stuff for the client owner only
         if (_main.IsOwner)
-            UpdateWeaponInfo();
+        {
+            _hud.UpdateWeaponName();
+            _hud.UpdateWeaponInfo(-1, -1);
+        }
+            
 
         // Clear Primary Fire Action
         OnPrimaryFire = null;
@@ -99,7 +122,8 @@ public class PlayerCombat : MonoBehaviour
             recoilAmplitude = (data as HitscanData).recoilAmplitude;
             rightHandWeapon.SetResetTime();
             // Set up Hud stuff
-            UpdateWeaponInfo(data.weaponName, $"{c} / {r}");
+            _hud.UpdateWeaponName(data.weaponName);
+            _hud.UpdateWeaponInfo(c, r);
         }
         else if (_weaponType == WeaponType.Melee)
         {
@@ -107,7 +131,8 @@ public class PlayerCombat : MonoBehaviour
             recoilAmplitude = -(data as MeleeData).swingStrength;
             rightHandWeapon.SetResetTime(data.fireRate);
             // Set up Hud stuff
-            UpdateWeaponInfo(data.weaponName, "");
+            _hud.UpdateWeaponName(data.weaponName);
+            _hud.UpdateWeaponInfo(-1, -1);
         }
 
         rightHandWeapon.AddRecoil(-300);
@@ -175,16 +200,4 @@ public class PlayerCombat : MonoBehaviour
     {
         rightHandWeapon.AddRecoil(recoilAmplitude);
     }
-
-    /// <summary>
-    /// Update the hud text for the weapon name and ammo
-    /// </summary>
-    /// <param name="nameInfo"></param>
-    /// <param name="ammoInfo"></param>
-    public void UpdateWeaponInfo(string nameInfo = "", string ammoInfo = "")
-    {
-        _hud.weaponName.text = nameInfo;
-        _hud.ammo.text = ammoInfo;
-    }
-
 }
