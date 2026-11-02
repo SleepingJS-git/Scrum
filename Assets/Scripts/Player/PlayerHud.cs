@@ -8,9 +8,11 @@ public class PlayerHud : MonoBehaviour
 {
     public TextMeshProUGUI interactText;
     public TextMeshProUGUI ammo;
+    public Image ammoBar;
     public TextMeshProUGUI weaponName;
     public TextMeshProUGUI health;
     public GameObject youAreDeadObj;
+    public GameObject ammoIsLow;
     
     [Header("Crosshair")]
     public RectTransform crosshair;
@@ -198,6 +200,29 @@ public class PlayerHud : MonoBehaviour
         if (currentHealth > 75) healthBar.color = fullHealthColor;
         else if (currentHealth > 25) healthBar.color = medHealthColor;
         else healthBar.color = lowHealthColor;
+    }
+
+    public void UpdateWeaponName(string nameInfo = "")
+    {
+        weaponName.text = nameInfo;
+    }
+
+    public void UpdateWeaponInfo(int currentAmmo, int maxAmmo)
+    {
+        if (currentAmmo < 0 && maxAmmo < 0)
+        {
+            ammo.text = "";
+            ammoBar.fillAmount = 0f;
+            ammoIsLow.SetActive(false);
+            return;
+        }
+
+        float perc = (float) currentAmmo / maxAmmo;
+        ammoBar.fillAmount = perc;
+
+        if (perc <= .3f) ammoIsLow.SetActive(true);
+
+        ammo.text = $"{currentAmmo}/{maxAmmo}";
     }
 }
 
