@@ -32,6 +32,8 @@ public class DeathZone : NetworkBehaviour
             _enabled = true;
             kvp.Clear();
         };
+
+        _enabled = true;
     }
 
     void OnTriggerStay(Collider collider)

@@ -381,10 +381,7 @@ public class Weapon : NetworkBehaviour
         player.Combat.RightHandRecoil();
 
         if (data is HitscanData)
-            player.Combat.UpdateWeaponInfo(
-                data.weaponName,
-                $"{currentBullets} / {reserveBullets}"
-            );
+            player.Hud.UpdateWeaponInfo(currentBullets, reserveBullets);
     }
 
     /// <summary>

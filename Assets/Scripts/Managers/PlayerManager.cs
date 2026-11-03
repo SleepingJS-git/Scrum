@@ -231,7 +231,6 @@ public class PlayerManager : NetworkBehaviour
         {
             Player player = client.PlayerObject.GetComponent<Player>();
             player.health.Value = 100;
-            player.UpdateHealthClientRpc(player.OwnerClientId);
             player.isAlive.Value = true;
             player.Combat.EmptyWeapon();
             player.Combat.weaponHandler.DropWeapon();
