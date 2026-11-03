@@ -136,6 +136,9 @@ MonoBehaviour:
   - {x: 2, y: 1, z: 0}
   - {x: 3, y: 1, z: 0}
   mesh: {fileID: 2723657764474913556}
+  opaqueMaterials: []
+  transparentMaterials:
+  - {fileID: 2100000, guid: 9e2767228da90d446a81f4a6d4294258, type: 2}
   Id: 4
 --- !u!33 &9217527453795755373
 MeshFilter:
@@ -168,7 +171,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: eaf04e53092518346960500aeb4d60bf, type: 2}
+  - {fileID: 2100000, guid: 0f35e6867e8eab340931450b70cdeac1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
