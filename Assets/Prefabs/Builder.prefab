@@ -741,7 +741,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5245479600091456322}
-  m_Enabled: 0
+  m_Enabled: 1
 --- !u!114 &912036616704379515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -910,6 +910,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   gridBuilding: {fileID: 4732301475807183476}
+  freeCam: 1
   panSpeed: 10
   speedMultiplier: 3
   dragSensitivity: 0.25

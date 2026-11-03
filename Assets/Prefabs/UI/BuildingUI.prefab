@@ -397,6 +397,7 @@ GameObject:
   - component: {fileID: 7208851291264893325}
   - component: {fileID: 9206799724163838858}
   - component: {fileID: 471993465230828955}
+  - component: {fileID: 4068565584971584775}
   m_Layer: 5
   m_Name: Slot1
   m_TagString: Untagged
@@ -547,6 +548,18 @@ MonoBehaviour:
   cameraAngles: {x: 20, y: -25, z: 0}
   lightIntensity: 3
   previewRendererIndex: 1
+--- !u!114 &4068565584971584775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2315185652235521995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f8a90286a9dc14eab2adeb99fc4e82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2507901061082178059
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,6 +711,7 @@ GameObject:
   - component: {fileID: 8512747217218554697}
   - component: {fileID: 5561954416174610011}
   - component: {fileID: 3544220650312771391}
+  - component: {fileID: 1023978243274988054}
   m_Layer: 5
   m_Name: Slot3
   m_TagString: Untagged
@@ -848,6 +862,18 @@ MonoBehaviour:
   cameraAngles: {x: 20, y: -25, z: 0}
   lightIntensity: 3
   previewRendererIndex: 1
+--- !u!114 &1023978243274988054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3647121403618353166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f8a90286a9dc14eab2adeb99fc4e82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4208243671435488293
 GameObject:
   m_ObjectHideFlags: 0
@@ -992,6 +1018,7 @@ GameObject:
   - component: {fileID: 7673384884076658985}
   - component: {fileID: 2673267779618852148}
   - component: {fileID: 9173058369312959286}
+  - component: {fileID: 5647398714596497688}
   m_Layer: 5
   m_Name: Slot2
   m_TagString: Untagged
@@ -1142,6 +1169,18 @@ MonoBehaviour:
   cameraAngles: {x: 20, y: -25, z: 0}
   lightIntensity: 3
   previewRendererIndex: 1
+--- !u!114 &5647398714596497688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5680740497906428376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f8a90286a9dc14eab2adeb99fc4e82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5884624654345982501
 GameObject:
   m_ObjectHideFlags: 0

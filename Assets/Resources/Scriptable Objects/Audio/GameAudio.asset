@@ -21,3 +21,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6f9b7c21e16746f478a1720c9ad821e9, type: 3}
   menuMusic:
   - {fileID: 8300000, guid: 6c60f55c2419eed48b5dcb7455958f90, type: 3}
+  buttonHoverSounds:
+  - {fileID: 8300000, guid: 9b5b84a74c5f7cb4ea0f2045f2907c83, type: 3}
+  - {fileID: 8300000, guid: e9d881fd88b4a784b89b1a93e111b076, type: 3}
+  - {fileID: 8300000, guid: d42c677b21b01494696568a5c509931d, type: 3}
+  buttonClickSounds:
+  - {fileID: 8300000, guid: f65df503ec0366449a15c20a1b108109, type: 3}
