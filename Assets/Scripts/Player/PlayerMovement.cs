@@ -49,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
 
     // Horizontal movement
     private bool isMoving;
-    private Vector3 velocity;       // Actual Velocity    
+    [SerializeField] private Vector3 velocity;       // Actual Velocity    
     private Vector3 moveDir;        // Movement Direction
     private bool isSprinting = false;
 
@@ -97,7 +97,6 @@ public class PlayerMovement : MonoBehaviour
     public void Move(Vector3 moveInput)
     {
         if (!cc.enabled) return;
-
         // The actual direction relative to the way the player is facing
         moveDir = transform.right * moveInput.x + transform.forward * moveInput.z;
         moveDir.Normalize();
@@ -288,16 +287,23 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="dir">Direction of the force</param>
     /// <param name="force">Amount of Force</param>
     /// <param name="forceMode">The Force Mode</param>
-    public void AddForce(Vector3 dir, float force, ForceMode forceMode)
+    public void AddForce(Vector3 dir, float force, float dt, ForceMode forceMode)
     {
         Debug.Log("AddForce ForceMode: " + forceMode);
+        Debug.Log("Direction: " + dir);
+        Debug.Log("Force: " + force);
+        Debug.Log("Mass: " + mass);
+
         switch (forceMode)
         {
             case ForceMode.Impulse:
                 velocity += PhysicsHelper.Impulse(dir, force, mass);
             break;
             case ForceMode.Force:
-                velocity += PhysicsHelper.ContinuousForce(dir, force, mass, Time.deltaTime);
+                Debug.Log("Velocity Before: " + velocity);
+                velocity += PhysicsHelper.ContinuousForce(dir, force, mass, dt);
+                Debug.Log("Velocity After: " + velocity);
+
             break;
         }
     }
