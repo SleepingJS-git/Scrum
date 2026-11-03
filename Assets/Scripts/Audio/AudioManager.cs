@@ -13,6 +13,10 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private Vector2 buttonPitchRange = new Vector2(0.95f, 1.05f);
     [SerializeField, Range(0f, 1f)] private float hoverVolume = 0.5f;
     [SerializeField, Range(0f, 1f)] private float clickVolume = 0.7f;
+    [Header("Placement Audio")]
+    [SerializeField, Range(0f, 1f)] private float placementVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float invalidPlacementVolume = 1f;
+    [SerializeField] private AudioSource placementAudioSource;
 
     private void Awake()
     {
@@ -66,5 +70,24 @@ public class AudioManager : MonoBehaviour
         source.pitch = Random.Range(buttonPitchRange.x, buttonPitchRange.y);
         source.volume = volume;
         source.Play();
+    }
+
+    public void PlayPlacement()
+    {
+        AudioClip[] clips = audioData.placementSounds;
+
+        if (placementAudioSource == null || clips == null || clips.Length == 0)
+            return;
+
+        AudioClip clip = clips[Random.Range(0, clips.Length)];
+
+        if (clip != null)
+            placementAudioSource.PlayOneShot(clip, placementVolume);
+    }
+
+    public void PlayInvalidPlacement()
+    {
+        if (placementAudioSource != null && audioData.invalidPlacementSound != null)
+            placementAudioSource.PlayOneShot(audioData.invalidPlacementSound, invalidPlacementVolume);
     }
 }

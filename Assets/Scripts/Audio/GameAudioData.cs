@@ -10,4 +10,8 @@ public class GameAudioData : ScriptableObject
     [Header("UI Sounds")]
     public AudioClip[] buttonHoverSounds;
     public AudioClip[] buttonClickSounds;
+
+    [Header("Placement Sounds")]
+    public AudioClip[] placementSounds;
+    public AudioClip invalidPlacementSound;
 }

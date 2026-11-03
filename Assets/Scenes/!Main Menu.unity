@@ -834,14 +834,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -4209770699605691907, guid: 0a2eb91d005005343be43aaecd8b2867, type: 3}
-      propertyPath: clickVolume
-      value: 0.607
-      objectReference: {fileID: 0}
-    - target: {fileID: -4209770699605691907, guid: 0a2eb91d005005343be43aaecd8b2867, type: 3}
-      propertyPath: hoverVolume
-      value: 0.603
-      objectReference: {fileID: 0}
     - target: {fileID: 2729448989879949161, guid: 0a2eb91d005005343be43aaecd8b2867, type: 3}
       propertyPath: m_LocalPosition.x
       value: 371.6228

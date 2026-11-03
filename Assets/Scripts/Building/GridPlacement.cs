@@ -173,9 +173,12 @@ public class GridPlacement : NetworkBehaviour
         PreviewObjectServerRpc(mousePos, cellPos);
 
         // If left-clicked, create the object at the location of the preview
-        if (placeAction.WasPressedThisFrame() && canPlace.Value)
+        if (placeAction.WasPressedThisFrame())
         {
-            PlaceBuildableServerRpc(cellPos);
+            if (canPlace.Value)
+                PlaceBuildableServerRpc(cellPos);
+            else if (previewObject != null)
+                AudioManager.Instance?.PlayInvalidPlacement();
         }
     }
 
@@ -260,11 +263,16 @@ public class GridPlacement : NetworkBehaviour
     private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (currentPlacements.Value >= maxPlacements) return;
+        if (currentPlacements.Value >= maxPlacements)
+        {
+            PlacementResultRpc(false);
+            return;
+        }
         // Send Server Request to create object
         Buildable obj = Instantiate(buildable, previewObject.transform.position, Quaternion.Euler(0, rotation.Value, 0));
         obj.NetworkObject.Spawn();
         BuildableDatabase.SetCellsToOccupied(buildable, cellPos, rotation.Value);
+        PlacementResultRpc(true);
         currentPlacements.Value++;
         BreakableToClientRpc(obj.NetworkObjectId);
     }
@@ -485,6 +493,16 @@ public class GridPlacement : NetworkBehaviour
 
         previewObject = null;
         previewRenderer = null;
+    }
+
+    //Used for playing placement sounds
+    [Rpc(SendTo.Owner)]
+    private void PlacementResultRpc(bool placed)
+    {
+        if (placed)
+            AudioManager.Instance?.PlayPlacement();
+        else
+            AudioManager.Instance?.PlayInvalidPlacement();
     }
 }
 
