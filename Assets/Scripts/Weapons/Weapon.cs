@@ -73,6 +73,11 @@ public class Weapon : NetworkBehaviour
     public bool hasWeapon;
     public GameObject testSphere;
 
+    [Header("Pickup Audio")]
+    [SerializeField] private AudioSource pickupAudioSource;
+    [SerializeField, Range(0f, 1f)] private float ownPickupVolume = 0.55f;
+    [SerializeField, Range(0f, 1f)] private float otherPickupVolume = 0.8f;
+
     public NetworkVariable<FixedString64Bytes> debugInfo = new(
         "",
         NetworkVariableReadPermission.Everyone,
@@ -512,6 +517,20 @@ public class Weapon : NetworkBehaviour
     private void DebugInfoServerRpc()
     {
         debugInfo.Value = $@"Weapon Spread: {net_currentSpread} / {maxSpread}";
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void PlayPickupSoundClientRpc(ulong pickedUpWeaponId, RpcParams rpcParams = default)
+    {
+        if (rpcParams.Receive.SenderClientId != Unity.Netcode.NetworkManager.ServerClientId || pickupAudioSource == null)
+            return;
+
+        AudioClip clip = WeaponDatabase.GetWeapon(pickedUpWeaponId)?.pickupSound;
+        if (clip == null)
+            return;
+
+        pickupAudioSource.spatialBlend = IsOwner ? 0f : 1f;
+        pickupAudioSource.PlayOneShot(clip, IsOwner ? ownPickupVolume : otherPickupVolume);
     }
 
 }

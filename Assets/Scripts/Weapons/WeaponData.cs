@@ -24,6 +24,7 @@ public abstract class WeaponData : ScriptableObject
     public GameObject weaponModel;
     public GameObject shootingEffect;
     public AudioClip fireSound;
+    public AudioClip pickupSound;
 }
 
 public enum FiringType
