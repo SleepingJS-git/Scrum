@@ -200,6 +200,7 @@ MonoBehaviour:
   - {x: 1, y: 1, z: 0}
   mesh: {fileID: 5861399812786316320}
   Id: 0
+  weight: 3
 --- !u!54 &-6020042510372449929
 Rigidbody:
   m_ObjectHideFlags: 0

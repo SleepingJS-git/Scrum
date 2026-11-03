@@ -55,7 +55,7 @@ public class BuildingUI : MonoBehaviour
 
         wasBuilding = isBuilding;
 
-        if (placementInfo) placementInfo.text = gridPlacement ? $"{gridPlacement.currentPlacements.Value}/{gridPlacement.maxPlacements}" : "";
+        if (placementInfo) placementInfo.text = gridPlacement ? $"{gridPlacement.currentWeight.Value}/{gridPlacement.maxWeight}" : "";
 
         if (!isBuilding || !gridPlacement || !gridPlacement.IsSpawned || !gridPlacement.IsOwner) return;
 

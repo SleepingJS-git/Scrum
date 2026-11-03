@@ -13,6 +13,7 @@ public class Buildable : NetworkBehaviour
 
     private Vector3Int dimensions;
     public ulong Id;
+    public float weight = 1f;
     public Vector3Int[] OccupiedCells
     {
         get { return occupiedCells; }

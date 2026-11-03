@@ -55,11 +55,18 @@ public class GridPlacement : NetworkBehaviour
 
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
+    //The maximum weight of all placed buildable objects
+    public float maxWeight = 15.0f;
     public NetworkVariable<int> currentPlacements = new NetworkVariable<int>(
         0,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    public NetworkVariable<float> currentWeight = new NetworkVariable<float>(
+    0,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server
+);
     public NetworkVariable<bool> canPlace = new NetworkVariable<bool>(
         false,
         NetworkVariableReadPermission.Everyone,
@@ -122,7 +129,8 @@ public class GridPlacement : NetworkBehaviour
     private void ResetCounterServerRpc()
     {   
         ResetBreakablesRpc();
-        currentPlacements.Value = 0;
+        //currentPlacements.Value = 0;
+        currentWeight.Value = 0;
     }
 
     // Update is called once per frame
@@ -263,7 +271,7 @@ public class GridPlacement : NetworkBehaviour
     private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (currentPlacements.Value >= maxPlacements)
+        if (currentWeight.Value >= maxWeight)
         {
             PlacementResultRpc(false);
             return;
@@ -273,7 +281,7 @@ public class GridPlacement : NetworkBehaviour
         obj.NetworkObject.Spawn();
         BuildableDatabase.SetCellsToOccupied(buildable, cellPos, rotation.Value);
         PlacementResultRpc(true);
-        currentPlacements.Value++;
+        currentWeight.Value += buildable.weight;
         BreakableToClientRpc(obj.NetworkObjectId);
     }
 
@@ -373,8 +381,8 @@ public class GridPlacement : NetworkBehaviour
         if (buildable == null)
             return false;
 
-        // Player has used all their placements
-        if (currentPlacements.Value >= maxPlacements)
+        // Player has used all their placement weight
+        if (currentWeight.Value >= maxWeight)
             return false;
 
         // Why tho?
@@ -398,7 +406,7 @@ public class GridPlacement : NetworkBehaviour
         if (buildable) buildableName = $"{buildable.name} ({buildable.Id})";
         debugInfo.Value =  $@"(Grid Placement)
         Current Buildable: {buildableName}
-        Current Placements: {currentPlacements.Value} / {maxPlacements}
+        Current Weight: {currentWeight.Value} / {maxWeight}
         Preview Object: {previewObject}
         CanPreviewBuildable: {CanPreviewBuildable()}
         ";

@@ -14807,6 +14807,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   mesh: {fileID: 5047416908333565366}
   Id: 11
+  weight: 2.5
 --- !u!33 &3143865495374475159
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -14967,6 +14968,7 @@ MonoBehaviour:
   - {fileID: 4238067623277504783}
   breakDelayShort: 0.18
   breakDelayLong: 0.4
+  attacker: {fileID: 0}
 --- !u!64 &3784540783021137509
 MeshCollider:
   m_ObjectHideFlags: 0

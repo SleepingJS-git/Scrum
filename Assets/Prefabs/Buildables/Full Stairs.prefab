@@ -143,6 +143,7 @@ MonoBehaviour:
   - {x: 3, y: 1, z: 1}
   mesh: {fileID: 2723657764474913556}
   Id: 9
+  weight: 1.25
 --- !u!33 &9217527453795755373
 MeshFilter:
   m_ObjectHideFlags: 0
