@@ -158,6 +158,7 @@ GameObject:
   - component: {fileID: 4650914437015166877}
   - component: {fileID: 7304890222746176080}
   - component: {fileID: 4601268744641080153}
+  - component: {fileID: 825690862073347818}
   m_Layer: 5
   m_Name: Slot4
   m_TagString: Untagged
@@ -308,6 +309,18 @@ MonoBehaviour:
   cameraAngles: {x: 20, y: -25, z: 0}
   lightIntensity: 3
   previewRendererIndex: 1
+--- !u!114 &825690862073347818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1361601849761321405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f8a90286a9dc14eab2adeb99fc4e82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1876852699892313475
 GameObject:
   m_ObjectHideFlags: 0

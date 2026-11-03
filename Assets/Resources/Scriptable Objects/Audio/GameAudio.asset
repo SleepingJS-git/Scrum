@@ -26,4 +26,4 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e9d881fd88b4a784b89b1a93e111b076, type: 3}
   - {fileID: 8300000, guid: d42c677b21b01494696568a5c509931d, type: 3}
   buttonClickSounds:
-  - {fileID: 8300000, guid: f65df503ec0366449a15c20a1b108109, type: 3}
+  - {fileID: 8300000, guid: 1e9be8a0cb6f1b64983fd3bfe8b6693c, type: 3}
