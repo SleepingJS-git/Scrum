@@ -35,8 +35,6 @@ public class PlayerLook : MonoBehaviour
         cam.gameObject.SetActive(isOn);
     }
 
-
-
     /// <summary>
     /// Makes the player look by rotating the camera and the player transform.
     /// </summary>
@@ -52,6 +50,7 @@ public class PlayerLook : MonoBehaviour
 
         // Rotate Player Transform for looking left and right
         transform.Rotate(0f, input.x * sensitivity.x, 0f);
+
     }
 
 

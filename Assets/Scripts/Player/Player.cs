@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -18,6 +19,12 @@ public class Player : Entity
     [SerializeField] private AudioSource playerAudioSource;
     public DeathCamera deathCamera;
 
+    // Regeneration
+    public float regenRate;
+    public float regenDelay;
+    public int regenAmount;
+    public int maxRegen;
+
     // Player Hud - Gets set by PlayerManager
     public PlayerHud Hud { get; private set; }
     public void SetHud(PlayerHud h) => Hud = h; 
@@ -33,6 +40,9 @@ public class Player : Entity
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+
+    private Coroutine regenRoutine;
+    private float actualHealth;
 
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
@@ -81,25 +91,34 @@ public class Player : Entity
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
 
+        if (!_initialized) return;
+
+        UpdateHealth();
         // No controls unless all values are true
-        if (!_initialized || !isAlive.Value || !CanMove) return;
+        if (!isAlive.Value || !CanMove) return;
 
         Move.Move(Input.MoveInput);
         Combat.PrimaryInput(Input.PrimaryInput);
         Interaction.Interaction();
     }
 
+
+
     void LateUpdate()
     {
         // If not owner, then don't move something that isn't yours
         if (!IsOwner) return;
 
+        if (!_initialized) return;
+
         Hud.CrosshairSpread(Combat.weaponHandler.net_currentSpread.Value);
+
         // No controls unless all values are true
-        if (!_initialized || !isAlive.Value || !CanMove) return;
+        if (!isAlive.Value || !CanMove) return;
 
         LookInput = Input.LookInput();
         Look.Look(LookInput);
+        Combat.CheckAimOnTarget();
         RotateRigAimRpc(Look.XRot);
     }
 
@@ -129,11 +148,47 @@ public class Player : Entity
     /// <param name="damage"></param>
     public override void OnHit(OnHitData onHitData)
     {
-        OnHitClientRpc(onHitData.damage, onHitData.sourceHit, onHitData.explosionForce, onHitData.upwardsModifier);
+        OnHitClientRpc(
+            onHitData.damage, 
+            onHitData.sourceHit, 
+            onHitData.explosionForce, 
+            onHitData.upwardsModifier,
+            onHitData.attacker.transform.position);
         
         
         base.OnHit(onHitData);
-        UpdateHealthClientRpc(OwnerClientId);
+
+        if (isAlive.Value)
+        {
+            if (regenRoutine != null) StopCoroutine(regenRoutine);
+
+            regenRoutine = StartCoroutine(RegenRoutine());
+        }
+        else
+            if (regenRoutine != null) StopCoroutine(regenRoutine);
+    }
+
+
+    private IEnumerator RegenRoutine()
+    {
+        yield return new WaitForSeconds(regenDelay - regenRate);
+
+        while (health.Value <= maxRegen)
+        {
+            yield return new WaitForSeconds(regenRate);
+
+            health.Value += regenAmount;
+        }
+
+        health.Value = maxRegen;
+    }
+
+    private void UpdateHealth()
+    {
+        if (health.Value == actualHealth) return;
+        actualHealth = health.Value;
+
+        Hud.UpdateHealth(health.Value, maxHealth);
     }
 
     /// <summary>
@@ -143,27 +198,24 @@ public class Player : Entity
     /// <param name="sourceHit"></param>
     /// <param name="upwardsModifier"></param>
     [Rpc(SendTo.Everyone)]
-    private void OnHitClientRpc(int damage, Vector3 sourceHit, float explosionForce, float upwardsModifier)
+    private void OnHitClientRpc(
+        int damage, 
+        Vector3 sourceHit, 
+        float explosionForce, 
+        float upwardsModifier, 
+        Vector3 sourcePos)
     {
         Body.onHitData.explosionForce = explosionForce;
         Body.onHitData.sourceHit = sourceHit;
         Body.onHitData.upwardsModifier = upwardsModifier;
 
-    }
 
-    /// <summary>
-    /// [Called by Server]
-    /// Updates the client who got damaged.
-    /// </summary>
-    [Rpc(SendTo.ClientsAndHost)]
-    public void UpdateHealthClientRpc(ulong clientId)
-    {
-        if (NetworkManager.Singleton.LocalClientId == clientId)
-        {
-            Hud.health.SetText(health.Value.ToString());
-            
-            if (!isAlive.Value) Hud.health.SetText("0");
-        }
+        if (!IsOwner) return;
+
+        if (sourcePos != Vector3.zero)
+            Hud.CreateIndicator(sourceHit, transform);
+
+        Hud.HitFeedback();
     }
 
     public void ToggleMove(bool canMove)
