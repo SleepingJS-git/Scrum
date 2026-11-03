@@ -99,6 +99,7 @@ public class ExplosiveStructure : BreakableStructureEntity
                             explodingForce.normalized,
                             explodingForce.magnitude,
                             (int) ForceMode.Impulse,
+                            Time.deltaTime,
                             RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp)
                         );
                     }

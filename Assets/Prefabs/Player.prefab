@@ -2098,6 +2098,7 @@ MonoBehaviour:
   kickHorizForce: 2.75
   wallKickCooldown: 0.65
   mass: 0.25
+  velocity: {x: 0, y: 0, z: 0}
   isCrouchHeld: 0
   holdToCrouchInput: 0
 --- !u!114 &5570463379167910784
