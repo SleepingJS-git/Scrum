@@ -50,7 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 888536398
+  GlobalObjectIdHash: 1978235953
   InScenePlacedSourceGlobalObjectIdHash: 1594494088
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
@@ -217,7 +217,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6925235844718620342}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &1682716676488457875
 MeshRenderer:
   m_ObjectHideFlags: 0

@@ -1607,7 +1607,7 @@ CharacterController:
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.35
-  m_SlopeLimit: 45
+  m_SlopeLimit: 37.5
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
@@ -2083,11 +2083,13 @@ MonoBehaviour:
   upwardGravMult: 2
   jumpAudio: {fileID: 2248750698211550465}
   crouchSpeed: 3.75
-  crouchHeight: 1
+  crouchHeight: 0.5
+  crouchHelperVal: 45
   positionChangeSpeed: 0.125
   sprintSpeed: 9
   slideSpeed: 5
   slideDeceleration: 8
+  slideAcceleration: 4
   slideMinSpeed: 1
   slideDuration: 3
   slideCooldown: 0.5
@@ -2098,9 +2100,12 @@ MonoBehaviour:
   kickHorizForce: 2.75
   wallKickCooldown: 0.65
   mass: 0.25
+  castingDist: 1.3
+  coyoteTime: 0.1
   velocity: {x: 0, y: 0, z: 0}
   isCrouchHeld: 0
   holdToCrouchInput: 0
+  isGrounded: 0
 --- !u!114 &5570463379167910784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2491,7 +2496,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7342539564703258927}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e4dbe1173496479489a80da29f8ebba9, type: 3}
   m_Name: 
