@@ -24,6 +24,8 @@ public class PlayerCombat : MonoBehaviour
     private Transform _cam;             // Camera reference for aiming
     private float recoilAmplitude;
     private float wallKickElapsed;
+    private float weaponDist;
+    public bool KickIsReady => Time.time >= wallKickElapsed + wallKickCooldown;
     /// <summary>
     /// [Called by Client]
     /// Initialize Player Combat. If the client is the owner, then save camera transform for shooting and enable firing
@@ -41,6 +43,8 @@ public class PlayerCombat : MonoBehaviour
         {
             _main.AddDeathEvent(weaponHandler.DropWeapon);
         }
+
+        weaponDist = kickReach;
     }
 
     /// <summary>
@@ -50,7 +54,7 @@ public class PlayerCombat : MonoBehaviour
     public void CheckAimOnTarget()
     {
         Vector3 adjustedHeadPos = _cam.position + (_cam.forward * .65f);
-        if (Physics.Raycast(adjustedHeadPos, _cam.forward, 100f, Layer.Player, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(adjustedHeadPos, _cam.forward, weaponDist, Layer.Player, QueryTriggerInteraction.Ignore))
         {
             if (_hud.CurrentCrosshairColor != CrosshairColor.Red)
                 _hud.SetCrosshairColor(CrosshairColor.Red);
@@ -59,7 +63,30 @@ public class PlayerCombat : MonoBehaviour
         {
             if (_hud.CurrentCrosshairColor != CrosshairColor.White)
                 _hud.SetCrosshairColor(CrosshairColor.White);
-        } 
+        }
+
+        // If valid surface is within range of kickreach and kick is ready, turn on the brackets
+            // else rest does not run 
+        // If airborne (_main.Move.IsGrounded), turn on the arrow indicators
+            // else arrows are off
+        // If aiming at player or buildable, turn the brackets red
+            // else brackets are white
+
+        if (!KickIsReady)
+        {
+            _hud.SetMeleeBracket(CrosshairColor.None, false);
+            return;
+        }
+
+        if (Physics.Raycast(adjustedHeadPos, _cam.forward, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("Buildable"))
+                _hud.SetMeleeBracket(CrosshairColor.Red, !_main.Move.IsGrounded);
+            else _hud.SetMeleeBracket(CrosshairColor.White, !_main.Move.IsGrounded);
+                
+                
+        }
+        else _hud.SetMeleeBracket(CrosshairColor.None, false);
     }
 
     /// <summary>
@@ -128,6 +155,8 @@ public class PlayerCombat : MonoBehaviour
             // Set up Hud stuff
             _hud.UpdateWeaponName(data.weaponName);
             _hud.UpdateWeaponInfo(c, r);
+
+            weaponDist = 50f;
         }
         else if (_weaponType == WeaponType.Melee)
         {
@@ -137,6 +166,7 @@ public class PlayerCombat : MonoBehaviour
             // Set up Hud stuff
             _hud.UpdateWeaponName(data.weaponName);
             _hud.UpdateWeaponInfo(-1, -1);
+            weaponDist = (data as MeleeData).attackRange;
         }
 
         rightHandWeapon.AddRecoil(-300);
@@ -207,7 +237,7 @@ public class PlayerCombat : MonoBehaviour
 
     public void MeleeKick()
     {
-        if (Time.time < wallKickElapsed + wallKickCooldown) return;
+        if (!KickIsReady) return;
 
         _main.Body.PlayKick();
 

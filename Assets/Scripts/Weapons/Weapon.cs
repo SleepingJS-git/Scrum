@@ -187,9 +187,10 @@ public class Weapon : NetworkBehaviour
                         damageType = DamageType.Blunt
                     });
 
+                    hitPlayer = true;
+
                     if (e is Player p)
                     {
-                        hitPlayer = true;
 
                         Vector3 meleeForce = PhysicsHelper.ExplosionForce(
                             hit.point,

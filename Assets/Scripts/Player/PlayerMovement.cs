@@ -79,6 +79,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private bool isCrouchHeld;
     [SerializeField] private bool holdToCrouchInput;
     [SerializeField] private bool isGrounded;
+    public bool IsGrounded => isGrounded;
     private bool slideJumped = false;
 
     // Wall Kicking
