@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -36,10 +37,8 @@ public class PlayerMovement : MonoBehaviour
     [Range(0f, 2f)] public float slideInputDrag;
 
     [Header("Wall Kicking")]
-    public float kickReach;
     public float kickUpForce;
     public float kickHorizForce;
-    public float wallKickCooldown;
 
     [Header("Physics")]
     public float mass;
@@ -84,7 +83,6 @@ public class PlayerMovement : MonoBehaviour
 
     // Wall Kicking
     private int wallKicks;
-    private float wallKickElapsed;
 
     // Coyote Time
     private Coroutine coyoteTimeRoutine;
@@ -437,38 +435,31 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Temporary WallKick method. If the player is looking at a valid surface, do a wall kick.
+    /// If the player is looking at a valid surface, do a wall kick.
     /// </summary>
     public void WallKick()
     {
-        if (Time.time < wallKickElapsed + wallKickCooldown) return;
-        body.PlayTrigger("Kick");
-        // Damage logic can happen during this window
-        if (cc.isGrounded) return;
+        if (isGrounded) return;
 
-        if (Physics.Raycast(main.PlayerCam.position, main.PlayerCam.forward, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
+        Vector3 direction;
+
+        // Wall kicks become less effective if the player does multiple consecutive wallkicks without resetting
+        if (wallKicks == 0)
         {
-            Vector3 direction;
-
-            // Wall kicks become less effective if the player does multiple consecutive wallkicks without resetting
-            if (wallKicks == 0)
-            {
-                float y = Mathf.Sqrt(kickUpForce * 2f * gravityScale);
-                direction = -main.PlayerCam.forward * kickHorizForce;
-                direction.y += y;
-                velocity = direction;
-            }
-            else
-            {
-                float y = Mathf.Sqrt(kickUpForce / (wallKicks + 1) * 2f * gravityScale);
-                direction = -main.PlayerCam.forward;
-                direction.y = y;
-                velocity += direction;
-            }
-
-            wallKicks++;
-            wallKickElapsed = Time.time;
+            float y = Mathf.Sqrt(kickUpForce * 2f * gravityScale);
+            direction = -main.PlayerCam.forward * kickHorizForce;
+            direction.y += y;
+            velocity = direction;
         }
+        else
+        {
+            float y = Mathf.Sqrt(kickUpForce / (wallKicks + 1) * 2f * gravityScale);
+            direction = -main.PlayerCam.forward;
+            direction.y = y;
+            velocity += direction;
+        }
+
+        wallKicks++;
 
     }
 

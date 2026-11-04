@@ -77,6 +77,10 @@ public class Player : Entity
             deathCamera.Init();
 
             Interaction.Init(Look.cam.transform, Hud);
+
+            Combat.onWallKick += () => {
+                Move.WallKick();
+            };
         }
 
         Combat.Init(IsOwner, Hud);

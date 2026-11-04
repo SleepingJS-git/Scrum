@@ -12,6 +12,9 @@ public class PlayerCombat : MonoBehaviour
     public GameObject weaponInHand;     // The game object in the player's fps hand or 3d hand
     public Transform weaponHolder;      // The transform used to spawn the 3d model in the player's fps pov
     public WeaponRecoil rightHandWeapon;
+    public float wallKickCooldown = 0.65f;
+    public float kickReach;
+    public Action onWallKick;
     private event Action OnPrimaryFire; // An action event that is used when the player is holding the shoot input
     private event Action OnSecondaryFire;
     private bool _canFire;              // Can the player fire their gun?
@@ -20,6 +23,7 @@ public class PlayerCombat : MonoBehaviour
     private WeaponType _weaponType;     // Determines the weapon type when the player fires the gun
     private Transform _cam;             // Camera reference for aiming
     private float recoilAmplitude;
+    private float wallKickElapsed;
     /// <summary>
     /// [Called by Client]
     /// Initialize Player Combat. If the client is the owner, then save camera transform for shooting and enable firing
@@ -199,5 +203,22 @@ public class PlayerCombat : MonoBehaviour
     public void RightHandRecoil()
     {
         rightHandWeapon.AddRecoil(recoilAmplitude);
+    }
+
+    public void MeleeKick()
+    {
+        if (Time.time < wallKickElapsed + wallKickCooldown) return;
+
+        _main.Body.PlayKick();
+
+
+        weaponHandler.MeleeKickServerRpc(kickReach);
+
+        wallKickElapsed = Time.time;
+    }
+
+    public void OnWallKick()
+    {
+        onWallKick?.Invoke();
     }
 }
