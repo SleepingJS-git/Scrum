@@ -26759,6 +26759,7 @@ MonoBehaviour:
     CrouchingType: 0
     DefaultPOV: 80
     DevMode: 0
+    MeleeIndicatorVersion: 2
   spawnPoints:
   - {fileID: 1638018075}
   playerPrefab: {fileID: 6448125735744906079, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
@@ -38264,10 +38265,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3596020289183896546, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -6
-      objectReference: {fileID: 0}
     - target: {fileID: 4833997908172416288, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -38351,10 +38348,6 @@ PrefabInstance:
     - target: {fileID: 5424544409422060311, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
       propertyPath: m_Name
       value: Player Hud Canvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 8291063407373686821, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

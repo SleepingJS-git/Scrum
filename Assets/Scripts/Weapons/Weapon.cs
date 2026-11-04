@@ -145,7 +145,7 @@ public class Weapon : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    public void MeleeKickServerRpc(float kickReach, RpcParams rpcParams = default)
+    public void MeleeKickServerRpc(Vector3 headPos, Vector3 aimDir, float kickReach, RpcParams rpcParams = default)
     {
         Player player = GetPlayer(rpcParams.Receive.SenderClientId);
         if (!player) return;
@@ -153,8 +153,8 @@ public class Weapon : NetworkBehaviour
         bool hitPlayer = false;
         bool killedPlayer = false;
 
-        Vector3 dir = player.PlayerCam.forward;
-        Vector3 adjustedHeadPos = player.PlayerCam.position + (dir * .65f);
+        Vector3 dir = aimDir;
+        Vector3 adjustedHeadPos = headPos + (dir * .65f);
 
         if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {

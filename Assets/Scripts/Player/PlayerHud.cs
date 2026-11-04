@@ -51,7 +51,8 @@ public class PlayerHud : MonoBehaviour
     [Header("Wall Kick Indicators")]
     public float bracketAlpha;
     public GameObject wallKickIndicators;   // arrows showing to kick up
-    public TextMeshProUGUI[] brackets; // change these to images later
+    public TextMeshProUGUI[] bracketsV1; // change these to images later
+    public TextMeshProUGUI[] bracketsV2; // change these to images later
     public CrosshairColor CurrentBracketColor { get; private set; }
     private bool wallKickArrowsOn;
     private float _cursorSize;
@@ -258,8 +259,22 @@ public class PlayerHud : MonoBehaviour
             color.a = (int) desiredColor == 2 ?
                 0f : bracketAlpha / 255f;
 
-            brackets[0].color = color;
-            brackets[1].color = color;
+            if (PlayerManager.PlayerSettings.MeleeIndicatorVersion == 1)
+            {
+                bracketsV1[0].color = color;
+                bracketsV1[1].color = color;
+
+                bracketsV2[0].color = invisibleColor;
+                bracketsV2[1].color = invisibleColor;
+            }
+            else
+            {
+                bracketsV2[0].color = color;
+                bracketsV2[1].color = color;
+
+                bracketsV1[0].color = invisibleColor;
+                bracketsV1[1].color = invisibleColor;
+            }
             CurrentBracketColor = desiredColor;
         }
 

@@ -242,7 +242,7 @@ public class PlayerCombat : MonoBehaviour
         _main.Body.PlayKick();
 
 
-        weaponHandler.MeleeKickServerRpc(kickReach);
+        weaponHandler.MeleeKickServerRpc(_cam.position, _cam.forward, kickReach);
 
         wallKickElapsed = Time.time;
     }
