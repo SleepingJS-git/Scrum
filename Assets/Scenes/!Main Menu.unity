@@ -19941,6 +19941,26 @@ PrefabInstance:
       propertyPath: musicManager
       value: 
       objectReference: {fileID: 2125296962}
+    - target: {fileID: 2806277562483593471, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2806277562483593471, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7549599761146379096, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7549599761146379096, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7549599761146379096, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8850395918584302805, guid: 1a24839a11a5014489f6fc3a13314b8a, type: 3}
       propertyPath: m_Name
       value: MainMenuUI

@@ -1,19 +1,17 @@
 
+using System;
+using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using Unity.Netcode;
+using TMPro;
 
 public class LevelSelector : MonoBehaviour
 {
-    [System.Serializable]
-    public class LevelOption
-    {
-        public Button button;
-        public string sceneName;
-    }
 
     [SerializeField] private TitleScreen titleScreen;
-    [SerializeField] private LevelOption[] levels;
+    private string[] levels;
+    [SerializeField] private TMP_Dropdown levelDropdown;
 
     [SerializeField] private Color selectedColor = Color.white;
     [SerializeField] private Color unselectedColor = new Color(0.6f, 0.6f, 0.6f, 1f);
@@ -22,10 +20,9 @@ public class LevelSelector : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i < levels.Length; i++)
+        for (int i = 0; i < levelDropdown.options.Count; i++)
         {
-            int index = i;
-            levels[i].button.onClick.AddListener(() => SelectLevel(index));
+            levels[i] = levelDropdown.options[i].text;
         }
     }
 
@@ -44,21 +41,13 @@ public class LevelSelector : MonoBehaviour
         bool wasHost = previousHostState == true;
         previousHostState = isHost;
 
-        for (int i = 0; i < levels.Length; i++)
-        {
-            levels[i].button.gameObject.SetActive(isHost);
-        }
+        levelDropdown.gameObject.SetActive(isHost);
 
-        if (isHost && !wasHost) SelectLevel(0);
+        SelectLevel(levelDropdown.value);
     }
 
     private void SelectLevel(int index)
     {
-        titleScreen.SetSceneName(levels[index].sceneName);
-
-        for (int i = 0; i < levels.Length; i++)
-        {
-            levels[i].button.image.color = i == index ? selectedColor : unselectedColor;
-        }
+        titleScreen.SetSceneName(levels[index]);
     }
 }
