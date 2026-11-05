@@ -104,24 +104,24 @@ public class GridPlacement : NetworkBehaviour
         ResetCounterServerRpc();
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ResetBreakablesRpc()
-    {
-        if (builtObjects.Count != 0)
-        {
-            foreach (GameObject build in builtObjects)
-            {
-                if(build.GetComponent<ExplosiveStructure>() != null) { build.GetComponent<Rigidbody>().isKinematic = true; }
-                build.gameObject.SetActive(true);
-                build.GetComponent<BreakableStructureEntity>().ResetBreakable();
-            }
-        }
-    }
+    //[Rpc(SendTo.ClientsAndHost)]
+    //private void ResetBreakablesRpc()
+    //{
+    //    if (builtObjects.Count != 0)
+    //    {
+    //        foreach (GameObject build in builtObjects)
+    //        {
+    //            if (build.GetComponent<ExplosiveStructure>() != null) { build.GetComponent<Rigidbody>().isKinematic = true; }
+    //            build.gameObject.SetActive(true);
+    //            build.GetComponent<BreakableStructureEntity>().ResetBreakable();
+    //        }
+    //    }
+    //}
 
     [Rpc(SendTo.Server)]
     private void ResetCounterServerRpc()
-    {   
-        ResetBreakablesRpc();
+    {
+        //ResetBreakablesRpc();
         currentPlacements.Value = 0;
     }
 

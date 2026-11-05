@@ -163,7 +163,7 @@ public class ExplosiveStructure : BreakableStructureEntity
             StartCoroutine(OnRoundStart());
         else
         {
-            rb.isKinematic = false;
+            rb.isKinematic = true;
             Destroy(fracture.FragmentRoot);
         }
     }
@@ -174,12 +174,5 @@ public class ExplosiveStructure : BreakableStructureEntity
         yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
         rb.isKinematic = false;
         Debug.Log("Rigidbody physics enabled");
-    }
-    
-    private IEnumerator Despawn()
-    {
-        yield return new WaitForSeconds(5f);
-        Destroy(fracture.FragmentRoot);
-        gameObject.SetActive(false);
     }
 }

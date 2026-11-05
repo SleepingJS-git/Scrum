@@ -46,6 +46,7 @@ public class FanTrap : BreakableStructureEntity
     {
         fanCollider.enabled = true;
         GetComponent<MeshRenderer>().enabled = true;
+        if (!IsServer) return;
         this.health.Value = maxHealth;
         this.isAlive.Value = true;
     }

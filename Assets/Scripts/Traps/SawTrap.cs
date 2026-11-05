@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class SawTrap : Entity
+public class SawTrap : BreakableStructureEntity
 {
     [SerializeField] private Collider damageCollider;
     public int damage;
