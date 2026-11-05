@@ -329,7 +329,9 @@ public class PlayerMovement : MonoBehaviour
                 velocity.y -= gravityScale * Time.deltaTime;
         }
 
-        cc.Move(velocity * Time.deltaTime);
+        Vector3 finalVelocity = velocity + ExternalForce();;
+
+        cc.Move(finalVelocity * Time.deltaTime);
 
 
         // Update the slide timer
@@ -405,6 +407,7 @@ public class PlayerMovement : MonoBehaviour
     public void StopVelocity()
     {
         velocity = Vector3.zero;
+        externalForces = Vector3.zero;
     }
 
     private void CheckSlope()

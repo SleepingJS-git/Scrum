@@ -95,7 +95,7 @@ public class GridPlacement : NetworkBehaviour
         grid = GameObject.Find("Plane (Grid)").GetComponent<Grid>();
         playerInput = GetComponent<PlayerInput>();
         playerInput.enabled = IsOwner;
-        buildCam.enabled = IsOwner;
+        buildCam.gameObject.SetActive(IsOwner);
         if (!IsOwner) return;
         PlayerManager.BuildingUI.SetGridPlacement(this);
         // Initialize all inputs

@@ -18,11 +18,26 @@ public class AreaEffector3D : NetworkBehaviour
     [SerializeField] private Collider effectArea;
     [Tooltip("Whether or not to use this objects forward transform as the force direction.")]
     [SerializeField] private bool useForwardTransform;
+    [SerializeField] private List<GameObject> affectedPlayers;
 
     // Start is called before the first frame update
     void Start()
     {
         effectArea.isTrigger = true;
+
+        affectedPlayers = new List<GameObject>();
+    }
+
+    public void ClearAffected()
+    {
+        for (int i = affectedPlayers.Count - 1;  i >= 0; i--)
+        {
+            Vector3 dir = useForwardTransform ? transform.forward : forceDir;
+            Player p = affectedPlayers[i].GetComponent<Player>();
+            p.ApplyContinuousForceRpc(-dir, force, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
+
+            affectedPlayers.RemoveAt(i);
+        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -30,8 +45,13 @@ public class AreaEffector3D : NetworkBehaviour
         if (!IsServer) return;
 
         if (!other.CompareTag("Player")) return;
-        Debug.Log("Player is affected: " + other.name);
 
+        if (!affectedPlayers.Contains(other.gameObject))
+            affectedPlayers.Add(other.gameObject);
+        else return;
+
+        Debug.Log("Player is affected: " + other.name);
+        
         Vector3 dir = useForwardTransform ? transform.forward : forceDir;
 
         Player p = other.GetComponent<Player>();
@@ -43,6 +63,11 @@ public class AreaEffector3D : NetworkBehaviour
         if (!IsServer) return;
 
         if (!other.CompareTag("Player")) return;
+
+        if (affectedPlayers.Contains(other.gameObject))
+            affectedPlayers.Remove(other.gameObject);
+        else return;
+
         Debug.Log("Player is affected: " + other.name);
 
         Vector3 dir = useForwardTransform ? transform.forward : forceDir;

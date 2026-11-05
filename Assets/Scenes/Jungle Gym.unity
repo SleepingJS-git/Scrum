@@ -37516,6 +37516,10 @@ PrefabInstance:
       value: FanTrap
       objectReference: {fileID: 0}
     - target: {fileID: 9084300534224724575, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
+      propertyPath: m_InScenePlaced
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9084300534224724575, guid: 4596afb19419fc74cb0d4d3937a4214f, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 314780820
       objectReference: {fileID: 0}
@@ -43146,6 +43150,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioData: {fileID: 11400000, guid: d3e96e511f4e3c74a92a599e6f0acf7c, type: 2}
   uiAudioSource: {fileID: 1889978668}
+  buttonHoverSource: {fileID: 0}
+  buttonClickSource: {fileID: 0}
+  buttonPitchRange: {x: 0.95, y: 1.05}
+  hoverVolume: 0.5
+  clickVolume: 0.7
+  placementVolume: 1
+  invalidPlacementVolume: 1
+  placementAudioSource: {fileID: 0}
 --- !u!4 &1889978667
 Transform:
   m_ObjectHideFlags: 0
