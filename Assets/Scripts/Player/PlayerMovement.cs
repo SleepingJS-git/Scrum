@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Crouching")]
     public float crouchSpeed;       // Movespeed of player while crouching
     public float crouchHeight = 1f;
+    public float crouchHelperVal = 40f;
     public float positionChangeSpeed;
 
     [Header("Sprinting")]
@@ -27,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Sliding")]
     public float slideSpeed;
     public float slideDeceleration;
+    public float slideAcceleration;
     public float slideMinSpeed;
     public float slideDuration;
     public float slideCooldown;
@@ -34,24 +37,35 @@ public class PlayerMovement : MonoBehaviour
     [Range(0f, 2f)] public float slideInputDrag;
 
     [Header("Wall Kicking")]
-    public float kickReach;
     public float kickUpForce;
     public float kickHorizForce;
-    public float wallKickCooldown;
 
     [Header("Physics")]
     public float mass;
+
+    [Header("Slope Handling")]
+    public float castingDist;
+    private RaycastHit slopeHit;
+    private bool onSlope;
+    private float slopeVelocityY;
+
+    [Header("Coyote Time")]
+    public float coyoteTime;
 
     // Private Variables
     // Current Move State
     private MovementState moveState => (MovementState)main.MoveState.Value;
     private bool isChangingState = false;
+    private bool isStuckOnCeiling = false;
 
     // Horizontal movement
     private bool isMoving;
     [SerializeField] private Vector3 velocity;       // Actual Velocity    
     private Vector3 moveDir;        // Movement Direction
     private bool isSprinting = false;
+
+    // Jumping
+    private bool canJump;
 
     // Crouching
     private float defaultHeight;
@@ -64,10 +78,16 @@ public class PlayerMovement : MonoBehaviour
     private float slideElapsed;
     [SerializeField] private bool isCrouchHeld;
     [SerializeField] private bool holdToCrouchInput;
+    [SerializeField] private bool isGrounded;
+    public bool IsGrounded => isGrounded;
+    private bool slideJumped = false;
 
     // Wall Kicking
     private int wallKicks;
-    private float wallKickElapsed;
+
+    // Coyote Time
+    private Coroutine coyoteTimeRoutine;
+    private bool coyoteTimeIsActive = false;
 
     // Components
     private CharacterController cc;
@@ -90,6 +110,30 @@ public class PlayerMovement : MonoBehaviour
 
 
     #region Basic Movement
+
+    private void GroundingLogic()
+    {
+        bool wasGrounded = isGrounded;
+        bool groundedNow = cc.isGrounded || onSlope;
+        if (moveState == MovementState.Sliding && isChangingState) groundedNow = true;
+
+        // Player just walked off a ledge
+        if (wasGrounded && !groundedNow && canJump)
+        {
+            CoyoteTime();
+        }
+
+        // Player just landed
+        else if (!wasGrounded && groundedNow)
+        {
+            StopCoyoteTime();
+            canJump = true;
+            slideJumped = false;
+        }
+
+        isGrounded = groundedNow;
+    }
+
     /// <summary>
     /// This does the movement for vertical (walking) and horizontal (gravity)
     /// </summary>
@@ -97,9 +141,26 @@ public class PlayerMovement : MonoBehaviour
     public void Move(Vector3 moveInput)
     {
         if (!cc.enabled) return;
+        if (isGrounded && !cc.isGrounded && canJump)
+        {
+            CoyoteTime();
+        }
+
         // The actual direction relative to the way the player is facing
         moveDir = transform.right * moveInput.x + transform.forward * moveInput.z;
         moveDir.Normalize();
+
+        CheckSlope();
+
+        GroundingLogic();
+        
+        if (cc.isGrounded)
+            wallKicks = 0;
+
+        if (isGrounded && cc.isGrounded) canJump = true;
+
+        if (onSlope)
+            moveDir = GetSlopeDirection(moveDir);
 
         if (moveState == MovementState.Sliding)
         {
@@ -113,34 +174,44 @@ public class PlayerMovement : MonoBehaviour
         {
             if (!isMoving) Sprint();
         }
-        
+
         // Cache the current speed
         currentSpeed = DetermineMoveSpeed();
 
         Vector3 targetVelocity = currentSpeed * moveDir;
 
-        if (cc.isGrounded) wallKicks = 0;
 
         // If is grounded, accelerate if moving or decelerate if not
         float accel = isMoving ? groundAccel : groundDecel;
 
         float velY = velocity.y;
-        targetVelocity.y = 0f;
-        velocity.y = 0f;
 
         // Accelerate current velocity to target
         velocity = Vector3.MoveTowards(velocity, targetVelocity, accel * Time.deltaTime);
         velocity.y = velY;
 
         // Gravity
-        if (cc.isGrounded && velocity.y < 0f)
-            velocity.y = -2f;
+        if (onSlope)
+            slopeVelocityY = targetVelocity.y;
         else
         {
-            if (velocity.y > 0f) velocity.y -= gravityScale * upwardGravMult * Time.deltaTime;
-            else velocity.y -= gravityScale * Time.deltaTime;
+            slopeVelocityY = 0f;
+
+            if (cc.isGrounded && velocity.y < 0f)
+                velocity.y = -2f;
+            else
+            {
+                if (velocity.y > 0f)
+                    velocity.y -= gravityScale * upwardGravMult * Time.deltaTime;
+                else
+                    velocity.y -= gravityScale * Time.deltaTime;
+            }
         }
-        cc.Move(velocity * Time.deltaTime);
+
+        Vector3 finalVelocity = velocity;
+        finalVelocity.y += slopeVelocityY;
+
+        cc.Move(finalVelocity * Time.deltaTime);
 
         UpdateAnimation();
     }
@@ -153,6 +224,16 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isMoving)
         {
+            if (slideJumped)
+            {
+                slideVelocity = Mathf.MoveTowards(
+                    slideVelocity,
+                    0f,
+                    slideDeceleration * .35f  * Time.deltaTime
+                );
+                return slideVelocity;
+            }
+                
             switch ((MovementState)main.MoveState.Value)
             {
                 case MovementState.Standing:
@@ -172,32 +253,61 @@ public class PlayerMovement : MonoBehaviour
     private void SlideMovement()
     {
         // Get the current sliding velocity after applying deceleration
-        slideVelocity = Mathf.MoveTowards(
-            slideVelocity,
-            0f,
-            slideDeceleration * Time.deltaTime
-        );
+
+        if (onSlope)
+        {
+            // Determine whether the player is moving downhill or uphill.
+            float slopeMovement = Vector3.Dot(slideDirection, GetSlopeDirection(Vector3.down));
+
+            if (slopeMovement > 0.01f)
+            {
+                // Gain momentum while moving downhill.
+                slideVelocity += slideAcceleration * slopeMovement * Time.deltaTime;
+            }
+            else if (slopeMovement < -0.01f)
+            {
+                // Lose momentum while moving uphill.
+                slideVelocity = Mathf.MoveTowards(
+                    slideVelocity,
+                    0f,
+                    slideDeceleration * Time.deltaTime
+                );
+            }
+        }
+        else
+            slideVelocity = Mathf.MoveTowards(
+                slideVelocity,
+                0f,
+                slideDeceleration * Time.deltaTime
+            );
 
         // Gradually steer the slide toward the player's input.
         if (moveDir.sqrMagnitude > 0.001f)
         {
+            if (onSlope) slideDirection = Vector3.ProjectOnPlane(slideDirection, slopeHit.normal).normalized;
+
             slideDirection = Vector3.Slerp(
                 slideDirection,
                 moveDir,
                 slideInputDrag * Time.deltaTime
             ).normalized;
         }
-        
+
         // Slide velocity is dependent on horizontal axis only
         Vector3 horizontalVelocity = slideDirection * slideVelocity;
         velocity.x = horizontalVelocity.x;
         velocity.z = horizontalVelocity.z;
 
-        // Apply gravity
-        if (cc.isGrounded && velocity.y < 0f)
-            velocity.y = -2f;
+        if (onSlope)
+            velocity.y = horizontalVelocity.y;
         else
-            velocity.y -= gravityScale * Time.deltaTime;
+        {
+            // Apply gravity
+            if (cc.isGrounded && velocity.y < 0f)
+                velocity.y = -2f;
+            else
+                velocity.y -= gravityScale * Time.deltaTime;
+        }
 
         cc.Move(velocity * Time.deltaTime);
 
@@ -276,6 +386,23 @@ public class PlayerMovement : MonoBehaviour
     {
         velocity = Vector3.zero;
     }
+
+    private void CheckSlope()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, castingDist, Layer.Ground, QueryTriggerInteraction.Ignore))
+        {
+            float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
+            onSlope = angle <= cc.slopeLimit && angle != 0;
+            return;
+        }
+
+        onSlope = false;
+    }
+
+    private Vector3 GetSlopeDirection(Vector3 dir)
+    {
+        return Vector3.ProjectOnPlane(dir, slopeHit.normal).normalized;
+    }
     #endregion
 
     #region Advanced Movement
@@ -298,49 +425,42 @@ public class PlayerMovement : MonoBehaviour
         {
             case ForceMode.Impulse:
                 velocity += PhysicsHelper.Impulse(dir, force, mass);
-            break;
+                break;
             case ForceMode.Force:
                 Debug.Log("Velocity Before: " + velocity);
                 velocity += PhysicsHelper.ContinuousForce(dir, force, mass, dt);
                 Debug.Log("Velocity After: " + velocity);
 
-            break;
+                break;
         }
     }
-    
+
     /// <summary>
-    /// Temporary WallKick method. If the player is looking at a valid surface, do a wall kick.
+    /// If the player is looking at a valid surface, do a wall kick.
     /// </summary>
     public void WallKick()
     {
-        if (Time.time < wallKickElapsed + wallKickCooldown) return;
-        body.PlayTrigger("Kick");
-        // Damage logic can happen during this window
-        if (cc.isGrounded) return;
+        if (isGrounded) return;
 
-        if (Physics.Raycast(main.PlayerCam.position, main.PlayerCam.forward, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
+        Vector3 direction;
+
+        // Wall kicks become less effective if the player does multiple consecutive wallkicks without resetting
+        if (wallKicks == 0)
         {
-            Vector3 direction;
-
-            // Wall kicks become less effective if the player does multiple consecutive wallkicks without resetting
-            if (wallKicks == 0)
-            {
-                float y = Mathf.Sqrt(kickUpForce * 2f * gravityScale);
-                direction = -main.PlayerCam.forward * kickHorizForce;
-                direction.y += y;
-                velocity = direction;
-            }
-            else
-            {
-                float y = Mathf.Sqrt(kickUpForce / (wallKicks + 1) * 2f * gravityScale);
-                direction = -main.PlayerCam.forward;
-                direction.y = y;
-                velocity += direction;
-            }
-
-            wallKicks++;
-            wallKickElapsed = Time.time;
+            float y = Mathf.Sqrt(kickUpForce * 2f * gravityScale);
+            direction = -main.PlayerCam.forward * kickHorizForce;
+            direction.y += y;
+            velocity = direction;
         }
+        else
+        {
+            float y = Mathf.Sqrt(kickUpForce / (wallKicks + 1) * 2f * gravityScale);
+            direction = -main.PlayerCam.forward;
+            direction.y = y;
+            velocity += direction;
+        }
+
+        wallKicks++;
 
     }
 
@@ -349,31 +469,57 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     public void Jump()
     {
-        if (cc.isGrounded)
+        if (!canJump) return;
+
+        // If the player was crouching, make them stand
+        if (moveState == MovementState.Crouching)
         {
-            // If the player was crouching, make them stand
-            if (moveState == MovementState.Crouching)
-            {
-                body.Play("IsCrouching", false);
-                main.ChangeMoveStateServerRpc((int)MovementState.Standing);
-            }
-
-            // If the player was sliding, make them stand and also make them jump
-            else if (moveState == MovementState.Sliding)
-            {
-                body.Play("IsSliding", false);
-                main.ChangeMoveStateServerRpc((int)MovementState.Standing);
-                velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
-                jumpAudio.PlayJump();
-            }
-
-            // If the player is standing or sprinting, do a normal jump
-            else
-            {
-                velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
-                jumpAudio.PlayJump();
-            }
+            body.Play("IsCrouching", false);
+            main.ChangeMoveStateServerRpc((int)MovementState.Standing);
         }
+        // If the player was sliding, make them stand and also make them jump
+        if (moveState == MovementState.Sliding)
+        {
+            body.Play("IsSliding", false);
+            main.ChangeMoveStateServerRpc((int)MovementState.Standing);
+            velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+
+            AddForce(transform.forward, Mathf.Sqrt(slideVelocity) * 1, Time.deltaTime, ForceMode.Impulse);
+            jumpAudio.PlayJump();
+
+            slideJumped = true;
+        }
+        // If the player is standing or sprinting, do a normal jump
+        else
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
+            jumpAudio.PlayJump();
+        }
+
+        StopCoyoteTime();
+    }
+
+    private void CoyoteTime()
+    {
+        StopCoyoteTime();
+        coyoteTimeRoutine = StartCoroutine(CoyoteTimeRoutine());
+    }
+
+    private void StopCoyoteTime()
+    {
+        if (coyoteTimeRoutine != null)
+            StopCoroutine(coyoteTimeRoutine);
+
+        canJump = false;
+    }
+
+    private IEnumerator CoyoteTimeRoutine()
+    {
+        canJump = true;
+
+        yield return new WaitForSeconds(coyoteTime);
+
+        canJump = false;
     }
 
     /// <summary>
@@ -405,8 +551,8 @@ public class PlayerMovement : MonoBehaviour
                 main.ChangeMoveStateServerRpc((int)MovementState.Standing);
             }
 
-            // If the player is standing, make them sprint
-            else if (moveState == MovementState.Standing)
+            // If the player is standing, make them sprint. If they are stuck under a ceiling, they can't sprint
+            else if (moveState == MovementState.Standing && !isStuckOnCeiling)
             {
                 body.Play("IsSprinting", true);
                 main.ChangeMoveStateServerRpc((int)MovementState.Sprinting);
@@ -431,7 +577,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    
+
     /// <summary>
     /// Crouching logic for players who have the 'Hold to Crouch' setting.
     /// This method is called whenever the player first presses or lets go of the crouch key.
@@ -479,7 +625,7 @@ public class PlayerMovement : MonoBehaviour
     /// This method is called only when the player presses the crouch key.
     /// </summary>
     public void CrouchOrSlide()
-    {        
+    {
         if (isChangingState) return;
 
         // If player was standing, make them crouch
@@ -531,7 +677,7 @@ public class PlayerMovement : MonoBehaviour
         // Get the initial slide velocity
         slideVelocity = new Vector3(velocity.x, 0f, velocity.z).magnitude + slideSpeed;
         slideTimer = 0f;
-        
+
         main.ChangeMoveStateServerRpc((int)MovementState.Sliding);
     }
 
@@ -588,8 +734,9 @@ public class PlayerMovement : MonoBehaviour
 
         // Increase y velocity to make the player immediately go up when crouching
         // This is to prevent stuttering because as the collider's height increases, its constantly clipping the floor.
-        if (!toCrouch && cc.isGrounded)
-            velocity.y = Mathf.Sqrt(30f);
+        if (!toCrouch)
+            velocity.y = Mathf.Sqrt(crouchHelperVal);
+
 
         // Set variables for the height of the collider
         float startHeight = cc.height;
@@ -602,40 +749,44 @@ public class PlayerMovement : MonoBehaviour
         float startCamLevel = pos.y;
 
         float t = 0f;
-        
-        bool ceiling = false;   // Will always be false if toCrouch is true
+
+        isStuckOnCeiling = false;   // Will always be false if toCrouch is true
         while (t < 1)
         {
             // Check if theres a wall or ground above the player only if they are uncrouching.
             if (!toCrouch)
             {
-                Vector3 origin = transform.position + new Vector3(0, cc.height / 2, 0);
-                ceiling = Physics.Raycast(origin, Vector3.up, 0.2f, Layer.Wall | Layer.Ground);
+                Vector3 origin = transform.position + Vector3.down * (cc.height * 0.5f);
+
+                isStuckOnCeiling = Physics.Raycast(
+                    origin,
+                    Vector3.up,
+                    cc.height + 0.2f,
+                    Layer.Wall | Layer.Ground,
+                    QueryTriggerInteraction.Ignore
+                );
             }
 
-            // If there is no ceiling yet, continue increasing or decreasing the height.
-            if (!ceiling)
+            // If there is no ceiling, stop increasing the height until player gets out of ceiling
+            if (!isStuckOnCeiling)
             {
+                // If there is no ceiling yet, continue increasing or decreasing the height.
+                t += Time.deltaTime / positionChangeSpeed;
+
                 pos.y = Mathf.Lerp(startCamLevel, TargetCamLevel, t);
                 main.Look.camHolder.localPosition = pos;
                 cc.height = Mathf.Lerp(startHeight, targetHeight, t);
-
-                t += Time.deltaTime / positionChangeSpeed;
+                
             }
-
-            // If there was a ceiling detected, break this loop
-            // Meaning the player's height and cam level will be at wherever it stopped.
-            else { ceiling = true; break; }
 
             yield return null;
         }
 
         // If there was no ceiling detected, set the camHolder pos and cc height to target values
-        if (!ceiling)
+        if (!isStuckOnCeiling)
         {
             pos.y = TargetCamLevel;
             main.Look.camHolder.localPosition = pos;
-
             cc.height = targetHeight;
         }
 

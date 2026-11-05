@@ -170,7 +170,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (ctx.started)
         {
-            move.WallKick();
+            _main.Combat.MeleeKick();
 
             // Combat Melee Kick Method
         }
