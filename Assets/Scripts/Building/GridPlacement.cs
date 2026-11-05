@@ -252,9 +252,9 @@ public class GridPlacement : NetworkBehaviour
         for (int i = 0; i < previewRenderer.materials.Length; i++)
         {
             if (!canPlace.Value)
-                previewRenderer.materials[i].color = new Color(2f, defaultColors[i].g, defaultColors[i].b, 0.1f);
+                previewRenderer.materials[i].color = new Color(2f, defaultColors[i].g, defaultColors[i].b, 0.5f);
             else
-                previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.1f);
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.5f);
         }
     }
 
@@ -346,7 +346,7 @@ public class GridPlacement : NetworkBehaviour
             for (int i = 0; i < previewRenderer.materials.Length; i++)
             {
                 defaultColors.Add(previewRenderer.materials[i].color);
-                previewRenderer.materials[i].color = new Color(defaultColors[i].r, defaultColors[i].g, defaultColors[i].b, 0.90f);
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, defaultColors[i].g, defaultColors[i].b, 0.5f);
                 defaultColors[i] = previewRenderer.materials[i].color;
             }
         }
