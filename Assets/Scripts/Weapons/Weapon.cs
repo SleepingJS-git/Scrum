@@ -298,7 +298,6 @@ public class Weapon : NetworkBehaviour
                 // Check if the entity is alive
                 if (e && e.isAlive.Value)
                 {
-                    hitPlayer = true;
                     e.OnHit(new OnHitData()
                     {
                         attacker = player,
@@ -310,15 +309,41 @@ public class Weapon : NetworkBehaviour
                         damageType = (DamageType) data.damageType
                     });
 
-                    if (!e.isAlive.Value && e.CompareTag("Player"))
+                    hitPlayer = true;
+
+                    if (e is Player p)
                     {
-                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        Vector3 meleeForce = PhysicsHelper.ExplosionForce(
+                            player.transform.position,
+                            p.transform.position,
+                            Mathf.Sqrt(data.damage) / 2f,
+                            data.attackRange,
+                            .1f
+                        );
+
+                        if (meleeForce != Vector3.zero)
                         {
-                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
-                            stats.AddKill();
-                            killedPlayer = true;
+                            p.AddForceRpc(
+                                meleeForce.normalized,
+                                meleeForce.magnitude,
+                                (int) ForceMode.Impulse,
+                                Time.deltaTime,
+                                RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp)
+                            );
+                        }
+
+                        if (!p.isAlive.Value)
+                        {
+                            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                            {
+                                PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                                stats.AddKill();
+                                killedPlayer = true;
+                            }
                         }
                     }
+
+                    
                 }
             }
         }
@@ -469,13 +494,11 @@ public class Weapon : NetworkBehaviour
             if (killedPlayer) player.Hud.Deathmarker();
             else player.Hud.Hitmarker();
         }
-        player.Combat.RightHandRecoil();
 
         if (data is HitscanData)
         {
             player.Hud.UpdateWeaponInfo(currentBullets, reserveBullets);
             player.Combat.RightHandRecoil();
-
         }
     }
 

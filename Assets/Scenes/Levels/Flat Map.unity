@@ -818,6 +818,7 @@ MonoBehaviour:
     CrouchingType: 0
     DefaultPOV: 80
     DevMode: 0
+    MeleeIndicatorVersion: 1
   spawnPoints:
   - {fileID: 998218085}
   - {fileID: 1965402590}
