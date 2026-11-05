@@ -15,6 +15,8 @@ public class GridPlacement : NetworkBehaviour
     // Track the preview for the placeable object
     Buildable previewObject;
     Renderer previewRenderer;
+    [SerializeField]
+    private Material previewMaterial;
 
     [Tooltip("The grid being placed on.")]
     [SerializeField]
@@ -261,9 +263,9 @@ public class GridPlacement : NetworkBehaviour
         for (int i = 0; i < previewRenderer.materials.Length; i++)
         {
             if (!canPlace.Value)
-                previewRenderer.materials[i].color = new Color(2f, defaultColors[i].g, defaultColors[i].b, 0.1f);
+                previewRenderer.materials[i].color = new Color(2f, defaultColors[i].g, defaultColors[i].b, 0.5f);
             else
-                previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.1f);
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.5f);
         }
     }
 
@@ -335,8 +337,14 @@ public class GridPlacement : NetworkBehaviour
         // Create the preview object and make it transparent
         previewObject = Instantiate(buildable);
         previewObject.NetworkObject.Spawn();
+        previewRenderer = previewObject.ObjectRenderer;
+        Material[] modifiedMaterials = previewRenderer.materials;
+        for (int i = 0; i < modifiedMaterials.Length; i++)
+        {
+            modifiedMaterials[i] = previewMaterial;
+        }
+        previewRenderer.materials = modifiedMaterials;
         UpdateOffset();
-        Debug.Log(offset);
         PreviewClientRpc(previewObject.NetworkObjectId);
     }
 
@@ -354,7 +362,7 @@ public class GridPlacement : NetworkBehaviour
             for (int i = 0; i < previewRenderer.materials.Length; i++)
             {
                 defaultColors.Add(previewRenderer.materials[i].color);
-                previewRenderer.materials[i].color = new Color(defaultColors[i].r, defaultColors[i].g, defaultColors[i].b, 0.1f);
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, defaultColors[i].g, defaultColors[i].b, 0.5f);
                 defaultColors[i] = previewRenderer.materials[i].color;
             }
         }

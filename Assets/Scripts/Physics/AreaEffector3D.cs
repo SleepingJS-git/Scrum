@@ -44,8 +44,10 @@ public class AreaEffector3D : NetworkBehaviour
 
         if (other.CompareTag("Player"))
         {
+            Debug.Log("Player is affected: " + other.name);
+
             Player p = other.GetComponent<Player>();
-            p.AddForceRpc(dir, newForce, 0, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
+            p.AddForceRpc(dir, newForce, 0, Time.deltaTime, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
         }
         else
         {

@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0b6dcc438df27584e85f5307a7ba86f0, type: 3}
-  m_Name: 0 Test Gun
+  m_Name: 0 Drill Gun
   m_EditorClassIdentifier: 
-  weaponName: Test Gun
+  weaponName: Drill Gun
   weaponID: 0
   firingType: 0
   WeaponType: 0
@@ -30,5 +30,5 @@ MonoBehaviour:
   fireSound: {fileID: 8300000, guid: b9fd3f93a2be5e84aae63553a2c7cbfe, type: 3}
   pickupSound: {fileID: 8300000, guid: 281ef5ce6a178084d83b8d16a81bec96, type: 3}
   trail: {fileID: 6054875183091041710, guid: ddef6a7c1338919478524e3ab4ff32e0, type: 3}
-  bulletImpact: {fileID: 2466890847199373625, guid: 2cfcfcd2ebc663f49a9ed727850f1eff, type: 3}
+  bulletImpact: {fileID: 8419526965441767673, guid: fadbdac4f97f5ee4e8c2ba0eafb373dc, type: 3}
   recoilAmplitude: 25

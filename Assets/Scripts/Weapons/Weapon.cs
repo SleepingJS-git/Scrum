@@ -71,7 +71,8 @@ public class Weapon : NetworkBehaviour
     [SerializeField] private float spreadRecoveryTime = 0.15f;
     [SerializeField] private float spreadRecoverySpeed = 5f;
     public bool hasWeapon;
-    public GameObject testSphere;
+    public GameObject bloodSpray;
+    public GameObject tempImpactParticles;
 
     [Header("Pickup Audio")]
     [SerializeField] private AudioSource pickupAudioSource;
@@ -150,6 +151,95 @@ public class Weapon : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
+    public void MeleeKickServerRpc(Vector3 headPos, Vector3 aimDir, float kickReach, RpcParams rpcParams = default)
+    {
+        Player player = GetPlayer(rpcParams.Receive.SenderClientId);
+        if (!player) return;
+
+        bool hitPlayer = false;
+        bool killedPlayer = false;
+
+        Vector3 dir = aimDir;
+        Vector3 adjustedHeadPos = headPos + (dir * .65f);
+
+        if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
+        {
+            Debug.Log(hit.collider.name + "was hit!");
+
+            Collider h = hit.collider;
+            if (h.attachedRigidbody && !h.attachedRigidbody.isKinematic)
+            {
+                h.attachedRigidbody.AddExplosionForce(
+                    25f, 
+                    hit.point, 2f, .5f,
+                    ForceMode.Impulse);
+            }
+            hitPlayer = h.CompareTag("Player");
+            if (hitPlayer || h.CompareTag("Buildable"))
+            {
+                Entity e = hit.collider.GetComponent<Entity>();
+                // Check if the entity is alive
+                if (e && e.isAlive.Value)
+                {
+                    e.OnHit(new OnHitData()
+                    {
+                        attacker = player,
+                        damage = 5,
+                        explosionForce = 10f,
+                        sourceHit = hit.point,
+                        movingDir = dir,
+                        upwardsModifier = .5f,
+                        damageType = DamageType.Blunt
+                    });
+
+                    if (e is Player p)
+                    {
+                        Vector3 meleeForce = PhysicsHelper.ExplosionForce(
+                            hit.point,
+                            p.transform.position,
+                            5f,
+                            1f,
+                            .2f
+                        );
+
+                        Debug.Log("Melee Force Magnitude: " + meleeForce.magnitude);
+
+                        if (meleeForce != Vector3.zero)
+                        {
+                            p.AddForceRpc(
+                                meleeForce.normalized,
+                                meleeForce.magnitude,
+                                (int) ForceMode.Impulse,
+                                Time.deltaTime,
+                                RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp)
+                            );
+                        }
+                    }
+
+                    if (!e.isAlive.Value)
+                    {
+
+                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        {
+                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                            stats.AddKill();
+                            killedPlayer = true;
+                        }
+                    }
+                }
+            }
+        }
+        else return;
+
+        EffectsClientRpc(
+            hit.point,
+            hit.normal,
+            rpcParams.Receive.SenderClientId,
+            hitPlayer,
+            killedPlayer
+        );
+    }
+    [Rpc(SendTo.Server)]
     public void MeleeSwingServerRpc(Vector3 headPos, Vector3 aimDir, RpcParams rpcParams = default)
     {
         if (!IsReady)
@@ -205,13 +295,13 @@ public class Weapon : NetworkBehaviour
 
         if (closestCollider)
         {
-            if (closestCollider.CompareTag("Player") || closestCollider.CompareTag("Buildable"))
+            hitPlayer = closestCollider.CompareTag("Player");
+            if (hitPlayer || closestCollider.CompareTag("Buildable"))
             {
                 Entity e = closestCollider.GetComponent<Entity>();
                 // Check if the entity is alive
                 if (e && e.isAlive.Value)
                 {
-                    hitPlayer = true;
                     e.OnHit(new OnHitData()
                     {
                         attacker = player,
@@ -223,15 +313,40 @@ public class Weapon : NetworkBehaviour
                         damageType = (DamageType) data.damageType
                     });
 
-                    if (!e.isAlive.Value && e.CompareTag("Player"))
+
+                    if (e is Player p)
                     {
-                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        Vector3 meleeForce = PhysicsHelper.ExplosionForce(
+                            player.transform.position,
+                            p.transform.position,
+                            Mathf.Sqrt(data.damage) / 2f,
+                            data.attackRange,
+                            .1f
+                        );
+
+                        if (meleeForce != Vector3.zero)
                         {
-                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
-                            stats.AddKill();
-                            killedPlayer = true;
+                            p.AddForceRpc(
+                                meleeForce.normalized,
+                                meleeForce.magnitude,
+                                (int) ForceMode.Impulse,
+                                Time.deltaTime,
+                                RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp)
+                            );
+                        }
+
+                        if (!p.isAlive.Value)
+                        {
+                            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                            {
+                                PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                                stats.AddKill();
+                                killedPlayer = true;
+                            }
                         }
                     }
+
+                    
                 }
             }
         }
@@ -278,16 +393,14 @@ public class Weapon : NetworkBehaviour
         if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, 100f, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
         {
             hitPoint = hit.point;
-            Debug.Log(hit.collider.name + "was hit!");
-            // If the raycast hit a player, damage the entity. For right now it just
-            // damages the entity.
-            if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("Buildable"))
+            hitPlayer = hit.collider.CompareTag("Player");
+
+            if (hitPlayer || hit.collider.CompareTag("Buildable"))
             {
                 Entity e = hit.collider.GetComponent<Entity>();
                 // Check if the entity is alive
                 if (e && e.isAlive.Value)
                 {
-                    hitPlayer = true;
                     e.OnHit(new OnHitData()
                     {
                         attacker = player,
@@ -298,14 +411,16 @@ public class Weapon : NetworkBehaviour
                         upwardsModifier = .5f,
                         damageType = DamageType.Bullet
                     });
-
-                    if (!e.isAlive.Value && e.CompareTag("Player"))
+                    if (hitPlayer)
                     {
-                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        if (!e.isAlive.Value)
                         {
-                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
-                            stats.AddKill();
-                            killedPlayer = true;
+                            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                            {
+                                PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                                stats.AddKill();
+                                killedPlayer = true;
+                            }
                         }
                     }
                 }
@@ -338,9 +453,8 @@ public class Weapon : NetworkBehaviour
     /// <param name="clientId"></param>
     [Rpc(SendTo.ClientsAndHost)]
     public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId, bool hitPlayer, bool killedPlayer)
-    {
+    {   
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
-
         float randomPitch = UnityEngine.Random.Range(0.985f, 1.015f);
         float randomVolume = UnityEngine.Random.Range(0.5f, 0.55f);
         weaponAudioSource.pitch = randomPitch;
@@ -356,14 +470,19 @@ public class Weapon : NetworkBehaviour
                 hitscanData,
                 hitPoint,
                 firingPoint.position,
-                dir
+                dir,
+                hitPlayer
             );
         }
         else if (data is MeleeData meleeData)
         {
-            // idkkkkkk
-            GameObject test = Instantiate(testSphere, hitPoint, Quaternion.identity);
-            Destroy(test, 5f);
+            GameObject impact;
+            
+            if (hitPlayer)
+                impact = Instantiate(bloodSpray, hitPoint, Quaternion.LookRotation(dir));
+            else impact = Instantiate(meleeData.impactParticles, hitPoint, Quaternion.LookRotation(dir));
+            
+            Destroy(impact, 1f);
         }
 
 
@@ -383,10 +502,60 @@ public class Weapon : NetworkBehaviour
             if (killedPlayer) player.Hud.Deathmarker();
             else player.Hud.Hitmarker();
         }
-        player.Combat.RightHandRecoil();
 
         if (data is HitscanData)
+        {
             player.Hud.UpdateWeaponInfo(currentBullets, reserveBullets);
+            player.Combat.RightHandRecoil();
+        }
+    }
+
+    /// <summary>
+    /// This is specifically for the melee kick
+    /// Every client's copy of this weapon handler will now create the vfx for their screens
+    /// </summary>
+    /// <param name="hitPoint"></param>
+    /// <param name="currentBullets"></param>
+    /// <param name="reserveBullets"></param>
+    /// <param name="clientId"></param>
+    [Rpc(SendTo.ClientsAndHost)]
+    public void EffectsClientRpc(Vector3 hitPoint, Vector3 normal, ulong clientId, bool hitPlayer, bool killedPlayer)
+    {   
+        WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
+        float randomPitch = UnityEngine.Random.Range(0.985f, 1.015f);
+        float randomVolume = UnityEngine.Random.Range(0.5f, 0.55f);
+        weaponAudioSource.pitch = randomPitch;
+        weaponAudioSource.volume = randomVolume;
+        bool isLocalShooter = NetworkManager.Singleton.LocalClientId == clientId;
+        weaponAudioSource.spatialBlend = isLocalShooter ? 0f : 1f;
+        weaponAudioSource.PlayOneShot(data.fireSound);
+
+        GameObject impact;
+            
+            if (hitPlayer)
+                impact = Instantiate(bloodSpray, hitPoint, Quaternion.LookRotation(-normal));
+            else impact = Instantiate(tempImpactParticles, hitPoint, Quaternion.LookRotation(-normal));
+            
+            Destroy(impact, 1f);
+
+        // If the current client wasn't the client that requested the serverrpc, return
+        if (NetworkManager.Singleton.LocalClientId != clientId)
+            return;
+
+        // Update the hud for the client that shot the weapon
+        Player player = GetPlayer(clientId);
+
+        if (!player) return;
+
+        if (hitPlayer)
+        {
+            AudioManager.Instance.PlayHitmarker();
+            
+            if (killedPlayer) player.Hud.Deathmarker();
+            else player.Hud.Hitmarker();
+        }
+
+        player.Combat.OnWallKick();
     }
 
     /// <summary>
@@ -395,12 +564,12 @@ public class Weapon : NetworkBehaviour
     /// </summary>
     /// <param name="startPos"></param>
     /// <param name="endPos"></param>
-    public void BulletTrail(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
+    public void BulletTrail(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir, bool hitPlayer)
     {
-        StartCoroutine(BulletTrailRoutine(data, hitPoint, startPos, dir));
+        StartCoroutine(BulletTrailRoutine(data, hitPoint, startPos, dir, hitPlayer));
     }
 
-    private IEnumerator BulletTrailRoutine(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir)
+    private IEnumerator BulletTrailRoutine(HitscanData data, Vector3 hitPoint, Vector3 startPos, Vector3 dir, bool hitPlayer)
     {
         float time = 0f;
         TrailRenderer trail = Instantiate(data.trail, startPos, Quaternion.identity);
@@ -415,9 +584,12 @@ public class Weapon : NetworkBehaviour
 
         trail.transform.position = hitPoint;
         Destroy(trail.gameObject, trail.time);
-        GameObject bulletImpact = Instantiate(data.bulletImpact, hitPoint, Quaternion.LookRotation(dir));
+        GameObject bulletImpact;
+        if (hitPlayer)
+            bulletImpact = Instantiate(bloodSpray, hitPoint, Quaternion.LookRotation(dir));
+        else bulletImpact = Instantiate(data.bulletImpact, hitPoint, Quaternion.LookRotation(dir));
+        Destroy(bulletImpact, 5f);
 
-        Destroy(bulletImpact, .5f);
     }
 
     /// <summary>
