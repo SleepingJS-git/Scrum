@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -8,6 +9,8 @@ public class PlayerBody : MonoBehaviour
     public Transform rightHand;
     public MultiAimConstraint rightArmRig;
     public Renderer bodyRenderer;
+    public Animator fpsPlayerModel;
+    public Animator fpsLegModel;
     public GameObject accessoryFolder;
     public OnHitData onHitData;
     [SerializeField] private float blendDampTime;
@@ -46,8 +49,20 @@ public class PlayerBody : MonoBehaviour
 
     public void ShowBodyRenderer(bool showRenderer)
     {
+        StartCoroutine(BodyRendererRoutine(showRenderer));
+    }
+
+    private IEnumerator BodyRendererRoutine(bool showRenderer)
+    {
+        yield return new WaitForEndOfFrame();
+
         bodyRenderer.enabled = showRenderer;
         accessoryFolder.SetActive(showRenderer);
+
+        if (fpsPlayerModel)
+            fpsPlayerModel.gameObject.SetActive(!showRenderer);
+        if (fpsLegModel)
+        fpsLegModel.gameObject.SetActive(!showRenderer);
     }
 
     public void UnRagdoll()
@@ -66,25 +81,44 @@ public class PlayerBody : MonoBehaviour
     public void Play(string para, bool val)
     {
         animator.SetBool(para, val);
+        
+        if (fpsPlayerModel)
+            fpsPlayerModel.SetBool(para, val);
     }
 
     public void Play(string para, float val)
     {
         animator.SetFloat(para, val);
+
+        if (fpsPlayerModel)
+            fpsPlayerModel.SetFloat(para, val);
     }
 
     public void CrossBlendLocomotion(string para, float val)
     {
         animator.SetFloat(para, val, blendDampTime, Time.deltaTime);
+        if (fpsPlayerModel)
+            fpsPlayerModel.SetFloat(para, val, blendDampTime, Time.deltaTime);
     }
 
     public void PlayTrigger(string para)
     {
         animator.SetTrigger(para);
+        if (fpsPlayerModel)
+            fpsPlayerModel.SetTrigger(para);
     }
 
     public void Play(string name)
     {
         animator.Play(name);
+
+        if (fpsPlayerModel)
+            fpsPlayerModel.Play(name);
+    }
+
+    public void PlayKick()
+    {
+        PlayTrigger("Kick");
+        fpsLegModel.SetTrigger("Kick");
     }
 }

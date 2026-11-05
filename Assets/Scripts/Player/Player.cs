@@ -77,6 +77,10 @@ public class Player : Entity
             deathCamera.Init();
 
             Interaction.Init(Look.cam.transform, Hud);
+
+            Combat.onWallKick += () => {
+                Move.WallKick();
+            };
         }
 
         Combat.Init(IsOwner, Hud);
@@ -297,12 +301,12 @@ public class Player : Entity
     /// <param name="forceMode">The Force Mode -> See note at the bottom of script</param>
     /// <param name="rpcParams">This should be sent only to the client that is affected by the force</param>
     [Rpc(SendTo.SpecifiedInParams)]
-    public void AddForceRpc(Vector3 dir, float force, int forceMode, RpcParams rpcParams = default)
+    public void AddForceRpc(Vector3 dir, float force, int forceMode, float dt, RpcParams rpcParams = default)
     {
         Debug.Log("AddForceRPC IsOwner?: " + IsOwner);
         Debug.Log("OwnerID: " + OwnerClientId);
         if (!IsOwner) return; // just in case
-        Move.AddForce(dir, force, (ForceMode) forceMode);
+        Move.AddForce(dir, force, dt, (ForceMode) forceMode);
     }
 }
 

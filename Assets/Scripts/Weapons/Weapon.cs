@@ -145,6 +145,98 @@ public class Weapon : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
+    public void MeleeKickServerRpc(float kickReach, RpcParams rpcParams = default)
+    {
+        Player player = GetPlayer(rpcParams.Receive.SenderClientId);
+        if (!player) return;
+
+        bool hitPlayer = false;
+        bool killedPlayer = false;
+
+        Vector3 dir = player.PlayerCam.forward;
+        Vector3 adjustedHeadPos = player.PlayerCam.position + (dir * .65f);
+
+        if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
+        {
+            Debug.Log(hit.collider.name + "was hit!");
+
+            Collider h = hit.collider;
+            if (h.attachedRigidbody && !h.attachedRigidbody.isKinematic)
+            {
+                h.attachedRigidbody.AddExplosionForce(
+                    25f, 
+                    hit.point, 2f, .5f,
+                    ForceMode.Impulse);
+            }
+            // If the raycast hit a player, damage the entity. For right now it just
+            // damages the entity.
+            if (h.CompareTag("Player") || h.CompareTag("Buildable"))
+            {
+                Entity e = hit.collider.GetComponent<Entity>();
+                // Check if the entity is alive
+                if (e && e.isAlive.Value)
+                {
+                    e.OnHit(new OnHitData()
+                    {
+                        attacker = player,
+                        damage = 15,
+                        explosionForce = 10f,
+                        sourceHit = hit.point,
+                        movingDir = dir,
+                        upwardsModifier = .5f,
+                        damageType = DamageType.Blunt
+                    });
+
+                    hitPlayer = true;
+
+                    if (e is Player p)
+                    {
+
+                        Vector3 meleeForce = PhysicsHelper.ExplosionForce(
+                            hit.point,
+                            p.transform.position,
+                            5f,
+                            1f,
+                            .2f
+                        );
+
+                        Debug.Log("Melee Force Magnitude: " + meleeForce.magnitude);
+
+                        if (meleeForce != Vector3.zero)
+                        {
+                            p.AddForceRpc(
+                                meleeForce.normalized,
+                                meleeForce.magnitude,
+                                (int) ForceMode.Impulse,
+                                Time.deltaTime,
+                                RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp)
+                            );
+                        }
+                    }
+
+                    if (!e.isAlive.Value)
+                    {
+
+                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
+                        {
+                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                            stats.AddKill();
+                            killedPlayer = true;
+                        }
+                    }
+                }
+            }
+        }
+        else return;
+
+        EffectsClientRpc(
+            hit.point,
+            rpcParams.Receive.SenderClientId,
+            hitPlayer,
+            killedPlayer
+        );
+    }
+    [Rpc(SendTo.Server)]
     public void MeleeSwingServerRpc(Vector3 headPos, Vector3 aimDir, RpcParams rpcParams = default)
     {
         if (!IsReady)
@@ -333,9 +425,8 @@ public class Weapon : NetworkBehaviour
     /// <param name="clientId"></param>
     [Rpc(SendTo.ClientsAndHost)]
     public void EffectsClientRpc(Vector3 hitPoint, Vector3 dir, int currentBullets, int reserveBullets, ulong clientId, bool hitPlayer, bool killedPlayer)
-    {
+    {   
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
-
         float randomPitch = UnityEngine.Random.Range(0.985f, 1.015f);
         float randomVolume = UnityEngine.Random.Range(0.5f, 0.55f);
         weaponAudioSource.pitch = randomPitch;
@@ -381,7 +472,56 @@ public class Weapon : NetworkBehaviour
         player.Combat.RightHandRecoil();
 
         if (data is HitscanData)
+        {
             player.Hud.UpdateWeaponInfo(currentBullets, reserveBullets);
+            player.Combat.RightHandRecoil();
+
+        }
+    }
+
+    /// <summary>
+    /// This is specifically for the melee kick
+    /// Every client's copy of this weapon handler will now create the vfx for their screens
+    /// </summary>
+    /// <param name="hitPoint"></param>
+    /// <param name="currentBullets"></param>
+    /// <param name="reserveBullets"></param>
+    /// <param name="clientId"></param>
+    [Rpc(SendTo.ClientsAndHost)]
+    public void EffectsClientRpc(Vector3 hitPoint, ulong clientId, bool hitPlayer, bool killedPlayer)
+    {   
+        WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
+        float randomPitch = UnityEngine.Random.Range(0.985f, 1.015f);
+        float randomVolume = UnityEngine.Random.Range(0.5f, 0.55f);
+        weaponAudioSource.pitch = randomPitch;
+        weaponAudioSource.volume = randomVolume;
+        bool isLocalShooter = NetworkManager.Singleton.LocalClientId == clientId;
+        weaponAudioSource.spatialBlend = isLocalShooter ? 0f : 1f;
+        weaponAudioSource.PlayOneShot(data.fireSound);
+
+
+        GameObject test = Instantiate(testSphere, hitPoint, Quaternion.identity);
+        Destroy(test, 5f);
+
+
+        // If the current client wasn't the client that requested the serverrpc, return
+        if (NetworkManager.Singleton.LocalClientId != clientId)
+            return;
+
+        // Update the hud for the client that shot the weapon
+        Player player = GetPlayer(clientId);
+
+        if (!player) return;
+
+        if (hitPlayer)
+        {
+            AudioManager.Instance.PlayHitmarker();
+            
+            if (killedPlayer) player.Hud.Deathmarker();
+            else player.Hud.Hitmarker();
+        }
+
+        player.Combat.OnWallKick();
     }
 
     /// <summary>
