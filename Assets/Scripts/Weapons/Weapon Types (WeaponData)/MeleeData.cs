@@ -9,6 +9,7 @@ public class MeleeData : WeaponData
     public float hitBoxWidth;
     public float lungeAmount;
     public MeleeDamageType damageType;
+    public GameObject impactParticles;
 
     public enum MeleeDamageType
     {

@@ -9,16 +9,20 @@ public class PlayerBody : MonoBehaviour
     public Transform rightHand;
     public MultiAimConstraint rightArmRig;
     public Renderer bodyRenderer;
+    public Renderer[] renderersToColor;
+    [Tooltip("First in list is order -> RBYG")] public Material[] playerColors;
     public Animator fpsPlayerModel;
     public Animator fpsLegModel;
     public Animator weaponAnimator;
     public GameObject accessoryFolder;
     public OnHitData onHitData;
     [SerializeField] private float blendDampTime;
-    public void Init(bool IsOwner)
+    public void Init(bool IsOwner, ulong ownerClientId)
     {
         ShowBodyRenderer(!IsOwner);
         onHitData = new OnHitData();
+
+        SetPlayerMaterial(playerColors[ownerClientId]);
     }
 
     /// <summary>
@@ -46,6 +50,12 @@ public class PlayerBody : MonoBehaviour
                 onHitData.sourceHit, 2f, onHitData.upwardsModifier,
                 ForceMode.Impulse);
         }
+    }
+
+    public void SetPlayerMaterial(Material newMaterial)
+    {
+        foreach(Renderer r in renderersToColor)
+            r.material = newMaterial;
     }
 
     public void ShowBodyRenderer(bool showRenderer)

@@ -2628,14 +2628,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3994182251
+  GlobalObjectIdHash: 2508019869
   InScenePlacedSourceGlobalObjectIdHash: 2508019869
-  m_InScenePlacedDisabledByDefault: 0
+  m_InScenePlacedDisabledByDefault: 1
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -2843,6 +2843,15 @@ MonoBehaviour:
   rightHand: {fileID: 3443673609609528477}
   rightArmRig: {fileID: 5401046928364835493}
   bodyRenderer: {fileID: 4609519911110115857}
+  renderersToColor:
+  - {fileID: 4609519911110115857}
+  - {fileID: 4136094493930545166}
+  - {fileID: 869551912064470873}
+  playerColors:
+  - {fileID: 2100000, guid: 4bbbf1614abd20e459f780b215fdde77, type: 2}
+  - {fileID: 2100000, guid: 4e954a2f9f6f9f74a83154ac73833da2, type: 2}
+  - {fileID: 2100000, guid: 2a93c006c97d0d1479f9a196607681d1, type: 2}
+  - {fileID: 2100000, guid: 755f0a42fb425434399ae9dd7fd4a76d, type: 2}
   fpsPlayerModel: {fileID: 6473903460907918152}
   fpsLegModel: {fileID: 7827524680669334559}
   weaponAnimator: {fileID: 8947472681213056992}
@@ -2880,8 +2889,8 @@ MonoBehaviour:
   slideCooldown: 0.5
   slideCancelDelay: 0.3
   slideInputDrag: 1.5
-  kickUpForce: 3
-  kickHorizForce: 2.75
+  kickUpForce: 3.75
+  kickHorizForce: 3.25
   mass: 0.25
   castingDist: 1.3
   coyoteTime: 0.1
@@ -2986,7 +2995,8 @@ MonoBehaviour:
   spreadRecoveryTime: 0.15
   spreadRecoverySpeed: 5
   hasWeapon: 0
-  testSphere: {fileID: 2466890847199373625, guid: 2cfcfcd2ebc663f49a9ed727850f1eff, type: 3}
+  bloodSpray: {fileID: 9014635404676828843, guid: e93c811e40e6fa94c93b0cb8e72c8fbd, type: 3}
+  tempImpactParticles: {fileID: 8419526965441767673, guid: fadbdac4f97f5ee4e8c2ba0eafb373dc, type: 3}
   debugInfo:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -5307,6 +5317,11 @@ Transform:
 --- !u!4 &1227465671894229265 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: 753c019b09aea734e859c89b284537ff, type: 3}
+  m_PrefabInstance: {fileID: 629792891204935385}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &4136094493930545166 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3592506131919666903, guid: 753c019b09aea734e859c89b284537ff, type: 3}
   m_PrefabInstance: {fileID: 629792891204935385}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &6438831104088501169 stripped
@@ -8235,6 +8250,11 @@ PrefabInstance:
       addedObject: {fileID: 6914252608508949931}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 753c019b09aea734e859c89b284537ff, type: 3}
+--- !u!137 &869551912064470873 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3592506131919666903, guid: 753c019b09aea734e859c89b284537ff, type: 3}
+  m_PrefabInstance: {fileID: 4452478454426153358}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2630046494632005190 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: 753c019b09aea734e859c89b284537ff, type: 3}
