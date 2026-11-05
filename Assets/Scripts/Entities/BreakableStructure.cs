@@ -54,9 +54,14 @@ public class BreakableStructureEntity: Entity
     [Rpc(SendTo.ClientsAndHost)]
     private void FractureApartClientRpc()
     {
+        FractureApart();
+    }
+
+    protected virtual void FractureApart()
+    {
         fracture.CauseFracture();
         Explode();
-        StartCoroutine(Despawn());     
+        StartCoroutine(Despawn());
     }
 
     private IEnumerator Despawn() { 
