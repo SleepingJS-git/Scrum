@@ -1439,7 +1439,7 @@ GameObject:
   m_Layer: 13
   m_Name: Hand.R
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7422848464349959988, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -1641,8 +1641,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1148753488438055806}
   - component: {fileID: 2459833691623427690}
+  - component: {fileID: 8947472681213056992}
   m_Layer: 0
-  m_Name: Right Hand Recoil
+  m_Name: Right Hand Motion Maker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1679,6 +1680,28 @@ MonoBehaviour:
   recoilStep: 0.5
   initialRecoilTime: 0.025
   recoilResetTime: 0.15
+--- !u!95 &8947472681213056992
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4076721486825102572}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 89950dd1600c62749b248b672a07e81a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &5043009344496478856
 GameObject:
   m_ObjectHideFlags: 0
@@ -2612,7 +2635,7 @@ MonoBehaviour:
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -2820,8 +2843,18 @@ MonoBehaviour:
   rightHand: {fileID: 3443673609609528477}
   rightArmRig: {fileID: 5401046928364835493}
   bodyRenderer: {fileID: 4609519911110115857}
+  renderersToColor:
+  - {fileID: 4609519911110115857}
+  - {fileID: 4136094493930545166}
+  - {fileID: 869551912064470873}
+  playerColors:
+  - {fileID: 2100000, guid: 4bbbf1614abd20e459f780b215fdde77, type: 2}
+  - {fileID: 2100000, guid: 4e954a2f9f6f9f74a83154ac73833da2, type: 2}
+  - {fileID: 2100000, guid: 2a93c006c97d0d1479f9a196607681d1, type: 2}
+  - {fileID: 2100000, guid: 755f0a42fb425434399ae9dd7fd4a76d, type: 2}
   fpsPlayerModel: {fileID: 6473903460907918152}
   fpsLegModel: {fileID: 7827524680669334559}
+  weaponAnimator: {fileID: 8947472681213056992}
   accessoryFolder: {fileID: 2032461095849471320}
   blendDampTime: 0.05
 --- !u!114 &7517925231291135140
@@ -2856,8 +2889,8 @@ MonoBehaviour:
   slideCooldown: 0.5
   slideCancelDelay: 0.3
   slideInputDrag: 1.5
-  kickUpForce: 3
-  kickHorizForce: 2.75
+  kickUpForce: 3.75
+  kickHorizForce: 3.25
   mass: 0.25
   castingDist: 1.3
   coyoteTime: 0.1
@@ -2962,7 +2995,8 @@ MonoBehaviour:
   spreadRecoveryTime: 0.15
   spreadRecoverySpeed: 5
   hasWeapon: 0
-  testSphere: {fileID: 2466890847199373625, guid: 2cfcfcd2ebc663f49a9ed727850f1eff, type: 3}
+  bloodSpray: {fileID: 9014635404676828843, guid: e93c811e40e6fa94c93b0cb8e72c8fbd, type: 3}
+  tempImpactParticles: {fileID: 8419526965441767673, guid: fadbdac4f97f5ee4e8c2ba0eafb373dc, type: 3}
   debugInfo:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -5285,6 +5319,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: 753c019b09aea734e859c89b284537ff, type: 3}
   m_PrefabInstance: {fileID: 629792891204935385}
   m_PrefabAsset: {fileID: 0}
+--- !u!137 &4136094493930545166 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3592506131919666903, guid: 753c019b09aea734e859c89b284537ff, type: 3}
+  m_PrefabInstance: {fileID: 629792891204935385}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6438831104088501169 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -3321919801592875672, guid: 753c019b09aea734e859c89b284537ff, type: 3}
@@ -5758,7 +5797,14 @@ MonoBehaviour:
   m_Animator: {fileID: 6866297339908473175}
   TransitionStateInfoList:
   - IsCrossFadeExit: 0
-    Layer: 2
+    Layer: 1
+    OriginatingState: -2065299877
+    DestinationState: -1111093309
+    TransitionDuration: 0
+    TriggerNameHash: -323753133
+    TransitionIndex: 1
+  - IsCrossFadeExit: 0
+    Layer: 3
     OriginatingState: 1917417168
     DestinationState: -1092128709
     TransitionDuration: 0.03291142
@@ -5798,6 +5844,18 @@ MonoBehaviour:
       NameHash: -1092128709
       Synchronize: 1
       ParameterType: 9
+    - name: WeaponType
+      NameHash: -1936256502
+      Synchronize: 1
+      ParameterType: 3
+    - name: SwingMelee
+      NameHash: -323753133
+      Synchronize: 1
+      ParameterType: 9
+    - name: MeleeAtkSpd
+      NameHash: -1792264569
+      Synchronize: 1
+      ParameterType: 1
   AnimatorParametersExpanded: 0
 --- !u!114 &1531321083589077531
 MonoBehaviour:
@@ -8192,6 +8250,11 @@ PrefabInstance:
       addedObject: {fileID: 6914252608508949931}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 753c019b09aea734e859c89b284537ff, type: 3}
+--- !u!137 &869551912064470873 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3592506131919666903, guid: 753c019b09aea734e859c89b284537ff, type: 3}
+  m_PrefabInstance: {fileID: 4452478454426153358}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2630046494632005190 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: 753c019b09aea734e859c89b284537ff, type: 3}

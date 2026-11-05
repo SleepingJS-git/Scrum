@@ -20,9 +20,11 @@ public class PlayerHud : MonoBehaviour
     public CrosshairRect bottomRect;
     public CrosshairRect leftRect;
     public CrosshairRect rightRect;
+    public Image circleDotCrosshair;
     public float maxCrosshairSpread = 50f;
     public float spreadLerpSpeed = 12f;
     public CrosshairColor CurrentCrosshairColor { get; private set; }
+    public CrosshairShape CurrentCrosshairShape { get; private set; }
 
     public Color crosshairRedColor;
     public Color crosshairWhiteColor;
@@ -51,7 +53,8 @@ public class PlayerHud : MonoBehaviour
     [Header("Wall Kick Indicators")]
     public float bracketAlpha;
     public GameObject wallKickIndicators;   // arrows showing to kick up
-    public TextMeshProUGUI[] brackets; // change these to images later
+    public TextMeshProUGUI[] bracketsV1; // change these to images later
+    public TextMeshProUGUI[] bracketsV2; // change these to images later
     public CrosshairColor CurrentBracketColor { get; private set; }
     private bool wallKickArrowsOn;
     private float _cursorSize;
@@ -78,12 +81,18 @@ public class PlayerHud : MonoBehaviour
 
         invisibleColor = Color.white;
         invisibleColor.a = 0f;
+
+        SwapCrosshair(CrosshairShape.CircleDot);
     }
 
     private void Update()
     {
-        foreach (CrosshairRect crosshairRect in crosshairRects)
-            crosshairRect.Update(_targetSpread, spreadLerpSpeed);
+        if (CurrentCrosshairShape == CrosshairShape.DefaultCrossHair)
+        {
+            foreach (CrosshairRect crosshairRect in crosshairRects)
+                crosshairRect.Update(_targetSpread, spreadLerpSpeed);
+        }
+        
     }
     public void SetCursorSize(float size)
     {
@@ -147,8 +156,18 @@ public class PlayerHud : MonoBehaviour
     {
         Color color = ColorPicker(desiredColor);
         CurrentCrosshairColor = desiredColor;
-        foreach (CrosshairRect crosshairRect in crosshairRects)
-            crosshairRect.image.color = color;
+
+        switch (CurrentCrosshairShape)
+        {
+            case CrosshairShape.DefaultCrossHair:
+                foreach (CrosshairRect crosshairRect in crosshairRects)
+                    crosshairRect.image.color = color;
+            break;
+            case CrosshairShape.CircleDot:
+                circleDotCrosshair.color = color;
+            break;
+        }
+        
     }
 
 
@@ -258,8 +277,22 @@ public class PlayerHud : MonoBehaviour
             color.a = (int) desiredColor == 2 ?
                 0f : bracketAlpha / 255f;
 
-            brackets[0].color = color;
-            brackets[1].color = color;
+            if (PlayerManager.PlayerSettings.MeleeIndicatorVersion == 1)
+            {
+                bracketsV1[0].color = color;
+                bracketsV1[1].color = color;
+
+                bracketsV2[0].color = invisibleColor;
+                bracketsV2[1].color = invisibleColor;
+            }
+            else
+            {
+                bracketsV2[0].color = color;
+                bracketsV2[1].color = color;
+
+                bracketsV1[0].color = invisibleColor;
+                bracketsV1[1].color = invisibleColor;
+            }
             CurrentBracketColor = desiredColor;
         }
 
@@ -269,6 +302,26 @@ public class PlayerHud : MonoBehaviour
 
         wallKickIndicators.SetActive(wallKickArrowsOn);
     }
+
+    public void SwapCrosshair(CrosshairShape desiredShape)
+    {
+        CurrentCrosshairShape = desiredShape;
+        switch (desiredShape)
+        {
+            case CrosshairShape.DefaultCrossHair:
+                foreach(CrosshairRect rect in crosshairRects)
+                    rect.image.color = crosshairWhiteColor;
+                
+                circleDotCrosshair.color = invisibleColor;
+            break;
+            case CrosshairShape.CircleDot:
+                foreach(CrosshairRect rect in crosshairRects)
+                    rect.image.color = invisibleColor;
+
+                circleDotCrosshair.color = crosshairWhiteColor;
+            break;
+        }
+    }
 }
 
 public enum CrosshairColor
@@ -276,6 +329,12 @@ public enum CrosshairColor
     White = 0,
     Red = 1,
     None = 2,
+}
+
+public enum CrosshairShape
+{
+    DefaultCrossHair,
+    CircleDot,
 }
 
 [System.Serializable]

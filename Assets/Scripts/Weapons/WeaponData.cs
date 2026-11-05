@@ -9,7 +9,7 @@ public abstract class WeaponData : ScriptableObject
     public WeaponType WeaponType;
     [Header("Weapon Stats")]
     public int damage;
-    [Range(0.01f, 1f)] public float fireRate;
+    [Range(0.01f, 1.5f)] public float fireRate;
     public int bulletCount;
     public int bulletsPerShot;
     public int magCount;

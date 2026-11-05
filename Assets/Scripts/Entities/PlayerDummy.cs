@@ -10,7 +10,7 @@ public class PlayerDummy : Entity
     {
         base.OnNetworkSpawn();
         if (_body)
-            _body.Init(false);
+            _body.Init(false, 1);
 
         if (IsServer)
         {

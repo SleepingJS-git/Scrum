@@ -68,7 +68,7 @@ public class Player : Entity
         // Check if the computer running this script is the client.
         // If it is then IsOwner = true.
         Input.Init(IsOwner);
-        Body.Init(IsOwner);
+        Body.Init(IsOwner, OwnerClientId);
         Move.Init(IsOwner);
         Look.Init(IsOwner);
         if (IsOwner)
