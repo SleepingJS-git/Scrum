@@ -39,6 +39,7 @@ public class Buildable : NetworkBehaviour
         // get { return mesh.GetComponent<Renderer>(); }
         get { return mesh; } // Just do this, because u can reference the Mesh in the inspector.
     }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
