@@ -25,9 +25,39 @@ public class AreaEffector3D : NetworkBehaviour
         effectArea.isTrigger = true;
     }
 
-    private void OnTriggerStay(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         if (!IsServer) return;
+
+        if (!other.CompareTag("Player")) return;
+        Debug.Log("Player is affected: " + other.name);
+
+        Vector3 dir = useForwardTransform ? transform.forward : forceDir;
+
+        Player p = other.GetComponent<Player>();
+        p.ApplyContinuousForceRpc(dir, force, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (!IsServer) return;
+
+        if (!other.CompareTag("Player")) return;
+        Debug.Log("Player is affected: " + other.name);
+
+        Vector3 dir = useForwardTransform ? transform.forward : forceDir;
+
+        Player p = other.GetComponent<Player>();
+        p.ApplyContinuousForceRpc(-dir, force, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+        if (!IsServer) return;
+        if (other.CompareTag("Player")) return;
+
+        Rigidbody rb = other.attachedRigidbody;
+        if (!rb) return;
 
         Vector3 dir = useForwardTransform ? transform.forward : forceDir;
 
@@ -42,18 +72,7 @@ public class AreaEffector3D : NetworkBehaviour
 
         float newForce = Mathf.Lerp(maxForce, force, norm);
 
-        if (other.CompareTag("Player"))
-        {
-            Debug.Log("Player is affected: " + other.name);
 
-            Player p = other.GetComponent<Player>();
-            p.AddForceRpc(dir, newForce, 0, Time.deltaTime, RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp));
-        }
-        else
-        {
-            Rigidbody rb = other.attachedRigidbody;
-            if (!rb) return;
-            rb.AddForceAtPosition(dir * newForce, other.ClosestPoint(transform.position));
-        }
+        rb.AddForceAtPosition(dir * newForce, other.ClosestPoint(transform.position));
     }
 }

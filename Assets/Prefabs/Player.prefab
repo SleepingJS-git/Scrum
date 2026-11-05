@@ -3048,6 +3048,9 @@ MonoBehaviour:
   mass: 0.25
   castingDist: 1.3
   coyoteTime: 0.1
+  externalForceDrag: 3.5
+  externalForces: {x: 0, y: 0, z: 0}
+  continuousForce: {x: 0, y: 0, z: 0}
   velocity: {x: 0, y: 0, z: 0}
   isCrouchHeld: 0
   holdToCrouchInput: 0
@@ -3149,12 +3152,11 @@ MonoBehaviour:
   spreadRecoveryTime: 0.15
   spreadRecoverySpeed: 5
   hasWeapon: 0
-  testSphere: {fileID: 2466890847199373625, guid: 2cfcfcd2ebc663f49a9ed727850f1eff, type: 3}
+  bloodSpray: {fileID: 9014635404676828843, guid: e93c811e40e6fa94c93b0cb8e72c8fbd, type: 3}
+  tempImpactParticles: {fileID: 8419526965441767673, guid: fadbdac4f97f5ee4e8c2ba0eafb373dc, type: 3}
   pickupAudioSource: {fileID: 6758714368968818260}
   ownPickupVolume: 0.55
   otherPickupVolume: 0.8
-  bloodSpray: {fileID: 9014635404676828843, guid: e93c811e40e6fa94c93b0cb8e72c8fbd, type: 3}
-  tempImpactParticles: {fileID: 8419526965441767673, guid: fadbdac4f97f5ee4e8c2ba0eafb373dc, type: 3}
   debugInfo:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0

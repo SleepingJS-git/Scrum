@@ -210,7 +210,6 @@ public class Weapon : NetworkBehaviour
                                 meleeForce.normalized,
                                 meleeForce.magnitude,
                                 (int) ForceMode.Impulse,
-                                Time.deltaTime,
                                 RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp)
                             );
                         }
@@ -330,7 +329,6 @@ public class Weapon : NetworkBehaviour
                                 meleeForce.normalized,
                                 meleeForce.magnitude,
                                 (int) ForceMode.Impulse,
-                                Time.deltaTime,
                                 RpcTarget.Single(p.OwnerClientId, RpcTargetUse.Temp)
                             );
                         }

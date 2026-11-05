@@ -301,13 +301,21 @@ public class Player : Entity
     /// <param name="forceMode">The Force Mode -> See note at the bottom of script</param>
     /// <param name="rpcParams">This should be sent only to the client that is affected by the force</param>
     [Rpc(SendTo.SpecifiedInParams)]
-    public void AddForceRpc(Vector3 dir, float force, int forceMode, float dt, RpcParams rpcParams = default)
+    public void AddForceRpc(Vector3 dir, float force, int forceMode, RpcParams rpcParams = default)
     {
         Debug.Log("AddForceRPC IsOwner?: " + IsOwner);
         Debug.Log("OwnerID: " + OwnerClientId);
         if (!IsOwner) return; // just in case
-        Move.AddForce(dir, force, dt, (ForceMode) forceMode);
+        Move.AddForce(dir, force, (ForceMode) forceMode);
     }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void ApplyContinuousForceRpc(Vector3 dir, float force, RpcParams rpcParams = default)
+    {
+        if (!IsOwner) return; // just in case
+        Move.ApplyContinuousForcerpc(dir * force);
+    }
+
 }
 
 /*

@@ -52,6 +52,12 @@ public class PlayerMovement : MonoBehaviour
     [Header("Coyote Time")]
     public float coyoteTime;
 
+    [Header("External Forces")]
+    public float externalForceDrag;
+    [SerializeField] private Vector3 externalForces;
+    [SerializeField] private Vector3 continuousForce;
+
+
     // Private Variables
     // Current Move State
     private MovementState moveState => (MovementState)main.MoveState.Value;
@@ -211,9 +217,23 @@ public class PlayerMovement : MonoBehaviour
         Vector3 finalVelocity = velocity;
         finalVelocity.y += slopeVelocityY;
 
+        finalVelocity += ExternalForce();
+
         cc.Move(finalVelocity * Time.deltaTime);
 
         UpdateAnimation();
+    }
+
+    private Vector3 ExternalForce()
+    {
+        if (continuousForce != Vector3.zero)
+            externalForces += PhysicsHelper.ContinuousForce(continuousForce, mass, Time.deltaTime);
+
+        if (externalForces.sqrMagnitude <= 0.00001f) return Vector3.zero; 
+
+        externalForces *= Mathf.Exp(-externalForceDrag * Time.deltaTime);
+
+        return externalForces;
     }
 
     /// <summary>
@@ -414,25 +434,24 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="dir">Direction of the force</param>
     /// <param name="force">Amount of Force</param>
     /// <param name="forceMode">The Force Mode</param>
-    public void AddForce(Vector3 dir, float force, float dt, ForceMode forceMode)
+    public void AddForce(Vector3 dir, float force, ForceMode forceMode)
     {
-        Debug.Log("AddForce ForceMode: " + forceMode);
-        Debug.Log("Direction: " + dir);
-        Debug.Log("Force: " + force);
-        Debug.Log("Mass: " + mass);
-
         switch (forceMode)
         {
             case ForceMode.Impulse:
-                velocity += PhysicsHelper.Impulse(dir, force, mass);
+                externalForces += PhysicsHelper.Impulse(dir, force, mass);
                 break;
             case ForceMode.Force:
-                Debug.Log("Velocity Before: " + velocity);
-                velocity += PhysicsHelper.ContinuousForce(dir, force, mass, dt);
-                Debug.Log("Velocity After: " + velocity);
-
                 break;
         }
+    }
+
+    public void ApplyContinuousForcerpc(Vector3 force)
+    {
+        continuousForce += force;
+
+        if (continuousForce.sqrMagnitude <= 0.00001f) 
+            continuousForce = Vector3.zero;
     }
 
     /// <summary>
@@ -484,7 +503,7 @@ public class PlayerMovement : MonoBehaviour
             main.ChangeMoveStateServerRpc((int)MovementState.Standing);
             velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravityScale);
 
-            AddForce(transform.forward, Mathf.Sqrt(slideVelocity) * 1, Time.deltaTime, ForceMode.Impulse);
+            AddForce(transform.forward, Mathf.Sqrt(slideVelocity) * 1, ForceMode.Impulse);
             jumpAudio.PlayJump();
 
             slideJumped = true;

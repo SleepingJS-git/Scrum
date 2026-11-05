@@ -257,7 +257,6 @@ public class PlayerCombat : MonoBehaviour
         _main.Move.AddForce(
             _cam.forward,
             lungeAmount,
-            Time.deltaTime,
             ForceMode.Impulse
         );
         
