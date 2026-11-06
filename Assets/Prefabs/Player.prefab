@@ -204,6 +204,108 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &1629699450204413804
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8663913569148711764}
+  - component: {fileID: 2699395799540235216}
+  - component: {fileID: 1675096269047756176}
+  m_Layer: 0
+  m_Name: Ceiling Lean Aim
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8663913569148711764
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1629699450204413804}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 529879616162300022}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2699395799540235216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1629699450204413804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Weight: 0
+  m_Data:
+    m_ConstrainedObject: {fileID: 808258440175070377}
+    m_SourceObjects:
+      m_Length: 1
+      m_Item0:
+        transform: {fileID: 8401578789301914205}
+        weight: 1
+      m_Item1:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item2:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item3:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item4:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item5:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item6:
+        transform: {fileID: 0}
+        weight: 0
+      m_Item7:
+        transform: {fileID: 0}
+        weight: 0
+    m_Offset: {x: 25, y: 0, z: 0}
+    m_MinLimit: -35
+    m_MaxLimit: 65
+    m_AimAxis: 4
+    m_UpAxis: 2
+    m_WorldUpType: 0
+    m_WorldUpObject: {fileID: 0}
+    m_WorldUpAxis: 2
+    m_MaintainOffset: 0
+    m_ConstrainedAxes:
+      x: 1
+      y: 0
+      z: 0
+--- !u!114 &1675096269047756176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1629699450204413804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b007de031b6d214e9760c99678038f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cc: {fileID: 3390551297032513119}
+  player: {fileID: 6448125735744906079}
+  ceilingConstraint: {fileID: 2699395799540235216}
 --- !u!1 &1720327828566845010
 GameObject:
   m_ObjectHideFlags: 0
@@ -1324,6 +1426,8 @@ Transform:
   - {fileID: 4264127163406524625}
   - {fileID: 4848307116597797148}
   - {fileID: 2893057923167703665}
+  - {fileID: 8663913569148711764}
+  - {fileID: 8401578789301914205}
   m_Father: {fileID: 696318350263425837}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3802290272217011151
@@ -2385,6 +2489,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6979018476153944591
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8401578789301914205}
+  m_Layer: 0
+  m_Name: Ceiling Spine Target
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8401578789301914205
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6979018476153944591}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.346, y: 0.24, z: 0.412}
+  m_LocalScale: {x: 1.1070275, y: 1.1070275, z: 1.1070275}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 529879616162300022}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7170702171812465884
 GameObject:
   m_ObjectHideFlags: 0
@@ -2960,8 +3095,8 @@ MonoBehaviour:
   playerAudioSource: {fileID: 2221025895430290969}
   deathCamera: {fileID: 8073839104316362123}
   regenRate: 0.45
-  regenDelay: 2.5
-  regenAmount: 6
+  regenDelay: 5
+  regenAmount: 4
   maxRegen: 80
   _initialized: 0
   MoveState:
@@ -3033,6 +3168,7 @@ MonoBehaviour:
   crouchSpeed: 3.75
   crouchHeight: 0.5
   crouchHelperVal: 45
+  crouchHelperValOnSlope: 15
   positionChangeSpeed: 0.125
   sprintSpeed: 9
   slideSpeed: 5
@@ -3051,6 +3187,7 @@ MonoBehaviour:
   externalForceDrag: 3.5
   externalForces: {x: 0, y: 0, z: 0}
   continuousForce: {x: 0, y: 0, z: 0}
+  isStuckOnCeiling: 0
   velocity: {x: 0, y: 0, z: 0}
   isCrouchHeld: 0
   holdToCrouchInput: 0
@@ -3072,7 +3209,7 @@ MonoBehaviour:
   rigAim: {fileID: 5181274312675402863}
   sensitivity: {x: 0.1, y: 0.06}
   standCamLevel: 0.8
-  crouchCamLevel: 0.325
+  crouchCamLevel: 0.4
   additiveSprintFOV: 20
   fovChangeTime: 0.25
   defaultFOV: 0

@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
     public float crouchSpeed;       // Movespeed of player while crouching
     public float crouchHeight = 1f;
     public float crouchHelperVal = 40f;
+    public float crouchHelperValOnSlope = 40f;
     public float positionChangeSpeed;
 
     [Header("Sprinting")]
@@ -62,7 +63,7 @@ public class PlayerMovement : MonoBehaviour
     // Current Move State
     private MovementState moveState => (MovementState)main.MoveState.Value;
     private bool isChangingState = false;
-    private bool isStuckOnCeiling = false;
+    public bool isStuckOnCeiling = false;
 
     // Horizontal movement
     private bool isMoving;
@@ -757,7 +758,24 @@ public class PlayerMovement : MonoBehaviour
         // Increase y velocity to make the player immediately go up when crouching
         // This is to prevent stuttering because as the collider's height increases, its constantly clipping the floor.
         if (!toCrouch)
-            velocity.y = Mathf.Sqrt(crouchHelperVal);
+        {
+
+            // Initially check for ceiling
+            Vector3 origin = transform.position + Vector3.down * (cc.height * 0.5f);
+
+                isStuckOnCeiling = Physics.Raycast(
+                    origin,
+                    Vector3.up,
+                    cc.height + 0.35f,
+                    Layer.Wall | Layer.Ground,
+                    QueryTriggerInteraction.Ignore
+                );
+            
+            if (!isStuckOnCeiling && isGrounded) 
+                velocity.y = Mathf.Sqrt(onSlope ? crouchHelperValOnSlope: crouchHelperVal);
+            else
+                body.Play("IsCrouching", true);
+        }
 
 
         // Set variables for the height of the collider
@@ -778,12 +796,12 @@ public class PlayerMovement : MonoBehaviour
             // Check if theres a wall or ground above the player only if they are uncrouching.
             if (!toCrouch)
             {
-                Vector3 origin = transform.position + Vector3.down * (cc.height * 0.5f);
+                Vector3 origin = transform.position + Vector3.down * (cc.height * 0.35f);
 
                 isStuckOnCeiling = Physics.Raycast(
                     origin,
                     Vector3.up,
-                    cc.height + 0.2f,
+                    cc.height + 0.35f,
                     Layer.Wall | Layer.Ground,
                     QueryTriggerInteraction.Ignore
                 );
@@ -798,7 +816,10 @@ public class PlayerMovement : MonoBehaviour
                 pos.y = Mathf.Lerp(startCamLevel, TargetCamLevel, t);
                 main.Look.camHolder.localPosition = pos;
                 cc.height = Mathf.Lerp(startHeight, targetHeight, t);
-                
+            }
+            else
+            {
+                body.Play("IsCrouching", true);
             }
 
             yield return null;
@@ -810,6 +831,10 @@ public class PlayerMovement : MonoBehaviour
             pos.y = TargetCamLevel;
             main.Look.camHolder.localPosition = pos;
             cc.height = targetHeight;
+
+            if (!toCrouch)
+                body.Play("IsCrouching", false);
+
         }
 
         isChangingState = false;

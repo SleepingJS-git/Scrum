@@ -25,6 +25,14 @@ public class FanTrap : MonoBehaviour
 
             if (toggleRoutine != null) StopCoroutine(toggleRoutine);
         });
+
+        structure.OnRespawn += ResetFan; // Resets the fan behavior when buildable respawns
+        ResetFan(); // Put this here because it basically starts the fan
+        
+    }
+
+    public void ResetFan()
+    {
         if (GameManager.Instance)
             StartCoroutine(WaitForCombat());
         else toggleRoutine = StartCoroutine(OnOff());

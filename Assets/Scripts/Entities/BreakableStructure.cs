@@ -8,7 +8,7 @@ public class BreakableStructureEntity: Entity
     protected Fracture fracture;
     protected Action fractureApart;
     [SerializeField] protected float explosionForce, explosionRadius, upwardsModifier;
-
+    public Action OnRespawn;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
@@ -24,6 +24,8 @@ public class BreakableStructureEntity: Entity
         GetComponent<MeshRenderer>().enabled = true;
         this.health.Value = maxHealth;
         this.isAlive.Value = true;
+
+        OnRespawn?.Invoke();
     }
 
     protected void Explode()
