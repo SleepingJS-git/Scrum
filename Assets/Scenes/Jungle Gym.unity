@@ -13971,11 +13971,6 @@ Mesh:
     offset: 0
     size: 0
     path: 
---- !u!143 &604829609 stripped
-CharacterController:
-  m_CorrespondingSourceObject: {fileID: 3390551297032513119, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
-  m_PrefabInstance: {fileID: 1421328654}
-  m_PrefabAsset: {fileID: 0}
 --- !u!43 &622693295
 Mesh:
   m_ObjectHideFlags: 0
@@ -31561,7 +31556,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7342539564703258927, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8987153296960708780, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
       propertyPath: m_InScenePlaced
@@ -31578,10 +31573,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1629699450204413804, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1999169422}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
 --- !u!1 &1427471374
 GameObject:
@@ -45629,36 +45621,6 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
---- !u!1 &1999169419 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1629699450204413804, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
-  m_PrefabInstance: {fileID: 1421328654}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1999169421 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2699395799540235216, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
-  m_PrefabInstance: {fileID: 1421328654}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999169419}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3c430f382484144e925c097c2d33cfe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1999169422
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999169419}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b007de031b6d214e9760c99678038f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cc: {fileID: 604829609}
-  ceilingConstraint: {fileID: 1999169421}
 --- !u!1 &2019242669
 GameObject:
   m_ObjectHideFlags: 0
