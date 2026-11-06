@@ -180,7 +180,7 @@ public class PlayerCombat : MonoBehaviour
 
             _hud.SwapCrosshair(CrosshairShape.CircleDot);
 
-            weaponDist = mData.attackRange + 1.5f;
+            weaponDist = mData.attackRange + 1f;
             meleeWindUp = mData.windupTime;
             lungeAmount = mData.lungeAmount;
             _main.Body.SetInt("WeaponType", 1, true);
@@ -238,6 +238,8 @@ public class PlayerCombat : MonoBehaviour
 
     private void SwingWeapon()
     {
+        Debug.Log("Weapon Handler is Ready: " + weaponHandler.IsReady);
+        Debug.Log("Is Winding Up: " + isWindingUp);
         if (weaponHandler.IsReady && !isWindingUp)
         {
             // Have the weapon handler handle the weapon behavior
