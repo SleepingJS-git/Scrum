@@ -2,9 +2,10 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class SawTrap : Entity
+public class SawTrap : BreakableStructureEntity
 {
     [SerializeField] private Collider damageCollider;
+    [SerializeField] private GameObject blade;
     public int damage;
     private OnHitData hitData;
 
@@ -26,6 +27,18 @@ public class SawTrap : Entity
         
     }
 
+    public override void ResetBreakable()
+    {       
+        base.ResetBreakable();
+        blade.SetActive(true);
+    }
+    protected override void FractureApart()
+    {
+        blade.SetActive(false);
+        damageCollider.enabled = false;
+        base.FractureApart();
+    }
+
     private IEnumerator WaitForCombat()
     {
         yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat;});
@@ -43,7 +56,6 @@ public class SawTrap : Entity
     private void OnTriggerStay(Collider other)
     {
         if (!IsServer) return;
-        Debug.Log("Hurting Player");
         if (other.CompareTag("Player")) {other.GetComponent<Player>().OnHit(hitData);}  
     }
 }

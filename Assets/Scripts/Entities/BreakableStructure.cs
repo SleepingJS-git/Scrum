@@ -18,10 +18,17 @@ public class BreakableStructureEntity: Entity
         AddDeathEvent(fractureApart);
     }
 
+    [Rpc(SendTo.ClientsAndHost)]
+    protected void ResetBreakableRpc() {
+    
+        ResetBreakable(); 
+    }
+
     public virtual void ResetBreakable()
     {
         GetComponent<Collider>().enabled = true;
         GetComponent<MeshRenderer>().enabled = true;
+        if (!IsServer) { return; }
         this.health.Value = maxHealth;
         this.isAlive.Value = true;
 
@@ -56,14 +63,26 @@ public class BreakableStructureEntity: Entity
     [Rpc(SendTo.ClientsAndHost)]
     private void FractureApartClientRpc()
     {
-        fracture.CauseFracture();
-        Explode();
-        StartCoroutine(Despawn());     
+        FractureApart();
     }
 
-    private IEnumerator Despawn() { 
+    protected IEnumerator WaitForBuildPhase()
+    {
+        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Building; });
+        ResetBreakableRpc();
+    }
+
+    protected virtual void FractureApart()
+    {
+        fracture.CauseFracture();
+        Explode();
+        StartCoroutine(Despawn());
+    }
+
+    protected IEnumerator Despawn() { 
         yield return new WaitForSeconds(5f);
         Destroy(fracture.FragmentRoot);
-        gameObject.SetActive(false);
+        this.GetComponent<Collider>().enabled = false;
+        StartCoroutine(WaitForBuildPhase());
     }
 }

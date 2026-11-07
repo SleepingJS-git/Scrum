@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class FanTrap : MonoBehaviour
+public class FanTrap : BreakableStructureEntity
 {
     [Tooltip("The time before the fan turns off.")]
     [SerializeField] private float offTime;
@@ -10,32 +10,29 @@ public class FanTrap : MonoBehaviour
     [SerializeField] private Collider windBox;
     [SerializeField] private ParticleSystem windParticles;
     [SerializeField] private AreaEffector3D areaEffector3D;
-    [SerializeField] private BreakableStructureEntity structure;
+    [SerializeField] private Collider fanCollider;
     private Coroutine toggleRoutine;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() 
-    { 
-
-        structure.AddDeathEvent(() => areaEffector3D.ClearAffected());
-        structure.AddDeathEvent(() =>
-        {
-            windBox.enabled = false;
-            windParticles.Clear();
-            windParticles.Pause();
-
-            if (toggleRoutine != null) StopCoroutine(toggleRoutine);
-        });
-
-        structure.OnRespawn += ResetFan; // Resets the fan behavior when buildable respawns
-        ResetFan(); // Put this here because it basically starts the fan
-        
+    {
+        AddDeathEvent(() => areaEffector3D.ClearAffected());
+        StartCoroutine(WaitForCombat());
     }
 
-    public void ResetFan()
+    public override void ResetBreakable()
     {
-        if (GameManager.Instance)
-            StartCoroutine(WaitForCombat());
-        else toggleRoutine = StartCoroutine(OnOff());
+        base.ResetBreakable();
+        StartCoroutine(WaitForCombat());
+    }
+
+    protected override void FractureApart()
+    {
+        StopCoroutine(toggleRoutine);
+        base.FractureApart();
+        windParticles.Clear();
+        windParticles.Pause();
+        fanCollider.enabled = false;
+        windBox.enabled = false;
     }
 
     private IEnumerator OnOff()
