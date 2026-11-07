@@ -14803,6 +14803,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  type: 1
   occupiedCells:
   - {x: 0, y: 0, z: 0}
   mesh: {fileID: 5047416908333565366}

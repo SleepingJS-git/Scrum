@@ -7,12 +7,12 @@ public class Buildable : NetworkBehaviour
 {
     public enum BuildType
     {
-        BASIC,
-        TRAP,
-        EXPLOSIVE
+        Basic,
+        Trap,
+        Explosive
     }
     [SerializeField]
-    private BuildType type = BuildType.BASIC;
+    private BuildType type = BuildType.Basic;
 
     [SerializeField]
     private Vector3Int[] occupiedCells;
