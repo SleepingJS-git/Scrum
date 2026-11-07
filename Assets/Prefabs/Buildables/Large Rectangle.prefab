@@ -126,6 +126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  type: 0
   occupiedCells:
   - {x: 0, y: 0, z: 0}
   - {x: 1, y: 0, z: 0}
@@ -136,10 +137,8 @@ MonoBehaviour:
   - {x: 2, y: 1, z: 0}
   - {x: 3, y: 1, z: 0}
   mesh: {fileID: 2723657764474913556}
-  opaqueMaterials: []
-  transparentMaterials:
-  - {fileID: 2100000, guid: 9e2767228da90d446a81f4a6d4294258, type: 2}
-  Id: 4
+  Id: 2
+  weight: 1
 --- !u!33 &9217527453795755373
 MeshFilter:
   m_ObjectHideFlags: 0
