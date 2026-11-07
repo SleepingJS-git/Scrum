@@ -52,6 +52,7 @@ public class FanTrap : BreakableStructureEntity
             areaEffector3D.ClearAffected();
             yield return new WaitForSeconds(offTime);
         }
+        StartCoroutine(WaitForCombat());
     }
 
     private IEnumerator WaitForCombat()

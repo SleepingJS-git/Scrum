@@ -27,6 +27,8 @@ public class SteamTrap : BreakableStructureEntity
             damage = damage,
             sourceHit = this.transform.position
         };
+
+        StartCoroutine(WaitForCombat());
     }
 
     // Update is called once per frame
@@ -37,12 +39,17 @@ public class SteamTrap : BreakableStructureEntity
 
     public override void ResetBreakable()
     {
+        steamParticles.Play();
         base.ResetBreakable();
+        StartCoroutine(WaitForCombat());
     }
 
     protected override void FractureApart()
     {
         StopCoroutine(toggleRoutine);
+        steamParticles.Pause();
+        steamParticles.Clear();
+        damageCollider.enabled = false;
         base.FractureApart();
     }
 
@@ -54,9 +61,12 @@ public class SteamTrap : BreakableStructureEntity
             steamParticles.Play();
             yield return new WaitForSeconds(onTime);
 
-            yield return new WaitForSeconds(offTime);
+            steamParticles.Clear();
+            steamParticles.Pause();
             damageCollider.enabled = false;
+            yield return new WaitForSeconds(offTime);
         }
+        StartCoroutine(WaitForCombat());
     }
 
     private IEnumerator WaitForCombat()
@@ -69,6 +79,12 @@ public class SteamTrap : BreakableStructureEntity
     private void OnTriggerStay(Collider other)
     {
         if (!IsServer) return;
-        if (other.CompareTag("Player")) { other.GetComponent<Player>().OnHit(hitData); }
+        RaycastHit hit;
+        if (other.CompareTag("Player"))
+        {
+            Physics.Raycast(this.transform.position, other.transform.position - this.transform.position, out hit, Layer.Player | Layer.Buildable | Layer.Ground | Layer.Wall);
+            if (!hit.collider.CompareTag("Player")) return;
+            other.GetComponent<Player>().OnHit(hitData); 
+        }
     }
 }
