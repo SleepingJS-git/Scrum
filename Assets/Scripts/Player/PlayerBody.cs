@@ -9,15 +9,20 @@ public class PlayerBody : MonoBehaviour
     public Transform rightHand;
     public MultiAimConstraint rightArmRig;
     public Renderer bodyRenderer;
+    public Renderer[] renderersToColor;
+    [Tooltip("First in list is order -> RBYG")] public Material[] playerColors;
     public Animator fpsPlayerModel;
     public Animator fpsLegModel;
+    public Animator weaponAnimator;
     public GameObject accessoryFolder;
     public OnHitData onHitData;
     [SerializeField] private float blendDampTime;
-    public void Init(bool IsOwner)
+    public void Init(bool IsOwner, ulong ownerClientId)
     {
         ShowBodyRenderer(!IsOwner);
         onHitData = new OnHitData();
+
+        SetPlayerMaterial(playerColors[ownerClientId]);
     }
 
     /// <summary>
@@ -45,6 +50,12 @@ public class PlayerBody : MonoBehaviour
                 onHitData.sourceHit, 2f, onHitData.upwardsModifier,
                 ForceMode.Impulse);
         }
+    }
+
+    public void SetPlayerMaterial(Material newMaterial)
+    {
+        foreach(Renderer r in renderersToColor)
+            r.material = newMaterial;
     }
 
     public void ShowBodyRenderer(bool showRenderer)
@@ -94,6 +105,15 @@ public class PlayerBody : MonoBehaviour
             fpsPlayerModel.SetFloat(para, val);
     }
 
+    public void SetInt(string para, int val, bool excludeFpsModel = false)
+    {
+        animator.SetInteger(para, val);
+
+        if (excludeFpsModel) return;
+        if (fpsPlayerModel)
+            fpsPlayerModel.SetInteger(para, val);
+    }
+
     public void CrossBlendLocomotion(string para, float val)
     {
         animator.SetFloat(para, val, blendDampTime, Time.deltaTime);
@@ -101,9 +121,11 @@ public class PlayerBody : MonoBehaviour
             fpsPlayerModel.SetFloat(para, val, blendDampTime, Time.deltaTime);
     }
 
-    public void PlayTrigger(string para)
+    public void PlayTrigger(string para, bool excludeFpsModel = false)
     {
         animator.SetTrigger(para);
+
+        if (excludeFpsModel) return;
         if (fpsPlayerModel)
             fpsPlayerModel.SetTrigger(para);
     }
@@ -120,5 +142,10 @@ public class PlayerBody : MonoBehaviour
     {
         PlayTrigger("Kick");
         fpsLegModel.SetTrigger("Kick");
+    }
+
+    public void PlayWeaponAnim(string animName)
+    {
+        weaponAnimator.Play(animName);
     }
 }

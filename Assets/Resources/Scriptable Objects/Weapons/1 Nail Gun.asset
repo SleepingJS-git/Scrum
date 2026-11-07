@@ -28,6 +28,7 @@ MonoBehaviour:
   weaponModel: {fileID: 4600354628101149596, guid: 27c495b6cd48df449b9b0bf71dac4489, type: 3}
   shootingEffect: {fileID: 0}
   fireSound: {fileID: 8300000, guid: b9fd3f93a2be5e84aae63553a2c7cbfe, type: 3}
+  pickupSound: {fileID: 8300000, guid: 281ef5ce6a178084d83b8d16a81bec96, type: 3}
   trail: {fileID: 2059742913133304835, guid: 23e894f2da81ee8499685b78125ad8c8, type: 3}
   bulletImpact: {fileID: 4623250405035984504, guid: 5eb77df42ed0a7e47999dcc3c35d4e8a, type: 3}
   recoilAmplitude: 3.5

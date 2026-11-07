@@ -20,9 +20,11 @@ public class PlayerHud : MonoBehaviour
     public CrosshairRect bottomRect;
     public CrosshairRect leftRect;
     public CrosshairRect rightRect;
+    public Image circleDotCrosshair;
     public float maxCrosshairSpread = 50f;
     public float spreadLerpSpeed = 12f;
     public CrosshairColor CurrentCrosshairColor { get; private set; }
+    public CrosshairShape CurrentCrosshairShape { get; private set; }
 
     public Color crosshairRedColor;
     public Color crosshairWhiteColor;
@@ -48,6 +50,13 @@ public class PlayerHud : MonoBehaviour
     public Image healthBar;
     public Color fullHealthColor, medHealthColor, lowHealthColor;
 
+    [Header("Wall Kick Indicators")]
+    public float bracketAlpha;
+    public GameObject wallKickIndicators;   // arrows showing to kick up
+    public TextMeshProUGUI[] bracketsV1; // change these to images later
+    public TextMeshProUGUI[] bracketsV2; // change these to images later
+    public CrosshairColor CurrentBracketColor { get; private set; }
+    private bool wallKickArrowsOn;
     private float _cursorSize;
     private float _targetSpread;
     private float currentAlpha;
@@ -55,6 +64,7 @@ public class PlayerHud : MonoBehaviour
     private Coroutine deathMarkerRoutine;
     private Coroutine hitFeedbackRoutine;
     private List<CrosshairRect> crosshairRects;
+    private Color invisibleColor;
 
     private void Awake()
     {
@@ -68,12 +78,21 @@ public class PlayerHud : MonoBehaviour
         rightRect.Init(Vector2.right);
 
         currentAlpha = 0f;
+
+        invisibleColor = Color.white;
+        invisibleColor.a = 0f;
+
+        SwapCrosshair(CrosshairShape.CircleDot);
     }
 
     private void Update()
     {
-        foreach (CrosshairRect crosshairRect in crosshairRects)
-            crosshairRect.Update(_targetSpread, spreadLerpSpeed);
+        if (CurrentCrosshairShape == CrosshairShape.DefaultCrossHair)
+        {
+            foreach (CrosshairRect crosshairRect in crosshairRects)
+                crosshairRect.Update(_targetSpread, spreadLerpSpeed);
+        }
+        
     }
     public void SetCursorSize(float size)
     {
@@ -115,16 +134,40 @@ public class PlayerHud : MonoBehaviour
         img.color = new Color(1f, 1f, 1f, 0f);
     }
 
+    private Color ColorPicker(CrosshairColor desiredColor)
+    {
+        switch (desiredColor)
+        {
+            case CrosshairColor.White:
+                return crosshairWhiteColor;
+            case CrosshairColor.Red:
+                return crosshairRedColor;
+            case CrosshairColor.None:
+                return invisibleColor;
+            default:
+                return crosshairWhiteColor;
+        }
+    }
     /// <summary>
     /// Set the cross hair color
     /// </summary>
-    /// <param name="colorInt">0 = white, 1 = red</param>
+    /// <param name="colorInt">0 = white, 1 = red, 2 = invisible</param>
     public void SetCrosshairColor(CrosshairColor desiredColor)
     {
-        Color color = (int) desiredColor == 0 ? crosshairWhiteColor : crosshairRedColor;
+        Color color = ColorPicker(desiredColor);
         CurrentCrosshairColor = desiredColor;
-        foreach (CrosshairRect crosshairRect in crosshairRects)
-            crosshairRect.image.color = color;
+
+        switch (CurrentCrosshairShape)
+        {
+            case CrosshairShape.DefaultCrossHair:
+                foreach (CrosshairRect crosshairRect in crosshairRects)
+                    crosshairRect.image.color = color;
+            break;
+            case CrosshairShape.CircleDot:
+                circleDotCrosshair.color = color;
+            break;
+        }
+        
     }
 
 
@@ -224,12 +267,74 @@ public class PlayerHud : MonoBehaviour
 
         ammo.text = $"{currentAmmo}/{maxAmmo}";
     }
+
+    public void SetMeleeBracket(CrosshairColor desiredColor, bool turnOnArrows)
+    {
+        if (desiredColor != CurrentBracketColor)
+        {
+            Color color = ColorPicker(desiredColor);
+        
+            color.a = (int) desiredColor == 2 ?
+                0f : bracketAlpha / 255f;
+
+            if (PlayerManager.PlayerSettings.MeleeIndicatorVersion == 1)
+            {
+                bracketsV1[0].color = color;
+                bracketsV1[1].color = color;
+
+                bracketsV2[0].color = invisibleColor;
+                bracketsV2[1].color = invisibleColor;
+            }
+            else
+            {
+                bracketsV2[0].color = color;
+                bracketsV2[1].color = color;
+
+                bracketsV1[0].color = invisibleColor;
+                bracketsV1[1].color = invisibleColor;
+            }
+            CurrentBracketColor = desiredColor;
+        }
+
+        // Toggle arrows only if the previous state and new state are different
+        if (wallKickArrowsOn == turnOnArrows) return;
+        wallKickArrowsOn = turnOnArrows;
+
+        wallKickIndicators.SetActive(wallKickArrowsOn);
+    }
+
+    public void SwapCrosshair(CrosshairShape desiredShape)
+    {
+        CurrentCrosshairShape = desiredShape;
+        switch (desiredShape)
+        {
+            case CrosshairShape.DefaultCrossHair:
+                foreach(CrosshairRect rect in crosshairRects)
+                    rect.image.color = crosshairWhiteColor;
+                
+                circleDotCrosshair.color = invisibleColor;
+            break;
+            case CrosshairShape.CircleDot:
+                foreach(CrosshairRect rect in crosshairRects)
+                    rect.image.color = invisibleColor;
+
+                circleDotCrosshair.color = crosshairWhiteColor;
+            break;
+        }
+    }
 }
 
 public enum CrosshairColor
 {
     White = 0,
-    Red = 1
+    Red = 1,
+    None = 2,
+}
+
+public enum CrosshairShape
+{
+    DefaultCrossHair,
+    CircleDot,
 }
 
 [System.Serializable]

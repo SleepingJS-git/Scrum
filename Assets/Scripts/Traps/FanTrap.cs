@@ -1,33 +1,58 @@
 using System.Collections;
-using Unity.Netcode;
 using UnityEngine;
 
-public class FanTrap : BreakableStructureEntity
+public class FanTrap : MonoBehaviour
 {
     [Tooltip("The time before the fan turns off.")]
     [SerializeField] private float offTime;
     [Tooltip("The time before the fan turns on.")]
     [SerializeField] private float onTime;
     [SerializeField] private Collider windBox;
-    [SerializeField] private Collider fanCollider;
     [SerializeField] private ParticleSystem windParticles;
+    [SerializeField] private AreaEffector3D areaEffector3D;
+    [SerializeField] private BreakableStructureEntity structure;
+    private Coroutine toggleRoutine;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() 
     { 
-        windBox.isTrigger = true;
-        StartCoroutine(WaitForCombat()); 
+
+        structure.AddDeathEvent(() => areaEffector3D.ClearAffected());
+        structure.AddDeathEvent(() =>
+        {
+            windBox.enabled = false;
+            windParticles.Clear();
+            windParticles.Pause();
+
+            if (toggleRoutine != null) StopCoroutine(toggleRoutine);
+        });
+
+        structure.OnRespawn += ResetFan; // Resets the fan behavior when buildable respawns
+        ResetFan(); // Put this here because it basically starts the fan
+        
+    }
+
+    public void ResetFan()
+    {
+        if (GameManager.Instance)
+            StartCoroutine(WaitForCombat());
+        else toggleRoutine = StartCoroutine(OnOff());
     }
 
     private IEnumerator OnOff()
     {
-        while (GameManager.GamePhase == GamePhase.Combat && isAlive.Value)
+        while (!GameManager.Instance || GameManager.GamePhase == GamePhase.Combat)
         {
             //Turn on and wait
-            TurnOnRpc();
+            windBox.enabled = true;
+            windParticles.Play();
             yield return new WaitForSeconds(onTime);
 
             //Turn off and wait
-            TurnOffRpc();
+            windBox.enabled = false;
+            windParticles.Clear();
+            windParticles.Pause();
+            Debug.Log("Area Effector Called in OnOffRoutine");
+            areaEffector3D.ClearAffected();
             yield return new WaitForSeconds(offTime);
         }
         StartCoroutine(WaitForCombat());
@@ -35,42 +60,9 @@ public class FanTrap : BreakableStructureEntity
 
     private IEnumerator WaitForCombat()
     {
-        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Building; });
         windParticles.Play();
         windBox.enabled = false;
         yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
-        StartCoroutine(OnOff());
-    }
-
-    public override void ResetBreakable()
-    {
-        fanCollider.enabled = true;
-        GetComponent<MeshRenderer>().enabled = true;
-        if (!IsServer) return;
-        this.health.Value = maxHealth;
-        this.isAlive.Value = true;
-    }
-
-    [Rpc(SendTo.ClientsAndHost)]
-    private void TurnOnRpc()
-    {
-        windBox.enabled = true;
-        windParticles.Play();
-    }
-
-    [Rpc(SendTo.ClientsAndHost)]
-    private void TurnOffRpc()
-    {
-        windBox.enabled = false;
-        windParticles.Clear();
-        windParticles.Pause();
-    }
-
-    protected override void FractureApart()
-    {
-        windParticles.Clear();
-        windParticles.Pause();
-        fanCollider.enabled = false;
-        base.FractureApart();
+        toggleRoutine = StartCoroutine(OnOff());
     }
 }
