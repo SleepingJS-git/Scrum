@@ -57,6 +57,7 @@ public class PlayerMovement : MonoBehaviour
     public float externalForceDrag;
     [SerializeField] private Vector3 externalForces;
     [SerializeField] private Vector3 continuousForce;
+    [SerializeField] private float speedMultiplier = 1f;
 
 
     // Private Variables
@@ -185,7 +186,7 @@ public class PlayerMovement : MonoBehaviour
         // Cache the current speed
         currentSpeed = DetermineMoveSpeed();
 
-        Vector3 targetVelocity = currentSpeed * moveDir;
+        Vector3 targetVelocity = currentSpeed * moveDir * speedMultiplier;
 
 
         // If is grounded, accelerate if moving or decelerate if not
@@ -456,6 +457,11 @@ public class PlayerMovement : MonoBehaviour
 
         if (continuousForce.sqrMagnitude <= 0.00001f) 
             continuousForce = Vector3.zero;
+    }
+
+    public void ApplySpeedMultiplier(float speedMultiplier)
+    {
+        this.speedMultiplier = speedMultiplier;
     }
 
     /// <summary>

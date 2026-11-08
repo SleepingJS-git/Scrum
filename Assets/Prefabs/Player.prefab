@@ -3187,6 +3187,7 @@ MonoBehaviour:
   externalForceDrag: 3.5
   externalForces: {x: 0, y: 0, z: 0}
   continuousForce: {x: 0, y: 0, z: 0}
+  speedMultiplier: 1
   isStuckOnCeiling: 0
   velocity: {x: 0, y: 0, z: 0}
   isCrouchHeld: 0

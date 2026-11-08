@@ -316,6 +316,12 @@ public class Player : Entity
         Move.ApplyContinuousForcerpc(dir * force);
     }
 
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void ApplySpeedMultiplierRpc(float speedMultiplier, RpcParams rpcParams = default)
+    {
+        if (!IsOwner) return;
+        Move.ApplySpeedMultiplier(speedMultiplier);
+    }
 }
 
 /*
