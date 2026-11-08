@@ -186,7 +186,10 @@ public class GridPlacement : NetworkBehaviour
         if (placeAction.WasPressedThisFrame())
         {
             if (canPlace.Value)
-                PlaceBuildableServerRpc(cellPos);
+            {
+                if (buildable.Type != Buildable.BuildType.Explosive) { PlaceBuildableServerRpc(cellPos); }
+                else { }
+            }
             else if (previewObject != null)
                 AudioManager.Instance?.PlayInvalidPlacement();
         }
@@ -239,8 +242,16 @@ public class GridPlacement : NetworkBehaviour
             // Set the preview object's position to the grid cell
             previewObject.transform.position = grid.CellToWorld(cellPos);
 
-            // Offset the object's position based on its rotation
-            previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
+            if (previewObject.Type == Buildable.BuildType.Explosive)
+            {
+                // Offset the object's position based on its rotation
+                previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * new Vector3(0.5f, 0.5f, 0.5f));
+            }
+            else
+            {
+                // Offset the object's position based on its rotation
+                previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
+            }
         }
         if (buildable) canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value);
         else canPlace.Value = isObjectVisible;
@@ -285,6 +296,18 @@ public class GridPlacement : NetworkBehaviour
         PlacementResultRpc(true);
         currentWeight.Value += buildable.weight;
         BreakableToClientRpc(obj.NetworkObjectId);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ExplodeAreaServerRpc(Vector3Int cellPos)
+    {
+        if (!buildable) return;
+        if (currentWeight.Value >= maxWeight)
+        {
+            PlacementResultRpc(false);
+            return;
+        }
+
     }
 
     [Rpc(SendTo.ClientsAndHost)]
