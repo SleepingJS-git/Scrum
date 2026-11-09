@@ -48,6 +48,20 @@ AudioMixerEffectController:
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0
+--- !u!244 &-2472610931796867081
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 3009dc0bcdc25e3429bf433ad106f671
+  m_EffectName: Attenuation
+  m_MixLevel: 991da9432c251b44d92203ed1aadfff5
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
 --- !u!243 &-1898689508957517063
 AudioMixerGroupController:
   m_ObjectHideFlags: 0
@@ -89,6 +103,7 @@ AudioMixerController:
     - 80877d5f023f0d844ac3de466956cdb2
     - cbdd9ec68580fc04aaa220b2352db4fe
     - d0b09e4616031ec43921bb67ea098670
+    - 6bb2fe21544fac546b447f83c1b3a59c
     name: View
   m_CurrentViewIndex: 0
   m_TargetSnapshot: {fileID: 24500006}
@@ -137,10 +152,17 @@ AudioMixerSnapshotController:
   m_AudioMixer: {fileID: 24100000}
   m_SnapshotID: 9d434e98afac7654fbd3f93987902bec
   m_FloatValues:
+    4e72c6432fb67db4cbf7920802174008: 0
     c63a7273d53b2d749abeb7ca4296ccc2: 0
+    b441fc14fe806a047b7474acf953ce95: -0.27209988
+    25c7c024e025bab4f9ce1e7bc60bf70c: 0
     e3636bd5ecb8dfa42929e7ee40a59ffb: 0
     bd5299c789d50d44b9158a80e2b7566f: 10
+    47def5e7cac87b340991c720bbe159f7: 0.001
+    39cc74194b0953f4a9d5daad7ab67423: 0.155
+    2005ca1bb5a0fc84f84033a48eaf336d: -60.9
     6606ecbb0c7ce5c4dac3ceef1f0f17b4: -18.2
+    b771686cae0d4284f870c3cb07c30efa: 2.06
     31cd76acf4cccea47a721b321a4535e2: 0.001
     bf76554d36ca21f4099cf48564e5d468: 0.156
   m_TransitionOverrides: {}
@@ -183,11 +205,31 @@ AudioMixerGroupController:
   m_GroupID: cbdd9ec68580fc04aaa220b2352db4fe
   m_Children:
   - {fileID: -3731577092880171068}
+  - {fileID: 4795027569072764052}
   m_Volume: bff2233c20bfc534ea32dbee3a616a2f
   m_Pitch: de8a3debc8c8553418496397a70aaa6b
   m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: 7727069898596309028}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
+--- !u!243 &4795027569072764052
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Gunfire
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: 6bb2fe21544fac546b447f83c1b3a59c
+  m_Children: []
+  m_Volume: b441fc14fe806a047b7474acf953ce95
+  m_Pitch: f74cc66dbfef47b4f82a62bddc4b69b4
+  m_Send: 00000000000000000000000000000000
+  m_Effects:
+  - {fileID: -2472610931796867081}
   m_UserColorIndex: 0
   m_Mute: 0
   m_Solo: 0

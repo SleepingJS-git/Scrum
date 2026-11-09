@@ -20948,8 +20948,12 @@ MonoBehaviour:
   button: {fileID: 303583692}
   nameText: {fileID: 576732499}
   background: {fileID: 303583693}
+  modelPreview: {fileID: 0}
+  modelDisplay: {fileID: 0}
   normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  enlargedScale: 1.15
+  animationSpeed: 12
 --- !u!114 &303583692
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37823,8 +37827,12 @@ MonoBehaviour:
   button: {fileID: 612711176}
   nameText: {fileID: 1437348433}
   background: {fileID: 612711177}
+  modelPreview: {fileID: 0}
+  modelDisplay: {fileID: 0}
   normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  enlargedScale: 1.15
+  animationSpeed: 12
 --- !u!114 &612711176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47076,8 +47084,12 @@ MonoBehaviour:
   button: {fileID: 734162270}
   nameText: {fileID: 638728081}
   background: {fileID: 734162271}
+  modelPreview: {fileID: 0}
+  modelDisplay: {fileID: 0}
   normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  enlargedScale: 1.15
+  animationSpeed: 12
 --- !u!114 &734162270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76361,6 +76373,7 @@ MonoBehaviour:
   debugPlayerSettings:
     CrouchingType: 0
     DefaultPOV: 80
+    DevMode: 0
   spawnPoints:
   - {fileID: 1333743144}
   - {fileID: 1289956997}
@@ -108193,8 +108206,12 @@ MonoBehaviour:
   button: {fileID: 1479395597}
   nameText: {fileID: 149641161}
   background: {fileID: 1479395598}
+  modelPreview: {fileID: 0}
+  modelDisplay: {fileID: 0}
   normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  enlargedScale: 1.15
+  animationSpeed: 12
 --- !u!114 &1479395597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131709,6 +131726,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a8b9a7f1bd0b9b48b737107622c624b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactionArea: {fileID: 0}
 --- !u!114 &1874080722
 MonoBehaviour:
   m_ObjectHideFlags: 0

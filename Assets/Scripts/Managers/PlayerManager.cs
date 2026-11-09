@@ -231,7 +231,6 @@ public class PlayerManager : NetworkBehaviour
         {
             Player player = client.PlayerObject.GetComponent<Player>();
             player.health.Value = 100;
-            player.UpdateHealthClientRpc(player.OwnerClientId);
             player.isAlive.Value = true;
             player.Combat.EmptyWeapon();
             player.Combat.weaponHandler.DropWeapon();
@@ -446,6 +445,7 @@ public class PlayerManager : NetworkBehaviour
 
                 if (LocalPlayer) LocalPlayer.Look.cam.gameObject.SetActive(false);
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
+                if (builderHud) builderHud.gameObject.SetActive(false);
 
                 // Spectate Cam needs to be added soon.
                 TogglePlayerControls(false);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -12,6 +13,9 @@ public class PlayerCombat : MonoBehaviour
     public GameObject weaponInHand;     // The game object in the player's fps hand or 3d hand
     public Transform weaponHolder;      // The transform used to spawn the 3d model in the player's fps pov
     public WeaponRecoil rightHandWeapon;
+    public float wallKickCooldown = 0.65f;
+    public float kickReach;
+    public Action onWallKick;
     private event Action OnPrimaryFire; // An action event that is used when the player is holding the shoot input
     private event Action OnSecondaryFire;
     private bool _canFire;              // Can the player fire their gun?
@@ -20,6 +24,14 @@ public class PlayerCombat : MonoBehaviour
     private WeaponType _weaponType;     // Determines the weapon type when the player fires the gun
     private Transform _cam;             // Camera reference for aiming
     private float recoilAmplitude;
+    private float wallKickElapsed;
+    private float weaponDist;
+    private float meleeWindUp;
+    private string weaponName;
+    private float lungeAmount;
+    private Coroutine meleeSwingRoutine;
+    public bool KickIsReady => Time.time >= wallKickElapsed + wallKickCooldown;
+    private bool isWindingUp;
     /// <summary>
     /// [Called by Client]
     /// Initialize Player Combat. If the client is the owner, then save camera transform for shooting and enable firing
@@ -37,6 +49,50 @@ public class PlayerCombat : MonoBehaviour
         {
             _main.AddDeathEvent(weaponHandler.DropWeapon);
         }
+
+        weaponDist = kickReach;
+    }
+
+    /// <summary>
+    /// [Called by Client]
+    /// Handles if the player is looking at a viable target
+    /// </summary>
+    public void CheckAimOnTarget()
+    {
+        Vector3 adjustedHeadPos = _cam.position + (_cam.forward * .65f);
+        if (Physics.Raycast(adjustedHeadPos, _cam.forward, weaponDist, Layer.Player, QueryTriggerInteraction.Ignore))
+        {
+            if (_hud.CurrentCrosshairColor != CrosshairColor.Red)
+                _hud.SetCrosshairColor(CrosshairColor.Red);
+        }
+        else
+        {
+            if (_hud.CurrentCrosshairColor != CrosshairColor.White)
+                _hud.SetCrosshairColor(CrosshairColor.White);
+        }
+
+        // If valid surface is within range of kickreach and kick is ready, turn on the brackets
+            // else rest does not run 
+        // If airborne (_main.Move.IsGrounded), turn on the arrow indicators
+            // else arrows are off
+        // If aiming at player or buildable, turn the brackets red
+            // else brackets are white
+
+        if (!KickIsReady)
+        {
+            _hud.SetMeleeBracket(CrosshairColor.None, false);
+            return;
+        }
+
+        if (Physics.Raycast(adjustedHeadPos, _cam.forward, out RaycastHit hit, kickReach, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("Buildable"))
+                _hud.SetMeleeBracket(CrosshairColor.Red, !_main.Move.IsGrounded);
+            else _hud.SetMeleeBracket(CrosshairColor.White, !_main.Move.IsGrounded);
+                
+                
+        }
+        else _hud.SetMeleeBracket(CrosshairColor.None, false);
     }
 
     /// <summary>
@@ -64,7 +120,11 @@ public class PlayerCombat : MonoBehaviour
         _main.Body.Play("HasWeapon", false);
         // Reset Hud Stuff for the client owner only
         if (_main.IsOwner)
-            UpdateWeaponInfo();
+        {
+            _hud.UpdateWeaponName();
+            _hud.UpdateWeaponInfo(-1, -1);
+        }
+            
 
         // Clear Primary Fire Action
         OnPrimaryFire = null;
@@ -95,21 +155,39 @@ public class PlayerCombat : MonoBehaviour
         // If the weapon is hitscan, give it the normal gun firing behavior
         if (_weaponType == WeaponType.Hitscan)
         {
+            HitscanData hData = data as HitscanData;
             OnPrimaryFire = FireWeapon;
-            recoilAmplitude = (data as HitscanData).recoilAmplitude;
+            recoilAmplitude = hData.recoilAmplitude;
             rightHandWeapon.SetResetTime();
             // Set up Hud stuff
-            UpdateWeaponInfo(data.weaponName, $"{c} / {r}");
+            _hud.UpdateWeaponName(data.weaponName);
+            _hud.UpdateWeaponInfo(c, r);
+
+            _hud.SwapCrosshair(CrosshairShape.DefaultCrossHair);
+            _main.Body.PlayWeaponAnim("Idle");
+            weaponDist = 50f;
+            _main.Body.SetInt("WeaponType", 0, true);
         }
         else if (_weaponType == WeaponType.Melee)
         {
+            MeleeData mData = data as MeleeData;
             OnPrimaryFire = SwingWeapon;
-            recoilAmplitude = -(data as MeleeData).swingStrength;
+            recoilAmplitude = 0;
             rightHandWeapon.SetResetTime(data.fireRate);
             // Set up Hud stuff
-            UpdateWeaponInfo(data.weaponName, "");
+            _hud.UpdateWeaponName(data.weaponName);
+            _hud.UpdateWeaponInfo(-1, -1);
+
+            _hud.SwapCrosshair(CrosshairShape.CircleDot);
+
+            weaponDist = mData.attackRange + 1f;
+            meleeWindUp = mData.windupTime;
+            lungeAmount = mData.lungeAmount;
+            _main.Body.SetInt("WeaponType", 1, true);
         }
 
+        isWindingUp = false;
+        weaponName = data.weaponName;
         rightHandWeapon.AddRecoil(-300);
     }
 
@@ -160,15 +238,40 @@ public class PlayerCombat : MonoBehaviour
 
     private void SwingWeapon()
     {
-        if (weaponHandler.IsReady)
+        Debug.Log("Weapon Handler is Ready: " + weaponHandler.IsReady);
+        Debug.Log("Is Winding Up: " + isWindingUp);
+        if (weaponHandler.IsReady && !isWindingUp)
         {
             // Have the weapon handler handle the weapon behavior
-            weaponHandler.Shoot(
-                _weaponType,
-                _cam.position,
-                _cam.forward
-            );
+            _main.Body.PlayWeaponAnim(weaponName + "_swing");
+            _main.Body.PlayTrigger("SwingMelee", true);
+
+            isWindingUp = true;
+            if (meleeSwingRoutine != null) StopCoroutine(meleeSwingRoutine);
+            meleeSwingRoutine = StartCoroutine(MeleeSwingRoutine());
         }
+    }
+
+    private IEnumerator MeleeSwingRoutine()
+    {
+        yield return new WaitForSeconds(meleeWindUp / 2f);
+
+        _main.Move.AddForce(
+            _cam.forward,
+            lungeAmount,
+            ForceMode.Impulse
+        );
+        
+        yield return new WaitForSeconds(meleeWindUp / 2f);
+
+
+        weaponHandler.Shoot(
+            _weaponType,
+            _cam.position,
+            _cam.forward
+        );
+
+        isWindingUp = false;
     }
 
     public void RightHandRecoil()
@@ -176,15 +279,20 @@ public class PlayerCombat : MonoBehaviour
         rightHandWeapon.AddRecoil(recoilAmplitude);
     }
 
-    /// <summary>
-    /// Update the hud text for the weapon name and ammo
-    /// </summary>
-    /// <param name="nameInfo"></param>
-    /// <param name="ammoInfo"></param>
-    public void UpdateWeaponInfo(string nameInfo = "", string ammoInfo = "")
+    public void MeleeKick()
     {
-        _hud.weaponName.text = nameInfo;
-        _hud.ammo.text = ammoInfo;
+        if (!KickIsReady) return;
+
+        _main.Body.PlayKick();
+
+
+        weaponHandler.MeleeKickServerRpc(_cam.position, _cam.forward, kickReach);
+
+        wallKickElapsed = Time.time;
     }
 
+    public void OnWallKick()
+    {
+        onWallKick?.Invoke();
+    }
 }

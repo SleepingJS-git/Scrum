@@ -19,6 +19,31 @@ public static class PhysicsHelper
     }
 
     /// <summary>
+    /// Continuous velocity change over time.
+    /// </summary>
+    /// <param name="dir">Direction of force</param>
+    /// <param name="force">Force of the impact</param>
+    /// <param name="mass">Mass of object affected</param>
+    /// <param name="dt">Delta Time</param>
+    /// <returns>(Vector3) Resulting velocity from incoming force</returns>
+    public static Vector3 ContinuousForce(Vector3 dir, float force, float mass, float dt)
+    {
+        return dir * ((force * dt) / mass);
+    }
+
+    /// <summary>
+    /// Continuous velocity change over time. Assumes force is direction * force
+    /// </summary>
+    /// <param name="force">Force of the impact</param>
+    /// <param name="mass">Mass of object affected</param>
+    /// <param name="dt">Delta Time</param>
+    /// <returns>(Vector3) Resulting velocity from incoming force</returns>
+    public static Vector3 ContinuousForce(Vector3 force, float mass, float dt)
+    {
+        return dt * (force / mass);
+    }
+
+    /// <summary>
     /// The force decreases linearly with distance. A target at the center receives the maximum force, while a target at the radius boundary receives zero.
     /// </summary>
     /// <param name="explosionPos">Position of the explosion</param>

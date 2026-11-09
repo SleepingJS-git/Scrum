@@ -122,7 +122,8 @@ public class WeaponDrop : NetworkBehaviour
 
             // Update the player's weaponhandler with the networkvalues.
             weapon.Init(WeaponDatabase.GetWeapon(weaponID.Value), currentBullets.Value, reserveBullets.Value);
-            
+            weapon.PlayPickupSoundClientRpc(weaponID.Value);
+
             // Send a client rpc with id of the client who sent the request.
             EquipClientRpc(clientId);
 

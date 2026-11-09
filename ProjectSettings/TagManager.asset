@@ -27,7 +27,7 @@ TagManager:
   - Ragdoll
   - WeaponOverlay
   - Debris
-  - 
+  - UIModelPreview
   - 
   - 
   - 
@@ -57,3 +57,4 @@ TagManager:
   - Light Layer 6
   - Light Layer 7
   - Weapon Overlay
+  - FPS Body Overlay
