@@ -5,6 +5,15 @@ using UnityEngine;
 
 public class Buildable : NetworkBehaviour
 {
+    public enum BuildType
+    {
+        Basic,
+        Trap,
+        Explosive
+    }
+    [SerializeField]
+    private BuildType type = BuildType.Basic;
+
     [SerializeField]
     private Vector3Int[] occupiedCells;
 
@@ -41,6 +50,10 @@ public class Buildable : NetworkBehaviour
         get { return mesh; } // Just do this, because u can reference the Mesh in the inspector.
     }
 
+    public BuildType Type
+    {
+        get { return type; }
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {

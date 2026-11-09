@@ -41,7 +41,7 @@ public class DeathCamera : MonoBehaviour
 
     private IEnumerator SwapToBuildCamRoutine()
     {
-        yield return new WaitForSeconds(4.95f);
+        yield return new WaitForSeconds(3f);
         PlayerManager.Instance.ChangePov(1);
         PlayerManager.BuildingUI.gameObject.SetActive(false);
     }
