@@ -6,6 +6,7 @@ using Unity.Services.Multiplayer;
 using UnityEngine;
 using TMPro;
 using System;
+using UnityEngine.UI;
 
 public class GameManager : NetworkBehaviour
 {
@@ -27,9 +28,22 @@ public class GameManager : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    public Image timerBar;
+    public TextMeshProUGUI timerText;
+    public NetworkVariable<int> Net_TotalTime = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    [SerializeField] private float maxBuildTime = 30f;
+    [SerializeField] private float maxRoundTime = 90f;
+    private Coroutine timerRoutine;
     void Awake()
     {
         Instance = this;
+    }
+
+    void Update()
+    {
+        float perc = (float) Net_TotalTime.Value / maxBuildTime;
+        timerBar.fillAmount = perc;
+        timerText.text = $"{(int) Net_TotalTime.Value}";
     }
 
     public override void OnNetworkSpawn()
@@ -168,6 +182,7 @@ public class GameManager : NetworkBehaviour
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 PlayerControllerRpc((int) gamePhase);
+                StartBuildTimer();
                 break;
 
             case GamePhase.EndOfCombat:
@@ -179,6 +194,29 @@ public class GameManager : NetworkBehaviour
                 Invoke(nameof(ResetPlayers), 5f);
                 break;
         }
+    }
+
+    private void StartBuildTimer()
+    {
+        if (timerRoutine != null)
+            StopCoroutine(timerRoutine);
+
+        Net_TotalTime.Value = (int) maxBuildTime;
+        timerRoutine = StartCoroutine(TimerRoutine(maxBuildTime));
+    }
+
+    private IEnumerator TimerRoutine(float maxTime)
+    {
+        float timeLeft = maxTime;
+        while (timeLeft > 0)
+        {
+            Net_TotalTime.Value = (int) timeLeft;
+            yield return null;
+            timeLeft -= Time.deltaTime;
+        }
+        Net_TotalTime.Value = 0;
+
+        ChangeGamePhaseServerRpc(GamePhase.Combat);
     }
 
     private void ResetPlayers()
