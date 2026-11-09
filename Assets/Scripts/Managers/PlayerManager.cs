@@ -121,7 +121,7 @@ public class PlayerManager : NetworkBehaviour
                 OnPlayerDeath += (clientId) =>
                 {
                     Invoke(nameof(ClearSpawnPoints), 1f);
-                    Invoke(nameof(ServerPlayersReset), 1f);
+                    Invoke(nameof(ServerResetsAllPlayers), 1f);
                     Invoke(nameof(ResetPlayer), 1f);
                     Invoke(nameof(ToDefaultPov), 1f);
                 };
@@ -149,13 +149,14 @@ public class PlayerManager : NetworkBehaviour
 
                 // The host will reset server-side players
                 OnAllPlayersReset += ClearSpawnPoints;
-                OnAllPlayersReset += ServerPlayersReset;
+                OnAllPlayersReset += ServerResetsAllPlayers;
 
                 // The host/server will tell all clients to reset their players
                 OnAllPlayersReset += ResetAllPlayers;
 
                 // Tell gamemanager that a player had died
                 OnPlayerDeath += GameManager.Instance.PlayerDeath;
+                OnPlayerDeath += StartRespawn;
 
             break;
 
@@ -176,7 +177,7 @@ public class PlayerManager : NetworkBehaviour
                 OnPlayerDeath += (clientId) =>
                 {
                     Invoke(nameof(ClearSpawnPoints), 2f);
-                    Invoke(nameof(ServerPlayersReset), 2f);
+                    Invoke(nameof(ServerResetsAllPlayers), 2f);
                     Invoke(nameof(ClientPlayerResetRpc), 2f);
                 };
 
@@ -192,12 +193,12 @@ public class PlayerManager : NetworkBehaviour
         if (!IsServer) return;
 
         OnAllPlayersReset -= ClearSpawnPoints;
-        OnAllPlayersReset -= ServerPlayersReset;
+        OnAllPlayersReset -= ServerResetsAllPlayers;
         OnAllPlayersReset -= ResetAllPlayers;
         OnPlayerDeath -= GameManager.Instance.PlayerDeath;
 
         OnAllPlayersReset += ClearSpawnPoints;
-        OnAllPlayersReset += ServerPlayersReset;
+        OnAllPlayersReset += ServerResetsAllPlayers;
         OnAllPlayersReset += ResetAllPlayers;
         OnPlayerDeath += GameManager.Instance.PlayerDeath;
     }
@@ -225,10 +226,42 @@ public class PlayerManager : NetworkBehaviour
     /// Called by Server
     /// Server will reset network variables for each player
     /// </summary>
-    private void ServerPlayersReset()
+    private void ServerResetsAllPlayers()
     {
-        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
+        foreach (ulong clientID in NetworkManager.Singleton.ConnectedClientsIds)
         {
+            ServerResetPlayer(clientID);
+        }
+    }
+
+    private void StartRespawn(ulong clientID)
+    {
+        Debug.Log("Respawn Routine has started for: " + clientID);
+        StartCoroutine(RespawnRoutine(clientID));
+    }
+
+    private IEnumerator RespawnRoutine(ulong clientID)
+    {
+        Debug.Log("Waiting for respawn: " + clientID);
+        yield return new WaitForSeconds(6f);
+        Debug.Log("Finished respawn timing: " + clientID);
+        Debug.Log("Checking Gamephase gate: " + (GameManager.GamePhase == GamePhase.Combat));
+        if (GameManager.GamePhase == GamePhase.Combat)
+        {
+            ServerResetPlayer(clientID);
+            ResetNonLocalPlayerRpc(clientID);
+            LocallyResetSelfRpc(clientID);
+        }
+    }
+
+    private void ServerResetPlayer(ulong clientID)
+    {
+        Debug.Log("ServerResetPlayer: " + clientID);
+
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
+        {
+
+            Debug.Log("Passed TryGetValue: " + clientID);
             Player player = client.PlayerObject.GetComponent<Player>();
             player.health.Value = 100;
             player.isAlive.Value = true;
@@ -237,15 +270,44 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
+
     /// <summary>
-    /// Set the player settings
+    /// Host will tell all clients to reset specific player
     /// </summary>
-    /// <param name="newPlayerSettings"></param>
-    public void SetPlayerSettings(PlayerSettings newPlayerSettings)
-    {
-        Debug.Log("Player Settings Set");
-        PlayerSettings = newPlayerSettings;
+    /// <param name="clientID"></param>
+    [Rpc(SendTo.Everyone)]
+    private void ResetNonLocalPlayerRpc(ulong clientID)
+    {  
+        Debug.Log("ResetNonLocalPlayerRpc: " + clientID);
+
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
+        {
+
+            Debug.Log("Passed TryGetValue: " + clientID);
+
+            Player player = client.PlayerObject.GetComponent<Player>();
+
+            if (player != null && player != LocalPlayer)
+            {
+                Debug.Log("Passed player != local player gate: " + clientID);
+                player.Body.UnRagdoll();
+                player.Body.Play("IsMoving", false);
+                player.Move.OnDeathCollider(false);
+                Destroy(player.Combat.weaponInHand);
+            }
+        }
     }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void LocallyResetSelfRpc(ulong clientID)
+    {
+
+        Debug.Log($"LocallyResetSelfRpc: {clientID} == {LocalClientId}");
+        if (clientID != LocalClientId) return;
+        ResetPlayer();
+        ChangePov(0);
+    }
+
     /// <summary>
     /// Invoked by server. Method is subscribed to server's OnAllPlayersReset.
     /// The host will tell all clients to reset their local players.
@@ -258,6 +320,47 @@ public class PlayerManager : NetworkBehaviour
 
         OnPlayerReset?.Invoke();
     }
+
+    /// <summary>
+    /// Called by Client
+    /// Local clients need to reset their versions of other players
+    /// </summary>
+    private void ResetNonLocalPlayers()
+    {
+        foreach (NetworkClient networkClient in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            Player player = networkClient.PlayerObject.GetComponent<Player>();
+
+            if (player == null || player == LocalPlayer)
+                continue;
+
+            player.Body.UnRagdoll();
+            player.Body.Play("IsMoving", false);
+            player.Move.OnDeathCollider(false);
+            Destroy(player.Combat.weaponInHand);
+        }
+    }
+    
+
+    /// <summary>
+    /// Needs to be called by Client or ClientRpc
+    /// </summary>
+    private void ResetPlayer()
+    {
+        TeleportPlayer(GetRandomSpawnPoint().position);
+        LocalPlayer.Revive();
+    }
+
+    /// <summary>
+    /// Set the player settings
+    /// </summary>
+    /// <param name="newPlayerSettings"></param>
+    public void SetPlayerSettings(PlayerSettings newPlayerSettings)
+    {
+        Debug.Log("Player Settings Set");
+        PlayerSettings = newPlayerSettings;
+    }
+
 
 #region Player Setup
     /// <summary>
@@ -309,26 +412,7 @@ public class PlayerManager : NetworkBehaviour
     }
 
 
-    /// <summary>
-    /// Called by Client
-    /// Local clients need to reset their versions of other players
-    /// </summary>
-    private void ResetNonLocalPlayers()
-    {
-        foreach (NetworkClient networkClient in NetworkManager.Singleton.ConnectedClientsList)
-        {
-            Player player = networkClient.PlayerObject.GetComponent<Player>();
 
-            if (player == null || player == LocalPlayer)
-                continue;
-
-            player.Body.UnRagdoll();
-            player.Body.Play("IsMoving", false);
-            player.Move.OnDeathCollider(false);
-            Destroy(player.Combat.weaponInHand);
-        }
-    }
-    
     /// <summary>
     /// Called by Client
     /// Tell the Server's GameManager that this player has reset
@@ -480,15 +564,6 @@ public class PlayerManager : NetworkBehaviour
         if (LocalBuilder) LocalBuilder.ToggleInput(false);
     }
 
-
-    /// <summary>
-    /// Needs to be called by Client or ClientRpc
-    /// </summary>
-    private void ResetPlayer()
-    {
-        TeleportPlayer(GetRandomSpawnPoint().position);
-        LocalPlayer.Revive();
-    }
 
     private void TeleportPlayer(Vector3 pos)
     {
