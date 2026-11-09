@@ -36,6 +36,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI timerText;
     private Coroutine timerRoutine;
     public bool SuddenDeath {get; private set;}
+    public List<WeaponDrop> droppedWeapons = new List<WeaponDrop>();
     void Awake()
     {
         Instance = this;
@@ -206,6 +207,9 @@ public class GameManager : NetworkBehaviour
                 _deadPlayers = 0;
                 PlayerControllerRpc((int) gamePhase);
                 StartBuildTimer();
+
+                foreach(WeaponDrop wpn in droppedWeapons)
+                    wpn.NetworkObject.Despawn();
                 break;
 
             case GamePhase.EndOfCombat:

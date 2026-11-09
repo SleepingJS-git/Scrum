@@ -304,8 +304,8 @@ public class Weapon : NetworkBehaviour
                     e.OnHit(new OnHitData()
                     {
                         attacker = player,
-                        damage = data.damage * 2,
-                        explosionForce = data.damage,
+                        damage = data.damage,
+                        explosionForce = data.damage * 2,
                         sourceHit = sourceHit,
                         movingDir = aimDir,
                         upwardsModifier = 0f,

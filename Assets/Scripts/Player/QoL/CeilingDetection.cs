@@ -10,7 +10,7 @@ public class CeilingDetection : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (player.MoveState.Value == 1 || player.Move.isStuckOnCeiling)
+        if (player.MoveState.Value == 1 && player.Move.isStuckOnCeiling)
         {
             Vector3 origin = player.transform.position + Vector3.down * (cc.height * 0.35f);
 
