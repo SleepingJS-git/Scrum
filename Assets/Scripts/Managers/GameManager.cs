@@ -127,16 +127,18 @@ public class GameManager : NetworkBehaviour
             PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
             stats.AddDeath();
 
+            if (!SuddenDeath) return;
 
-            // _deadPlayers++;
+            _deadPlayers++;
 
-            // Debug.Log("Dead Players: " + _deadPlayers);
+            Debug.Log("Dead Players: " + _deadPlayers);
+            
+            if (_deadPlayers >= numOfPlayers - 1)
+            {
+                ChangeGamePhaseServerRpc(GamePhase.EndOfCombat);
+            }
+
         }
-
-        // if (_deadPlayers >= numOfPlayers - 1)
-        // {
-        //     ChangeGamePhaseServerRpc(GamePhase.EndOfCombat);
-        // }
 
     }
 

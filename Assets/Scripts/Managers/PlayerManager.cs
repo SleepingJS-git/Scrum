@@ -231,6 +231,14 @@ public class PlayerManager : NetworkBehaviour
         foreach (ulong clientID in NetworkManager.Singleton.ConnectedClientsIds)
         {
             ServerResetPlayer(clientID);
+
+            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
+            {
+                Player player = client.PlayerObject.GetComponent<Player>();
+                player.Stats.Kills.Value = 0;
+                player.Stats.Deaths.Value = 0;
+            }
+
         }
     }
 
