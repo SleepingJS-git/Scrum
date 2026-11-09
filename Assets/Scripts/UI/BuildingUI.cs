@@ -113,6 +113,7 @@ public class BuildingUI : MonoBehaviour
                 randomIndex = UnityEngine.Random.Range(0, availableNormals.Count);
                 chosenPrefabId = availableNormals[randomIndex];
                 availableNormals.RemoveAt(randomIndex);
+                available.Remove(chosenPrefabId);
                 normalChosen = true;
             }
             else if (!trapChosen)
@@ -120,6 +121,7 @@ public class BuildingUI : MonoBehaviour
                 randomIndex = UnityEngine.Random.Range(0, availableTraps.Count);
                 chosenPrefabId = availableTraps[randomIndex]; 
                 availableTraps.RemoveAt(randomIndex);
+                available.Remove(chosenPrefabId);
                 trapChosen = true;
             }
             else
