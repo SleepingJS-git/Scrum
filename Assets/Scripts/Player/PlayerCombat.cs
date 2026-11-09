@@ -32,6 +32,8 @@ public class PlayerCombat : MonoBehaviour
     private Coroutine meleeSwingRoutine;
     public bool KickIsReady => Time.time >= wallKickElapsed + wallKickCooldown;
     private bool isWindingUp;
+    private float nextFireTime;
+    private float weaponFireRate;
     /// <summary>
     /// [Called by Client]
     /// Initialize Player Combat. If the client is the owner, then save camera transform for shooting and enable firing
@@ -189,6 +191,9 @@ public class PlayerCombat : MonoBehaviour
         isWindingUp = false;
         weaponName = data.weaponName;
         rightHandWeapon.AddRecoil(-300);
+
+        weaponFireRate = data.fireRate;
+        nextFireTime = Time.time;
     }
 
     /// <summary>
@@ -224,7 +229,6 @@ public class PlayerCombat : MonoBehaviour
             EmptyWeapon();
             return;
         }
-
         if (weaponHandler.IsReady)
         {
             // Have the weapon handler handle the weapon behavior
@@ -238,15 +242,14 @@ public class PlayerCombat : MonoBehaviour
 
     private void SwingWeapon()
     {
-        Debug.Log("Weapon Handler is Ready: " + weaponHandler.IsReady);
-        Debug.Log("Is Winding Up: " + isWindingUp);
-        if (weaponHandler.IsReady && !isWindingUp)
+        if (Time.time >= nextFireTime && !isWindingUp)
         {
             // Have the weapon handler handle the weapon behavior
             _main.Body.PlayWeaponAnim(weaponName + "_swing");
             _main.Body.PlayTrigger("SwingMelee", true);
 
             isWindingUp = true;
+            _canFire = false;
             if (meleeSwingRoutine != null) StopCoroutine(meleeSwingRoutine);
             meleeSwingRoutine = StartCoroutine(MeleeSwingRoutine());
         }
@@ -254,6 +257,7 @@ public class PlayerCombat : MonoBehaviour
 
     private IEnumerator MeleeSwingRoutine()
     {
+        Debug.Log("Melee wind up time is: " + meleeWindUp);
         yield return new WaitForSeconds(meleeWindUp / 2f);
 
         _main.Move.AddForce(
@@ -264,7 +268,8 @@ public class PlayerCombat : MonoBehaviour
         
         yield return new WaitForSeconds(meleeWindUp / 2f);
 
-
+        nextFireTime = Time.time + weaponFireRate;
+        
         weaponHandler.Shoot(
             _weaponType,
             _cam.position,
@@ -272,6 +277,7 @@ public class PlayerCombat : MonoBehaviour
         );
 
         isWindingUp = false;
+        _canFire = true;
     }
 
     public void RightHandRecoil()
