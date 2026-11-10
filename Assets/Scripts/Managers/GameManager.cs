@@ -128,7 +128,7 @@ public class GameManager : NetworkBehaviour
             PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
             stats.AddDeath();
 
-            if (!SuddenDeath) return;
+            if (gamePhase != GamePhase.Combat) return;
 
             _deadPlayers++;
 
@@ -218,6 +218,14 @@ public class GameManager : NetworkBehaviour
                 ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
+                if (timerRoutine != null)
+                {
+                    StopCoroutine(timerRoutine);
+                    timerRoutine = null;
+                }
+
+                PlayerControllerRpc((int)gamePhase);
+                Net_TotalTime.Value = 0;
                 ShowRoundWinner();
                 Invoke(nameof(ResetPlayers), 5f);
                 break;
