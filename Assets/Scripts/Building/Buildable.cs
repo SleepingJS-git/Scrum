@@ -63,6 +63,8 @@ public class Buildable : NetworkBehaviour
         SetDimensions();
     }
 
+    public Vector3Int originPosition;
+
     // Update is called once per frame
     void Update()
     {

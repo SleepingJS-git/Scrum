@@ -51,6 +51,7 @@ public class GridPlacement : NetworkBehaviour
 
     // The offset of the object being placed
     private Vector3 offset;
+    private Vector3Int currentOriginPosition;
 
     // The default color of the placed object
     private List<Color> defaultColors = new List<Color>();
@@ -241,6 +242,7 @@ public class GridPlacement : NetworkBehaviour
 
             // Set the preview object's position to the grid cell
             previewObject.transform.position = grid.CellToWorld(cellPos);
+            currentOriginPosition = cellPos;
 
             // Offset the object's position based on its rotation
             previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
@@ -289,6 +291,7 @@ public class GridPlacement : NetworkBehaviour
         // Send Server Request to create object
         Buildable obj = Instantiate(buildable, previewObject.transform.position, Quaternion.Euler(0, rotation.Value, 0));
         obj.NetworkObject.Spawn();
+        obj.originPosition = currentOriginPosition;
         BuildableDatabase.SetCellsToOccupied(buildable, cellPos, rotation.Value);
         PlacementResultRpc(true);
         currentWeight.Value += buildable.weight;
@@ -307,8 +310,10 @@ public class GridPlacement : NetworkBehaviour
         List<GameObject> buildablesToExplode = GetBuildableInBox(grid.GetCellCenterWorld(cellPos), buildable.Dimensions);
         foreach (GameObject builtObject in buildablesToExplode)
         {
+            BuildableDatabase.SetCellsToClear(builtObject);
             Destroy(builtObject);
         }
+        currentWeight.Value += buildable.weight;
     }
 
     [Rpc(SendTo.ClientsAndHost)]
