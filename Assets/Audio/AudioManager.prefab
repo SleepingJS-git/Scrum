@@ -187,6 +187,7 @@ MonoBehaviour:
   placementVolume: 1
   invalidPlacementVolume: 1
   placementAudioSource: {fileID: 5138843791831678091}
+  buildableBreakSourcePrefab: {fileID: 7935118380997454761, guid: 9a4384838bf9e324c8fa2f54e6136305, type: 3}
 --- !u!82 &456598535219983139
 AudioSource:
   m_ObjectHideFlags: 0

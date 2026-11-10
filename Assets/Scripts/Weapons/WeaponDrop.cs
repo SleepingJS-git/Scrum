@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -94,6 +95,20 @@ public class WeaponDrop : NetworkBehaviour
 
         Vector3 finalTorque = (Helper.RandomTorque(-3f, 3f) * .25f) + (rot * Vector3.forward);
         rb.AddTorque(finalTorque, ForceMode.Impulse);
+
+        if (GameManager.Instance)
+        {
+            if (_currentBullets == 0)
+                StartCoroutine(DestroySelf());
+            else
+                GameManager.Instance.droppedWeapons.Add(this);
+        }
+    }
+
+    private IEnumerator DestroySelf()
+    {
+        yield return new WaitForSeconds(3f);
+        NetworkObject.Despawn();
     }
 
     /// <summary>
