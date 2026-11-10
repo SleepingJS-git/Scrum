@@ -273,7 +273,7 @@ public class GridPlacement : NetworkBehaviour
     private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (currentWeight.Value >= maxWeight)
+        if (currentWeight.Value + buildable.weight > maxWeight)
         {
             PlacementResultRpc(false);
             return;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class BuildingUI : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class BuildingUI : MonoBehaviour
     [SerializeField] private BarHoverCheck barHoverCheck;
     [SerializeField] private GridPlacement gridPlacement;
     [SerializeField] private TMP_Text placementInfo;
+    [SerializeField] private TMP_Text selectedWeightInfo;
 
     public GameObject SelectedPrefab { get; private set; }
 
@@ -19,10 +21,15 @@ public class BuildingUI : MonoBehaviour
     private bool choicesGenerated;
     private bool wasBuilding;
 
+    public Image weightBar;
+    public Color maxWeightColor, medWeightColor, lowWeightColor;
+
     private void OnEnable()
     {
         ClearSelection();
         wasBuilding = GridPlacement.IsBuildingPhase;
+        if (selectedWeightInfo)
+            selectedWeightInfo.text = string.Empty;
     }
 
     private void Start()
@@ -55,7 +62,9 @@ public class BuildingUI : MonoBehaviour
 
         wasBuilding = isBuilding;
 
-        if (placementInfo) placementInfo.text = gridPlacement ? $"{gridPlacement.currentWeight.Value}/{gridPlacement.maxWeight}" : "";
+        if (placementInfo) placementInfo.text = gridPlacement ? $"Placed Weight: {gridPlacement.currentWeight.Value}/{gridPlacement.maxWeight}" : "";
+
+        UpdateWeight(gridPlacement.currentWeight.Value, gridPlacement.maxWeight);
 
         if (!isBuilding || !gridPlacement || !gridPlacement.IsSpawned || !gridPlacement.IsOwner) return;
 
@@ -169,6 +178,9 @@ public class BuildingUI : MonoBehaviour
 
         Buildable prefab = BuildableDatabase.GetBuildable(selectedSlot.BuildPrefabID);
 
+        if (selectedWeightInfo)
+            selectedWeightInfo.text = $"Object Weight: {prefab.weight}";
+
         SelectedPrefab = prefab ? prefab.gameObject : null;
 
         gridPlacement.SetBuildable(selectedSlot.BuildPrefabID);
@@ -184,5 +196,17 @@ public class BuildingUI : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void UpdateWeight(float currentWeight, float maxWeight)
+    {
+
+        float perc = (float)currentWeight / maxWeight;
+
+        weightBar.fillAmount = perc;
+
+        if (currentWeight >= maxWeight) weightBar.color = maxWeightColor;
+        else if (currentWeight >= maxWeight / 2) weightBar.color = medWeightColor;
+        else weightBar.color = lowWeightColor;
     }
 }
