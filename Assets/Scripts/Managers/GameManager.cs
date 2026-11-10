@@ -6,6 +6,7 @@ using Unity.Services.Multiplayer;
 using UnityEngine;
 using TMPro;
 using System;
+using UnityEngine.UI;
 
 public class GameManager : NetworkBehaviour
 {
@@ -27,9 +28,23 @@ public class GameManager : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+
+    public NetworkVariable<int> Net_TotalTime = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    [SerializeField] private float maxBuildTime = 30f;
+    [SerializeField] private float maxRoundTime = 90f;
+    [SerializeField] private Image timerBar;
+    [SerializeField] private TextMeshProUGUI timerText;
+    private Coroutine timerRoutine;
+    public bool SuddenDeath {get; private set;}
+    public List<WeaponDrop> droppedWeapons = new List<WeaponDrop>();
     void Awake()
     {
         Instance = this;
+    }
+
+    void Update()
+    {
+
     }
 
     public override void OnNetworkSpawn()
@@ -40,9 +55,27 @@ public class GameManager : NetworkBehaviour
 
         MusicManager.Instance?.StopMusic();
 
+        Net_TotalTime.OnValueChanged += UpdateTimerUI;
         if (!IsServer) return;
         ChangeGamePhaseServerRpc(GamePhase.Loading);
-    }    
+    }  
+
+    private void UpdateTimerUI(int oldVal, int newVal)
+    {
+        timerText.text = newVal.ToString();
+
+        float perc = 0f;
+        if (GamePhase == GamePhase.Building)
+            perc = (float) newVal / maxBuildTime;
+        else if (GamePhase == GamePhase.Combat)
+            perc = (float) newVal / maxRoundTime;
+        else if (newVal == 0)
+            timerText.text = "";
+        else
+            timerText.text = "";
+
+        timerBar.fillAmount = perc;
+    }
     /// <summary>
     /// Set player count, used in NetworkSpawner after spawning players in
     /// </summary>
@@ -95,15 +128,17 @@ public class GameManager : NetworkBehaviour
             PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
             stats.AddDeath();
 
+            if (!SuddenDeath) return;
 
             _deadPlayers++;
 
             Debug.Log("Dead Players: " + _deadPlayers);
-        }
+            
+            if (_deadPlayers >= numOfPlayers - 1)
+            {
+                ChangeGamePhaseServerRpc(GamePhase.EndOfCombat);
+            }
 
-        if (_deadPlayers >= numOfPlayers - 1)
-        {
-            ChangeGamePhaseServerRpc(GamePhase.EndOfCombat);
         }
 
     }
@@ -155,22 +190,30 @@ public class GameManager : NetworkBehaviour
         switch (gamePhase)
         {
             case GamePhase.Combat:
+                SuddenDeath = false;
                 _readyPlayers = 0;
                 ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 PlayerControllerRpc((int) gamePhase);
+                StartCombatTimer();
                 break;
 
             case GamePhase.Building:
+                SuddenDeath = false;
                 _readyPlayers = 0;
                 ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 PlayerControllerRpc((int) gamePhase);
+                StartBuildTimer();
+
+                foreach(WeaponDrop wpn in droppedWeapons)
+                    wpn.NetworkObject.Despawn();
                 break;
 
             case GamePhase.EndOfCombat:
+                SuddenDeath = false;
                 _readyPlayers = 0;
                 ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
@@ -178,6 +221,50 @@ public class GameManager : NetworkBehaviour
                 ShowRoundWinner();
                 Invoke(nameof(ResetPlayers), 5f);
                 break;
+        }
+    }
+
+    private void StartBuildTimer()
+    {
+        if (timerRoutine != null)
+            StopCoroutine(timerRoutine);
+
+        Net_TotalTime.Value = (int) maxBuildTime;
+        timerRoutine = StartCoroutine(TimerRoutine(maxBuildTime));
+    }
+
+    private void StartCombatTimer()
+    {
+        if (timerRoutine != null)
+            StopCoroutine(timerRoutine);
+
+        Net_TotalTime.Value = (int) maxRoundTime;
+        timerRoutine = StartCoroutine(TimerRoutine(maxRoundTime));
+    }
+
+    private IEnumerator TimerRoutine(float maxTime)
+    {
+        float timeLeft = maxTime;
+        int oldInt = (int) maxTime;
+        
+        while (timeLeft > 0)
+        {
+            timeLeft -= Time.deltaTime;
+
+            if (oldInt != (int) timeLeft)
+                Net_TotalTime.Value = (int) timeLeft;
+
+            yield return null;
+            oldInt = (int) timeLeft;
+        }
+
+        Net_TotalTime.Value = 0;
+
+        if (GamePhase == GamePhase.Building)
+            ChangeGamePhaseServerRpc(GamePhase.Combat);
+        else if (GamePhase == GamePhase.Combat)
+        {
+            SuddenDeath = true;
         }
     }
 
@@ -199,6 +286,7 @@ public class GameManager : NetworkBehaviour
         }
         else if (gamePhase == GamePhase.Combat)
         {
+            connectUI.readyButton.gameObject.SetActive(false);
             PlayerManager.Instance.ChangePov(0);
         }
     }
@@ -229,25 +317,33 @@ public class GameManager : NetworkBehaviour
     /// </summary>
     private void ShowRoundWinner()
     {
+        int mostPoints = -1;
+        Player winner = null;
+
         foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             Player player = client.PlayerObject.GetComponent<Player>();
 
-            if (player != null && player.isAlive.Value)
+            if (player != null)
             {
                 PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
 
-                stats.AddRoundWin();
-
-                string winnerName = stats.PlayerName.Value.ToString();
-
-                ShowRoundWinnerRpc(winnerName);
-
-                return;
+                if (mostPoints < player.Stats.Kills.Value)
+                {
+                    mostPoints = player.Stats.Kills.Value;
+                    winner = player;
+                }
+                
             }
         }
 
-        Debug.LogWarning("Could not find a surviving player.");
+        if (winner != null)
+        {
+            winner.Stats.AddRoundWin();
+            ShowRoundWinnerRpc(winner.Stats.PlayerName.Value.ToString());
+        }
+        else
+            Debug.LogWarning("Could not find a winning player.");
     }
 
     /// <summary>

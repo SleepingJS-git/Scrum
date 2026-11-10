@@ -17,6 +17,17 @@ public class AudioManager : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float placementVolume = 1f;
     [SerializeField, Range(0f, 1f)] private float invalidPlacementVolume = 1f;
     [SerializeField] private AudioSource placementAudioSource;
+    [SerializeField] private AudioSource buildableBreakSourcePrefab;
+
+    public void PlayBuildableBreakSound(Vector3 position)
+    {
+        if (buildableBreakSourcePrefab == null || buildableBreakSourcePrefab.clip == null)
+            return;
+
+        AudioSource source = Instantiate(buildableBreakSourcePrefab, position, Quaternion.identity);
+        source.Play();
+        Destroy(source.gameObject, source.clip.length);
+    }
 
     private void Awake()
     {

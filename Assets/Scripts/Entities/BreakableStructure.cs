@@ -64,6 +64,9 @@ public class BreakableStructureEntity: Entity
     private void FractureApartClientRpc()
     {
         FractureApart();
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayBuildableBreakSound(transform.position);
     }
 
     protected IEnumerator WaitForBuildPhase()

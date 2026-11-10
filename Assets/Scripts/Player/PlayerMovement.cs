@@ -36,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
     public float slideCooldown;
     public float slideCancelDelay;
     [Range(0f, 2f)] public float slideInputDrag;
+    [SerializeField] private SlideAudio slideAudio;
 
     [Header("Wall Kicking")]
     public float kickUpForce;
@@ -708,6 +709,7 @@ public class PlayerMovement : MonoBehaviour
         slideTimer = 0f;
 
         main.ChangeMoveStateServerRpc((int)MovementState.Sliding);
+        slideAudio?.PlaySlide();
     }
 
     /// <summary>

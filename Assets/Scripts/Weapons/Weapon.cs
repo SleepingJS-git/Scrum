@@ -305,7 +305,7 @@ public class Weapon : NetworkBehaviour
                     {
                         attacker = player,
                         damage = data.damage,
-                        explosionForce = data.damage,
+                        explosionForce = data.damage * 2,
                         sourceHit = sourceHit,
                         movingDir = aimDir,
                         upwardsModifier = 0f,
@@ -382,13 +382,44 @@ public class Weapon : NetworkBehaviour
         // Get the weapon data from the sender client
         WeaponData data = WeaponDatabase.GetWeapon(weaponID.Value);
         Vector3 dir = SpreadRandomizer(aimDir, net_currentSpread.Value);
-        Vector3 adjustedHeadPos = headPos + (dir * .65f);
-        Vector3 hitPoint = adjustedHeadPos + (dir * 25f);
+        Vector3 hitPoint = headPos + (dir * 25f);
         bool hitPlayer = false;
         bool killedPlayer = false;
-        Debug.DrawLine(adjustedHeadPos, hitPoint, Color.red, 4f);
         // Send a raycast from the head to the new dirction within 100 units on only specific layers, and ignoring triggers
-        if (Physics.Raycast(adjustedHeadPos, dir, out RaycastHit hit, 100f, Layer.BulletSurfaces, QueryTriggerInteraction.Ignore))
+        RaycastHit[] hits = Physics.RaycastAll(
+            headPos,
+            dir,
+            100f,
+            Layer.BulletSurfaces,
+            QueryTriggerInteraction.Ignore
+        );
+
+        RaycastHit hit = default;
+        bool foundHit = false;
+        float closestDistance = float.MaxValue;
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider collider = hits[i].collider;
+            Player hitPlayerObject = collider.GetComponentInParent<Player>();
+
+            bool isShooter =
+                (hitPlayerObject && hitPlayerObject.OwnerClientId == player.OwnerClientId) ||
+                collider.transform == player.transform ||
+                collider.transform.IsChildOf(player.transform);
+
+            if (isShooter)
+                continue;
+
+            if (hits[i].distance < closestDistance)
+            {
+                closestDistance = hits[i].distance;
+                hit = hits[i];
+                foundHit = true;
+            }
+        }
+
+        if (foundHit)
         {
             hitPoint = hit.point;
             hitPlayer = hit.collider.CompareTag("Player");
@@ -396,7 +427,7 @@ public class Weapon : NetworkBehaviour
             if (hitPlayer || hit.collider.CompareTag("Buildable"))
             {
                 Entity e = hit.collider.GetComponent<Entity>();
-                // Check if the entity is alive
+
                 if (e && e.isAlive.Value)
                 {
                     e.OnHit(new OnHitData()
@@ -409,22 +440,19 @@ public class Weapon : NetworkBehaviour
                         upwardsModifier = .5f,
                         damageType = DamageType.Bullet
                     });
-                    if (hitPlayer)
+
+                    if (hitPlayer && !e.isAlive.Value)
                     {
-                        if (!e.isAlive.Value)
+                        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
                         {
-                            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(player.OwnerClientId, out NetworkClient client))
-                            {
-                                PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
-                                stats.AddKill();
-                                killedPlayer = true;
-                            }
+                            PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
+                            stats.AddKill();
+                            killedPlayer = true;
                         }
                     }
                 }
             }
         }
-
 
         currentBullets.Value--;
         lastShootTime = Time.time;

@@ -48,7 +48,6 @@ public class FanTrap : BreakableStructureEntity
             windBox.enabled = false;
             windParticles.Clear();
             windParticles.Pause();
-            Debug.Log("Area Effector Called in OnOffRoutine");
             areaEffector3D.ClearAffected();
             yield return new WaitForSeconds(offTime);
         }
