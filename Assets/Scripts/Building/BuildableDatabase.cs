@@ -82,6 +82,14 @@ public class BuildableDatabase : MonoBehaviour
         }
     }
 
+    public static void ClearCell(Vector3Int position)
+    {
+        if (IsCellTaken(position))
+        {
+            OccupiedCells.Remove(position);
+        }
+    }
+
     /// <summary>
     /// Sets all cells of the object being placed to occupid
     /// </summary>
@@ -100,6 +108,14 @@ public class BuildableDatabase : MonoBehaviour
         {
             //Debug.Log(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]));
             OccupyCell(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]), buildable.Id);
+        }
+    }
+
+    public static void SetCellsToClear(Buildable buildable, Vector3Int originPos, float rotation)
+    {
+        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+        {
+            ClearCell(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]));
         }
     }
     public static Buildable GetBuildable(ulong id)
