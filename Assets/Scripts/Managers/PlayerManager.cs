@@ -192,15 +192,28 @@ public class PlayerManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
+        // Configure PlayerManager for the full game.
+        debugConfig = new DebugConfig();
+        debugConfig.debuggingType = ConfigType.Full_Game;
+        debugConfig.FinishConfiguration();
+
+        DefaultPov = 3;
+
+        // Remove existing subscriptions to prevent duplicates.
         OnAllPlayersReset -= ClearSpawnPoints;
         OnAllPlayersReset -= ServerResetsAllPlayers;
         OnAllPlayersReset -= ResetAllPlayers;
-        OnPlayerDeath -= GameManager.Instance.PlayerDeath;
 
+        OnPlayerDeath -= GameManager.Instance.PlayerDeath;
+        OnPlayerDeath -= StartRespawn;
+
+        // Register Full_Game events.
         OnAllPlayersReset += ClearSpawnPoints;
         OnAllPlayersReset += ServerResetsAllPlayers;
         OnAllPlayersReset += ResetAllPlayers;
+
         OnPlayerDeath += GameManager.Instance.PlayerDeath;
+        OnPlayerDeath += StartRespawn;
     }
 
     /// <summary>
@@ -235,8 +248,6 @@ public class PlayerManager : NetworkBehaviour
             if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
             {
                 Player player = client.PlayerObject.GetComponent<Player>();
-                player.Stats.Kills.Value = 0;
-                player.Stats.Deaths.Value = 0;
             }
 
         }

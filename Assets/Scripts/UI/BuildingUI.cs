@@ -56,6 +56,7 @@ public class BuildingUI : MonoBehaviour
 
     private void Update()
     {
+        if (!gridPlacement) return;
         bool isBuilding = GridPlacement.IsBuildingPhase;
 
         if (wasBuilding && !isBuilding) ClearSelection();

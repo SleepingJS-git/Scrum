@@ -128,7 +128,7 @@ public class GameManager : NetworkBehaviour
             PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
             stats.AddDeath();
 
-            if (gamePhase != GamePhase.Combat) return;
+            if (!SuddenDeath) return;
 
             _deadPlayers++;
 
@@ -190,7 +190,6 @@ public class GameManager : NetworkBehaviour
         switch (gamePhase)
         {
             case GamePhase.Combat:
-                SuddenDeath = false;
                 _readyPlayers = 0;
                 ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
@@ -200,7 +199,6 @@ public class GameManager : NetworkBehaviour
                 break;
 
             case GamePhase.Building:
-                SuddenDeath = false;
                 _readyPlayers = 0;
                 ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
