@@ -188,8 +188,7 @@ public class GridPlacement : NetworkBehaviour
         {
             if (canPlace.Value)
             {
-                if (buildable.Type != Buildable.BuildType.Explosive) { PlaceBuildableServerRpc(cellPos); }
-                else { ExplodeAreaServerRpc(cellPos); }
+                EvaluateBuildOrBreakServerRpc(cellPos);
             }
             else if (previewObject != null)
                 AudioManager.Instance?.PlayInvalidPlacement();
@@ -277,6 +276,13 @@ public class GridPlacement : NetworkBehaviour
             else
                 previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.5f);
         }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void EvaluateBuildOrBreakServerRpc(Vector3Int cellPos)
+    {
+        if (buildable.Type != Buildable.BuildType.Explosive) { PlaceBuildableServerRpc(cellPos); }
+        else { ExplodeAreaServerRpc(cellPos); }
     }
 
     [Rpc(SendTo.Server)]
