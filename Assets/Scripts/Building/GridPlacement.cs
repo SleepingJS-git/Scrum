@@ -120,7 +120,7 @@ public class GridPlacement : NetworkBehaviour
         {
             foreach (GameObject build in builtObjects)
             {
-                if(build.GetComponent<ExplosiveStructure>() != null) { build.GetComponent<Rigidbody>().isKinematic = true; }
+                if (build.GetComponent<ExplosiveStructure>() != null) { build.GetComponent<Rigidbody>().isKinematic = true; }
                 build.gameObject.SetActive(true);
                 build.GetComponent<BreakableStructureEntity>().ResetBreakable();
             }
@@ -129,7 +129,7 @@ public class GridPlacement : NetworkBehaviour
 
     [Rpc(SendTo.Server)]
     private void ResetCounterServerRpc()
-    {   
+    {
         ResetBreakablesRpc();
         //currentPlacements.Value = 0;
         currentWeight.Value = 0;
@@ -140,11 +140,11 @@ public class GridPlacement : NetworkBehaviour
     {
 
         //if (IsServer)
-            //DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
+        //DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
 
         if (!IsOwner) return;
 
-        if (GameManager.Instance != null) 
+        if (GameManager.Instance != null)
         {
             if (GameManager.GamePhase == GamePhase.Loading) return;
         }
@@ -188,7 +188,7 @@ public class GridPlacement : NetworkBehaviour
             if (canPlace.Value)
             {
                 if (buildable.Type != Buildable.BuildType.Explosive) { PlaceBuildableServerRpc(cellPos); }
-                else { }
+                else { ExplodeAreaServerRpc(cellPos); }
             }
             else if (previewObject != null)
                 AudioManager.Instance?.PlayInvalidPlacement();
@@ -242,18 +242,15 @@ public class GridPlacement : NetworkBehaviour
             // Set the preview object's position to the grid cell
             previewObject.transform.position = grid.CellToWorld(cellPos);
 
-            if (previewObject.Type == Buildable.BuildType.Explosive)
-            {
-                // Offset the object's position based on its rotation
-                previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * new Vector3(0.5f, 0.5f, 0.5f));
-            }
-            else
-            {
-                // Offset the object's position based on its rotation
-                previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
-            }
+            // Offset the object's position based on its rotation
+            previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
+
         }
-        if (buildable) canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value);
+        if (buildable)
+        {
+            if (buildable.Type != Buildable.BuildType.Explosive) { canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value); }
+            else { canPlace.Value = !BuildableDatabase.IsCellTaken(cellPos); }
+        }
         else canPlace.Value = isObjectVisible;
 
         // If any of the cells of the object are taken, change color to red
@@ -307,14 +304,18 @@ public class GridPlacement : NetworkBehaviour
             PlacementResultRpc(false);
             return;
         }
-
+        List<GameObject> buildablesToExplode = GetBuildableInBox(grid.GetCellCenterWorld(cellPos), buildable.Dimensions);
+        foreach (GameObject builtObject in buildablesToExplode)
+        {
+            Destroy(builtObject);
+        }
     }
 
     [Rpc(SendTo.ClientsAndHost)]
     private void BreakableToClientRpc(ulong networkObjID)
     {
         NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(networkObjID, out NetworkObject obj);
-        if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj.gameObject);}
+        if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj.gameObject); }
         //if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj); }
     }
 
@@ -419,7 +420,7 @@ public class GridPlacement : NetworkBehaviour
         // Why tho?
         // Don't place/preview while interacting with the build UI
         //if (barCheck.IsHoveringBuildableBar)
-             //return false;
+        //return false;
 
         return true;
     }
@@ -435,7 +436,7 @@ public class GridPlacement : NetworkBehaviour
     {
         string buildableName = "None";
         if (buildable) buildableName = $"{buildable.name} ({buildable.Id})";
-        debugInfo.Value =  $@"(Grid Placement)
+        debugInfo.Value = $@"(Grid Placement)
         Current Buildable: {buildableName}
         Current Weight: {currentWeight.Value} / {maxWeight}
         Preview Object: {previewObject}
@@ -504,6 +505,20 @@ public class GridPlacement : NetworkBehaviour
         else if (distToNegZ == lowestDist) { return Vector3Int.back; }
         else if (distToPosZ == lowestDist) { return Vector3Int.forward; }
         return Vector3Int.zero;
+    }
+    private List<GameObject> GetBuildableInBox(Vector3 center, Vector3 dimensions)
+    {
+        List<GameObject> buildablesInBox = new List<GameObject>();
+        Vector3 adjustedHalfExtents = new Vector3((dimensions.x / 2) - 0.1f, (dimensions.y / 2) - 0.1f, (dimensions.z / 2) - 0.1f);
+        Collider[] colliders = Physics.OverlapBox(center, adjustedHalfExtents);
+        foreach (Collider collider in colliders)
+        {
+            if (collider.gameObject.GetComponent<Buildable>() != null)
+            {
+                buildablesInBox.Add(collider.gameObject);
+            }
+        }
+        return buildablesInBox;
     }
     public void ClearBuildable()
     {

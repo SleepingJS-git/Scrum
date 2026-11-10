@@ -36,7 +36,10 @@ public class Buildable : NetworkBehaviour
         get
         {
             SetDimensions();
-            Debug.Log(dimensions);
+            if (type == BuildType.Explosive)
+            {
+                return new Vector3(0.5f, 0.5f, 0.5f);
+            }
             return new Vector3(dimensions[0] / 2f, dimensions[1] / 2f, dimensions[2] / 2f);
         }
     }
