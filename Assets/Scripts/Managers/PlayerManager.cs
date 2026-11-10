@@ -255,6 +255,7 @@ public class PlayerManager : NetworkBehaviour
 
     private void StartRespawn(ulong clientID)
     {
+        if (GameManager.Instance.SuddenDeath) return;
         Debug.Log("Respawn Routine has started for: " + clientID);
         StartCoroutine(RespawnRoutine(clientID));
     }

@@ -208,6 +208,8 @@ public class GameManager : NetworkBehaviour
 
                 foreach(WeaponDrop wpn in droppedWeapons)
                     wpn.NetworkObject.Despawn();
+
+                droppedWeapons.Clear();
                 break;
 
             case GamePhase.EndOfCombat:

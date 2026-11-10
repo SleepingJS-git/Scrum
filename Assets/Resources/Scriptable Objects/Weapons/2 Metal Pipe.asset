@@ -32,7 +32,7 @@ MonoBehaviour:
   attackRange: 3
   windupTime: 0.33
   hitBoxHeight: 1
-  hitBoxWidth: 1
+  hitBoxWidth: 1.25
   lungeAmount: 3
   damageType: 5
   impactParticles: {fileID: 8419526965441767673, guid: fadbdac4f97f5ee4e8c2ba0eafb373dc, type: 3}
