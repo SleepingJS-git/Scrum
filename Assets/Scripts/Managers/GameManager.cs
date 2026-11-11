@@ -17,6 +17,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private int numOfPlayers;
     [SerializeField] private TMP_Text roundWinnerText;
     [SerializeField] private CanvasGroup roundWinnerCanvasGroup;
+    [SerializeField] private GameObject suddenDeathObj;
     private int _loadedPlayers;
     private int _deadPlayers;
     private int _readyPlayers;
@@ -68,7 +69,11 @@ public class GameManager : NetworkBehaviour
         if (GamePhase == GamePhase.Building)
             perc = (float) newVal / maxBuildTime;
         else if (GamePhase == GamePhase.Combat)
+        {
             perc = (float) newVal / maxRoundTime;
+            if (newVal == 0)
+                suddenDeathObj.SetActive(true);
+        }
         else
             timerText.text = "";
 
@@ -167,6 +172,9 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log($"Players Ready: {_loadedPlayers} / {numOfPlayers}");
 
+        if (_readyPlayers == 1)
+            StartBuildTimer();
+
         if (_readyPlayers == numOfPlayers)
             ChangeGamePhaseServerRpc(GamePhase.Combat);
     }
@@ -206,7 +214,6 @@ public class GameManager : NetworkBehaviour
                 _resetPlayers = 0;
                 _deadPlayers = 0;
                 PlayerControllerRpc((int) gamePhase);
-                StartBuildTimer();
 
                 foreach(WeaponDrop wpn in droppedWeapons)
                     wpn.NetworkObject.Despawn();
@@ -293,6 +300,7 @@ public class GameManager : NetworkBehaviour
             PlayerManager.Instance.ChangePov(1);
             roundWinnerCanvasGroup.alpha = 0f;
             connectUI.ResetReadyButton();
+            suddenDeathObj.SetActive(false);
         }
         else if (gamePhase == GamePhase.Combat)
         {
