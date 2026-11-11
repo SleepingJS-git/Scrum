@@ -24668,6 +24668,10 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 3301507825
       objectReference: {fileID: 0}
+    - target: {fileID: 1664070115840767432, guid: 8d74f245d9474a745b423b88faee1d79, type: 3}
+      propertyPath: damage
+      value: 80
+      objectReference: {fileID: 0}
     - target: {fileID: 3741870273208858787, guid: 8d74f245d9474a745b423b88faee1d79, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.5
@@ -33779,6 +33783,12 @@ MonoBehaviour:
   - {fileID: 1638018075}
   playerPrefab: {fileID: 6448125735744906079, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
   builderPrefab: {fileID: 0}
+  Net_RespawnTime:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  _respawnTime: 6
 --- !u!1 &1512471861
 GameObject:
   m_ObjectHideFlags: 0
@@ -43137,6 +43147,7 @@ MonoBehaviour:
   placementVolume: 1
   invalidPlacementVolume: 1
   placementAudioSource: {fileID: 0}
+  buildableBreakSourcePrefab: {fileID: 0}
 --- !u!4 &1889978667
 Transform:
   m_ObjectHideFlags: 0
