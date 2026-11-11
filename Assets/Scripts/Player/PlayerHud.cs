@@ -6,12 +6,16 @@ using UnityEngine.UI;
 
 public class PlayerHud : MonoBehaviour
 {
+    public GameObject[] objectsToHide;
     public TextMeshProUGUI interactText;
     public TextMeshProUGUI ammo;
     public Image ammoBar;
     public TextMeshProUGUI weaponName;
     public TextMeshProUGUI health;
     public GameObject youAreDeadObj;
+    public TextMeshProUGUI deathText;
+    public TextMeshProUGUI respawnTimerText;
+    public Image respawnTimerBar;
     public GameObject ammoIsLow;
     
     [Header("Crosshair")]
@@ -63,9 +67,10 @@ public class PlayerHud : MonoBehaviour
     private Coroutine hitmarkerRoutine;
     private Coroutine deathMarkerRoutine;
     private Coroutine hitFeedbackRoutine;
+    private Coroutine respawnTimerRoutine;
     private List<CrosshairRect> crosshairRects;
     private Color invisibleColor;
-
+    private bool isEnabled;
     private void Awake()
     {
         crosshairRects = new List<CrosshairRect>()
@@ -87,13 +92,24 @@ public class PlayerHud : MonoBehaviour
 
     private void Update()
     {
+        if (!enabled) return;
+
         if (CurrentCrosshairShape == CrosshairShape.DefaultCrossHair)
         {
             foreach (CrosshairRect crosshairRect in crosshairRects)
                 crosshairRect.Update(_targetSpread, spreadLerpSpeed);
         }
-        
     }
+
+    public void Toggle(bool isOn)
+    {
+        enabled = isOn;
+        foreach(GameObject obj in objectsToHide)
+        {
+            obj.SetActive(isOn);
+        }
+    }
+
     public void SetCursorSize(float size)
     {
         _cursorSize = size;
@@ -322,6 +338,46 @@ public class PlayerHud : MonoBehaviour
             break;
         }
     }
+
+    public void ToggleRespawnTimer(bool isDead)
+    {
+        if (isDead)
+        {
+            if (respawnTimerRoutine != null) StopCoroutine(respawnTimerRoutine);
+            respawnTimerRoutine = StartCoroutine(TimerRoutine(PlayerManager.Instance.Net_RespawnTime.Value));
+        }
+        else
+        {
+            respawnTimerText.SetText("");
+            respawnTimerBar.fillAmount = 0;
+        }
+    }
+
+    private IEnumerator TimerRoutine(float maxTime)
+    {
+        float timeLeft = maxTime;
+        int oldInt = (int) maxTime;
+        
+        while (timeLeft > 0)
+        {
+            timeLeft -= Time.deltaTime;
+
+            if (oldInt != (int) timeLeft)
+                respawnTimerText.SetText(((int) timeLeft).ToString());
+
+            float perc = timeLeft / maxTime;
+
+            respawnTimerBar.fillAmount = perc;
+
+            yield return null;
+
+            oldInt = (int) timeLeft;
+        }
+
+        respawnTimerText.SetText("");
+        respawnTimerBar.fillAmount = 0;
+    }
+
 }
 
 public enum CrosshairColor

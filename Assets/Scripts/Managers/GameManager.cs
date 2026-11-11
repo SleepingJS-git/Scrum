@@ -69,13 +69,15 @@ public class GameManager : NetworkBehaviour
             perc = (float) newVal / maxBuildTime;
         else if (GamePhase == GamePhase.Combat)
             perc = (float) newVal / maxRoundTime;
-        else if (newVal == 0)
-            timerText.text = "";
         else
+            timerText.text = "";
+
+        if (newVal == 0)
             timerText.text = "";
 
         timerBar.fillAmount = perc;
     }
+
     /// <summary>
     /// Set player count, used in NetworkSpawner after spawning players in
     /// </summary>

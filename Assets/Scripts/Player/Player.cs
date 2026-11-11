@@ -43,7 +43,7 @@ public class Player : Entity
 
     private Coroutine regenRoutine;
     private float actualHealth;
-
+    public OnHitData LastOnHitData{ get; private set; }
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -126,6 +126,29 @@ public class Player : Entity
         RotateRigAimRpc(Look.XRot);
     }
 
+    private IEnumerator RegenRoutine()
+    {
+        yield return new WaitForSeconds(regenDelay - regenRate);
+
+        while (health.Value <= maxRegen)
+        {
+            yield return new WaitForSeconds(regenRate);
+
+            health.Value += regenAmount;
+        }
+
+        health.Value = maxRegen;
+    }
+
+    private void UpdateHealth()
+    {
+        if (health.Value == actualHealth) return;
+        actualHealth = health.Value;
+
+        Hud.UpdateHealth(health.Value, maxHealth);
+    }
+
+
     /// <summary>
     /// Play death sound
     /// </summary>
@@ -142,7 +165,10 @@ public class Player : Entity
     public void ToggleDeathHud(bool isDead)
     {
         if (!IsOwner) return;
+
         Hud.youAreDeadObj.SetActive(isDead);
+        Hud.ToggleRespawnTimer(isDead);
+
     }
 
     /// <summary>
@@ -173,27 +199,6 @@ public class Player : Entity
     }
 
 
-    private IEnumerator RegenRoutine()
-    {
-        yield return new WaitForSeconds(regenDelay - regenRate);
-
-        while (health.Value <= maxRegen)
-        {
-            yield return new WaitForSeconds(regenRate);
-
-            health.Value += regenAmount;
-        }
-
-        health.Value = maxRegen;
-    }
-
-    private void UpdateHealth()
-    {
-        if (health.Value == actualHealth) return;
-        actualHealth = health.Value;
-
-        Hud.UpdateHealth(health.Value, maxHealth);
-    }
 
     /// <summary>
     /// Temporary rpc that makes it so ragdolls get pushed when dying for all clients.
@@ -212,7 +217,6 @@ public class Player : Entity
         Body.onHitData.explosionForce = explosionForce;
         Body.onHitData.sourceHit = sourceHit;
         Body.onHitData.upwardsModifier = upwardsModifier;
-
 
         if (!IsOwner) return;
 

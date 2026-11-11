@@ -826,6 +826,12 @@ MonoBehaviour:
   - {fileID: 286475793}
   playerPrefab: {fileID: 6448125735744906079, guid: f61feb42c3b4e5344b6b4409cc087e3a, type: 3}
   builderPrefab: {fileID: 1513123767215250648, guid: 214932880ed5356449811c972f34cd5e, type: 3}
+  Net_RespawnTime:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  respawnTime: 6
 --- !u!1 &154427427
 GameObject:
   m_ObjectHideFlags: 0
@@ -4208,6 +4214,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1582464203193210204, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
+      propertyPath: m_FillAmount
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4833997908172416288, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -4293,8 +4303,7 @@ PrefabInstance:
       value: Player Hud Canvas
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 1877779756812378282, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d96b8ffe6d425f44289dfd2e1eaf0a5c, type: 3}
@@ -8525,6 +8534,7 @@ MonoBehaviour:
   maxRoundTime: 90
   timerBar: {fileID: 1381251819}
   timerText: {fileID: 1331520387}
+  droppedWeapons: []
 --- !u!114 &1638061364
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10626,6 +10636,7 @@ MonoBehaviour:
   placementVolume: 1
   invalidPlacementVolume: 1
   placementAudioSource: {fileID: 0}
+  buildableBreakSourcePrefab: {fileID: 0}
 --- !u!1 &2024742702
 GameObject:
   m_ObjectHideFlags: 0
