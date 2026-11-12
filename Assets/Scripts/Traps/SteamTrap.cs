@@ -13,13 +13,17 @@ public class SteamTrap : BreakableStructureEntity
 
     [SerializeField] private Collider damageCollider;
     [SerializeField] private ParticleSystem steamParticles;
+    
 
     private OnHitData hitData;
     private Coroutine toggleRoutine;
+    private Coroutine combatEnd;
+    private AudioSource audioPlayer;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        audioPlayer = GetComponent<AudioSource>();
         hitData = new()
         {
             attacker = this,
@@ -28,12 +32,6 @@ public class SteamTrap : BreakableStructureEntity
         };
 
         StartCoroutine(WaitForCombat());
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public override void ResetBreakable()
@@ -46,6 +44,7 @@ public class SteamTrap : BreakableStructureEntity
     protected override void FractureApart()
     {
         StopCoroutine(toggleRoutine);
+        StopCoroutine(combatEnd);
         steamParticles.Pause();
         steamParticles.Clear();
         damageCollider.enabled = false;
@@ -56,25 +55,40 @@ public class SteamTrap : BreakableStructureEntity
     {
         while (!GameManager.Instance || GameManager.GamePhase == GamePhase.Combat)
         {
+            //audioPlayer.clip = ;
+            //audioPlayer.Play();
             damageCollider.enabled = true;
             steamParticles.Play();
             yield return new WaitForSeconds(onTime);
 
+            //audioPlayer.clip = ;
+            //audioPlayer.Play();
             steamParticles.Clear();
             steamParticles.Pause();
             damageCollider.enabled = false;
             yield return new WaitForSeconds(offTime);
         }
-        StartCoroutine(WaitForCombat());
+        //StartCoroutine(WaitForCombat());
     }
 
     private IEnumerator WaitForCombat()
     {
         steamParticles.Play();
         damageCollider.enabled = false;
+        Debug.Log("SteamTrap waiting for combat.");
         yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
         toggleRoutine = StartCoroutine(OnOff());
+        combatEnd = StartCoroutine(WaitForCombatEnd());
     }
+
+    private IEnumerator WaitForCombatEnd()
+    {
+        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.EndOfCombat; });
+        damageCollider.enabled = false;
+        StartCoroutine(WaitForCombat());
+        Debug.Log("Combat has ended.");
+    }
+
     private void OnTriggerStay(Collider other)
     {
         if (!IsServer) return;

@@ -153,7 +153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   slowTimer: 4
-  speedMultiplier: 0.7
+  speedMultiplier: 0.4
 --- !u!114 &2092274868051475516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -173,6 +173,7 @@ MonoBehaviour:
   mesh: {fileID: 8415475790922782836}
   Id: 16
   weight: 5
+  originPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &7850199747022574477
 MonoBehaviour:
   m_ObjectHideFlags: 0
