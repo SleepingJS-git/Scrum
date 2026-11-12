@@ -44,6 +44,7 @@ public class GridPlacement : NetworkBehaviour
     private InputAction placeAction;
     private InputAction rotateLeftAction;
     private InputAction rotateRightAction;
+    private InputAction verticalPlace;
 
     // Dictionary representing which cells are occupied and what they are occupied with
 
@@ -55,6 +56,9 @@ public class GridPlacement : NetworkBehaviour
 
     // The default color of the placed object
     private List<Color> defaultColors = new List<Color>();
+
+    private bool placingVertical = false;
+    private Vector3Int lockedCellPos;
 
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
@@ -103,6 +107,7 @@ public class GridPlacement : NetworkBehaviour
         placeAction = playerInput.actions.FindAction("Place");
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
+        verticalPlace = playerInput.actions.FindAction("Vertical Place");
 
         buildable = null;
         // Update the info of the buildable object
@@ -177,11 +182,31 @@ public class GridPlacement : NetworkBehaviour
 
         if (barCheck.IsHoveringBuildableBar) return;
 
-        // Find the position of the mouse on the grid, show the preview there
-        Vector3 mousePos = MouseToWorldSpace();
-        Vector3Int cellPos = grid.WorldToCell(mousePos);
 
-        PreviewObjectServerRpc(mousePos, cellPos);
+        Vector3Int cellPos = new Vector3Int();
+
+        if (!placingVertical)
+        {
+            // Find the position of the mouse on the grid, show the preview there
+            Vector3 mousePos = MouseToWorldSpace();
+            cellPos = grid.WorldToCell(mousePos);
+
+            PreviewObjectServerRpc(mousePos, cellPos);
+        }
+        else
+        {
+            cellPos = lockedCellPos;
+            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+            cellPos.y = (int)(lockedCellPos.y + mouseDelta.y);
+            lockedCellPos = cellPos;
+        }
+
+        if (verticalPlace.WasPressedThisFrame())
+        {
+            placingVertical = !placingVertical;
+            if (placingVertical) lockedCellPos = cellPos;
+            else lockedCellPos = new Vector3Int();
+        }
 
         // If left-clicked, create the object at the location of the preview
         if (placeAction.WasPressedThisFrame())
