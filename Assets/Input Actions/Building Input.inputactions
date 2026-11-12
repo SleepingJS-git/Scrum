@@ -79,13 +79,22 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Vertical Place",
+                    "name": "Lock Placement",
                     "type": "Button",
                     "id": "8c98e5d4-aab2-47ce-9dc4-3571b0a1cc1c",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Build Adjust",
+                    "type": "Value",
+                    "id": "c4269b26-071a-4d0e-856f-78b7e78fdd79",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -283,9 +292,64 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Vertical Place",
+                    "action": "Lock Placement",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "2D Vector",
+                    "id": "65a9b69b-7da1-4601-9ec2-976a8f98ca1d",
+                    "path": "2DVector(mode=2)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Build Adjust",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "ee4553f3-039c-4805-9bae-b5eabd9fe807",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Build Adjust",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "bd4a04c6-8acb-4d06-9832-637700d4239a",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Build Adjust",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "8c8cba0e-579d-4844-ab87-d129041da470",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Build Adjust",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "368a18f6-11a2-483b-b709-d5cbcf829c14",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Build Adjust",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         }

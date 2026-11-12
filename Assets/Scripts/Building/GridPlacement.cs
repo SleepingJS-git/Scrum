@@ -44,7 +44,9 @@ public class GridPlacement : NetworkBehaviour
     private InputAction placeAction;
     private InputAction rotateLeftAction;
     private InputAction rotateRightAction;
-    private InputAction verticalPlace;
+    private InputAction lockPlace;
+
+    private InputAction adjustment;
 
     // Dictionary representing which cells are occupied and what they are occupied with
 
@@ -57,7 +59,7 @@ public class GridPlacement : NetworkBehaviour
     // The default color of the placed object
     private List<Color> defaultColors = new List<Color>();
 
-    private bool placingVertical = false;
+    private bool placementLocked = false;
     private Vector3Int lockedCellPos;
     private float verticalMouseMovement = 0;
 
@@ -108,7 +110,8 @@ public class GridPlacement : NetworkBehaviour
         placeAction = playerInput.actions.FindAction("Place");
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
-        verticalPlace = playerInput.actions.FindAction("Vertical Place");
+        lockPlace = playerInput.actions.FindAction("Lock Placement");
+        adjustment = playerInput.actions.FindAction("Build Adjust");
 
         buildable = null;
         // Update the info of the buildable object
@@ -187,7 +190,7 @@ public class GridPlacement : NetworkBehaviour
         Vector3Int cellPos = new Vector3Int();
 
         Vector3 mousePos = MouseToWorldSpace();
-        if (!placingVertical)
+        if (!placementLocked)
         {
             // Find the position of the mouse on the grid, show the preview there
             cellPos = grid.WorldToCell(mousePos);
@@ -195,21 +198,17 @@ public class GridPlacement : NetworkBehaviour
         else
         {
             cellPos = lockedCellPos;
-            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
-            verticalMouseMovement += mouseDelta.y;
-            if (Mathf.Abs(verticalMouseMovement) >= 40)
-            {
-                cellPos.y += Mathf.RoundToInt(verticalMouseMovement/40);
-                verticalMouseMovement = 0;
-            }
+            Vector2 adjustmentVector = adjustment.ReadValue<Vector2>().normalized;
+            cellPos.x += Mathf.RoundToInt(adjustmentVector.x);
+            cellPos.z += Mathf.RoundToInt(adjustmentVector.y);
             lockedCellPos = cellPos;
         }
 
         PreviewObjectServerRpc(mousePos, cellPos);
-        if (verticalPlace.WasPressedThisFrame())
+        if (lockPlace.WasPressedThisFrame())
         {
-            placingVertical = !placingVertical;
-            if (placingVertical) lockedCellPos = cellPos;
+            placementLocked = !placementLocked;
+            if (placementLocked) lockedCellPos = cellPos;
             else lockedCellPos = new Vector3Int();
         }
 
@@ -261,7 +260,7 @@ public class GridPlacement : NetworkBehaviour
             previewObject.gameObject.GetComponent<Collider>().enabled = false;
 
             // If the cell is occupied
-            if (BuildableDatabase.IsCellTaken(cellPos) && !placingVertical)
+            if (BuildableDatabase.IsCellTaken(cellPos) && !placementLocked)
             {
                 if (BuildableDatabase.GetOccupiedID(cellPos) != spawnCellID)
                 {
@@ -313,7 +312,7 @@ public class GridPlacement : NetworkBehaviour
     {
         if (buildable.Type != Buildable.BuildType.Explosive) { PlaceBuildableServerRpc(cellPos); }
         else { ExplodeAreaServerRpc(cellPos); }
-        placingVertical = false;
+        placementLocked = false;
     }
 
     [Rpc(SendTo.Server)]
