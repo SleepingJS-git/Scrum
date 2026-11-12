@@ -64,7 +64,7 @@ public class GridPlacement : NetworkBehaviour
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
     //The maximum weight of all placed buildable objects
-    public float maxWeight = 15.0f;
+    public float currentMaxWeight = 15.0f;
     public NetworkVariable<int> currentPlacements = new NetworkVariable<int>(
         0,
         NetworkVariableReadPermission.Everyone,
@@ -96,6 +96,7 @@ public class GridPlacement : NetworkBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
+
         Debug.Log("GridPlacement.cs IsOwner?: " + IsOwner);
         builtObjects = new List<GameObject>();
         grid = GameObject.Find("Plane (Grid)").GetComponent<Grid>();
@@ -155,6 +156,10 @@ public class GridPlacement : NetworkBehaviour
         {
             if (GameManager.GamePhase == GamePhase.Loading) return;
         }
+        
+        //Really quite dumb; I wanted to have the max weight to change in GameManager so both GameManager and GridPlacement have their own maxWeight typa
+        //public field, it says "starting" max weight but it's gonna increase based on how many rounds have passed im sorry
+        currentMaxWeight = GameManager.Instance.startingMaxWeight;
 
         // Controls
 
@@ -320,7 +325,7 @@ public class GridPlacement : NetworkBehaviour
     private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (currentWeight.Value + buildable.weight > maxWeight)
+        if (currentWeight.Value + buildable.weight > currentMaxWeight)
         {
             PlacementResultRpc(false);
             return;
@@ -339,7 +344,7 @@ public class GridPlacement : NetworkBehaviour
     private void ExplodeAreaServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (currentWeight.Value >= maxWeight)
+        if (currentWeight.Value >= currentMaxWeight)
         {
             PlacementResultRpc(false);
             return;
@@ -456,7 +461,7 @@ public class GridPlacement : NetworkBehaviour
             return false;
 
         // Player has used all their placement weight
-        if (currentWeight.Value >= maxWeight)
+        if (currentWeight.Value >= currentMaxWeight)
             return false;
 
         // Why tho?
@@ -480,7 +485,7 @@ public class GridPlacement : NetworkBehaviour
         if (buildable) buildableName = $"{buildable.name} ({buildable.Id})";
         debugInfo.Value = $@"(Grid Placement)
         Current Buildable: {buildableName}
-        Current Weight: {currentWeight.Value} / {maxWeight}
+        Current Weight: {currentWeight.Value} / {currentMaxWeight}
         Preview Object: {previewObject}
         CanPreviewBuildable: {CanPreviewBuildable()}
         ";
