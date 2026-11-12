@@ -61,7 +61,7 @@ public class GridPlacement : NetworkBehaviour
 
     private bool placementLocked = false;
     private Vector3Int lockedCellPos;
-    private float verticalMouseMovement = 0;
+    private float adjustCooldown = 0.5f;
 
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
@@ -159,6 +159,7 @@ public class GridPlacement : NetworkBehaviour
             if (GameManager.GamePhase == GamePhase.Loading) return;
         }
 
+        adjustCooldown -= Time.deltaTime;
         // Controls
 
         // If the right rotate action is pressed, increase the rotation angle
@@ -199,9 +200,13 @@ public class GridPlacement : NetworkBehaviour
         {
             cellPos = lockedCellPos;
             Vector2 adjustmentVector = adjustment.ReadValue<Vector2>().normalized;
-            cellPos.x += Mathf.RoundToInt(adjustmentVector.x);
-            cellPos.z += Mathf.RoundToInt(adjustmentVector.y);
-            lockedCellPos = cellPos;
+            if (adjustCooldown <= 0 && adjustmentVector != Vector2.zero)
+            {
+                cellPos.x += Mathf.RoundToInt(adjustmentVector.x);
+                cellPos.z += Mathf.RoundToInt(adjustmentVector.y);
+                lockedCellPos = cellPos;
+                adjustCooldown = 0.1f;
+            }
         }
 
         PreviewObjectServerRpc(mousePos, cellPos);
