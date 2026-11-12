@@ -342,7 +342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4153791995
+  GlobalObjectIdHash: 3179598219
   InScenePlacedSourceGlobalObjectIdHash: 226443834
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
@@ -419,7 +419,19 @@ MonoBehaviour:
   maxHealth: 100
   onDeathEffects:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4845256974325665716}
+        m_TargetAssemblyTypeName: PlayerDummy, Assembly-CSharp
+        m_MethodName: PlayDeathSound
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onDeathLocalClient:
     m_PersistentCalls:
       m_Calls: []
@@ -450,8 +462,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 8696714475277768068}
   rightHand: {fileID: 1272772956864726936}
+  rightArmRig: {fileID: 0}
   bodyRenderer: {fileID: 4637697903836796529}
+  renderersToColor:
+  - {fileID: 4637697903836796529}
+  playerColors:
+  - {fileID: 2100000, guid: 4bbbf1614abd20e459f780b215fdde77, type: 2}
+  - {fileID: 2100000, guid: 4e954a2f9f6f9f74a83154ac73833da2, type: 2}
+  - {fileID: 2100000, guid: 2a93c006c97d0d1479f9a196607681d1, type: 2}
+  - {fileID: 2100000, guid: 755f0a42fb425434399ae9dd7fd4a76d, type: 2}
+  fpsPlayerModel: {fileID: 0}
+  fpsLegModel: {fileID: 0}
+  weaponAnimator: {fileID: 0}
   accessoryFolder: {fileID: 3705636566622693049}
+  blendDampTime: 0
 --- !u!82 &2321487064983705405
 AudioSource:
   m_ObjectHideFlags: 0

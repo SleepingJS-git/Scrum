@@ -126,11 +126,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  type: 0
   occupiedCells:
   - {x: 0, y: 0, z: 0}
   - {x: 1, y: 0, z: 0}
   mesh: {fileID: 2723657764474913556}
-  Id: 1
+  Id: 7
+  weight: 1
 --- !u!33 &9217527453795755373
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -162,7 +164,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: eaf04e53092518346960500aeb4d60bf, type: 2}
+  - {fileID: 2100000, guid: c57ca5357818ec04c8e7848d263caf0a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

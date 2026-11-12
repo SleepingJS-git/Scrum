@@ -72,6 +72,7 @@ public class PlayerStats : NetworkBehaviour
         PlayerName.Value = playerName;
     }
 
+
     public void AddKill()
     {
         if (!IsServer) return;

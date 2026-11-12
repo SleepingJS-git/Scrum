@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -94,6 +95,20 @@ public class WeaponDrop : NetworkBehaviour
 
         Vector3 finalTorque = (Helper.RandomTorque(-3f, 3f) * .25f) + (rot * Vector3.forward);
         rb.AddTorque(finalTorque, ForceMode.Impulse);
+
+        if (GameManager.Instance)
+        {
+            if (_currentBullets == 0)
+                StartCoroutine(DestroySelf());
+            else
+                GameManager.Instance.droppedWeapons.Add(this);
+        }
+    }
+
+    private IEnumerator DestroySelf()
+    {
+        yield return new WaitForSeconds(3f);
+        NetworkObject.Despawn();
     }
 
     /// <summary>
@@ -122,7 +137,8 @@ public class WeaponDrop : NetworkBehaviour
 
             // Update the player's weaponhandler with the networkvalues.
             weapon.Init(WeaponDatabase.GetWeapon(weaponID.Value), currentBullets.Value, reserveBullets.Value);
-            
+            weapon.PlayPickupSoundClientRpc(weaponID.Value);
+
             // Send a client rpc with id of the client who sent the request.
             EquipClientRpc(clientId);
 

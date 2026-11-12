@@ -6,7 +6,7 @@ public class ConnectUI : MonoBehaviour
 {
     [SerializeField] private Button hostButton;
     [SerializeField] private Button clientButton;
-    [SerializeField] private Button readyButton;
+    public Button readyButton;
     void Start()
     {
         // hostButton.onClick.AddListener(HostButtonOnClick);

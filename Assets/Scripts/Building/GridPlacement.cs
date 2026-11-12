@@ -15,6 +15,8 @@ public class GridPlacement : NetworkBehaviour
     // Track the preview for the placeable object
     Buildable previewObject;
     Renderer previewRenderer;
+    [SerializeField]
+    private Material previewMaterial;
 
     [Tooltip("The grid being placed on.")]
     [SerializeField]
@@ -42,6 +44,7 @@ public class GridPlacement : NetworkBehaviour
     private InputAction placeAction;
     private InputAction rotateLeftAction;
     private InputAction rotateRightAction;
+    private InputAction verticalPlace;
 
     // Dictionary representing which cells are occupied and what they are occupied with
 
@@ -49,17 +52,29 @@ public class GridPlacement : NetworkBehaviour
 
     // The offset of the object being placed
     private Vector3 offset;
+    private Vector3Int currentOriginPosition;
 
     // The default color of the placed object
     private List<Color> defaultColors = new List<Color>();
 
+    private bool placingVertical = false;
+    private Vector3Int lockedCellPos;
+    private float verticalMouseMovement = 0;
+
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
+    //The maximum weight of all placed buildable objects
+    public float maxWeight = 15.0f;
     public NetworkVariable<int> currentPlacements = new NetworkVariable<int>(
         0,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
+    public NetworkVariable<float> currentWeight = new NetworkVariable<float>(
+    0,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server
+);
     public NetworkVariable<bool> canPlace = new NetworkVariable<bool>(
         false,
         NetworkVariableReadPermission.Everyone,
@@ -86,13 +101,14 @@ public class GridPlacement : NetworkBehaviour
         grid = GameObject.Find("Plane (Grid)").GetComponent<Grid>();
         playerInput = GetComponent<PlayerInput>();
         playerInput.enabled = IsOwner;
-        buildCam.enabled = IsOwner;
+        buildCam.gameObject.SetActive(IsOwner);
         if (!IsOwner) return;
         PlayerManager.BuildingUI.SetGridPlacement(this);
         // Initialize all inputs
         placeAction = playerInput.actions.FindAction("Place");
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
+        verticalPlace = playerInput.actions.FindAction("Vertical Place");
 
         buildable = null;
         // Update the info of the buildable object
@@ -104,25 +120,26 @@ public class GridPlacement : NetworkBehaviour
         ResetCounterServerRpc();
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    private void ResetBreakablesRpc()
-    {
-        if (builtObjects.Count != 0)
-        {
-            foreach (GameObject build in builtObjects)
-            {
-                if(build.GetComponent<ExplosiveStructure>() != null) { build.GetComponent<Rigidbody>().isKinematic = true; }
-                build.gameObject.SetActive(true);
-                build.GetComponent<BreakableStructureEntity>().ResetBreakable();
-            }
-        }
-    }
+    //[Rpc(SendTo.ClientsAndHost)]
+    //private void ResetBreakablesRpc()
+    //{
+    //    if (builtObjects.Count != 0)
+    //    {
+    //        foreach (GameObject build in builtObjects)
+    //        {
+    //            if(build.GetComponent<ExplosiveStructure>() != null) { build.GetComponent<Rigidbody>().isKinematic = true; }
+    //            build.gameObject.SetActive(true);
+    //            build.GetComponent<BreakableStructureEntity>().ResetBreakable();
+    //        }
+    //    }
+    //}
 
     [Rpc(SendTo.Server)]
     private void ResetCounterServerRpc()
     {   
-        ResetBreakablesRpc();
-        currentPlacements.Value = 0;
+        //ResetBreakablesRpc();
+        //currentPlacements.Value = 0;
+        currentWeight.Value = 0;
     }
 
     // Update is called once per frame
@@ -130,11 +147,11 @@ public class GridPlacement : NetworkBehaviour
     {
 
         //if (IsServer)
-            //DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
+        //DebugViewOccupiedCellClientRpc(BuildableDatabase.OccupiedCells.Keys.ToArray());
 
         if (!IsOwner) return;
 
-        if (GameManager.Instance != null) 
+        if (GameManager.Instance != null)
         {
             if (GameManager.GamePhase == GamePhase.Loading) return;
         }
@@ -166,16 +183,45 @@ public class GridPlacement : NetworkBehaviour
 
         if (barCheck.IsHoveringBuildableBar) return;
 
-        // Find the position of the mouse on the grid, show the preview there
+
+        Vector3Int cellPos = new Vector3Int();
+
         Vector3 mousePos = MouseToWorldSpace();
-        Vector3Int cellPos = grid.WorldToCell(mousePos);
+        if (!placingVertical)
+        {
+            // Find the position of the mouse on the grid, show the preview there
+            cellPos = grid.WorldToCell(mousePos);
+        }
+        else
+        {
+            cellPos = lockedCellPos;
+            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+            verticalMouseMovement += mouseDelta.y;
+            if (Mathf.Abs(verticalMouseMovement) >= 40)
+            {
+                cellPos.y += Mathf.RoundToInt(verticalMouseMovement/40);
+                verticalMouseMovement = 0;
+            }
+            lockedCellPos = cellPos;
+        }
 
         PreviewObjectServerRpc(mousePos, cellPos);
+        if (verticalPlace.WasPressedThisFrame())
+        {
+            placingVertical = !placingVertical;
+            if (placingVertical) lockedCellPos = cellPos;
+            else lockedCellPos = new Vector3Int();
+        }
 
         // If left-clicked, create the object at the location of the preview
-        if (placeAction.WasPressedThisFrame() && canPlace.Value)
+        if (placeAction.WasPressedThisFrame())
         {
-            PlaceBuildableServerRpc(cellPos);
+            if (canPlace.Value)
+            {
+                EvaluateBuildOrBreakServerRpc(cellPos);
+            }
+            else if (previewObject != null)
+                AudioManager.Instance?.PlayInvalidPlacement();
         }
     }
 
@@ -215,7 +261,7 @@ public class GridPlacement : NetworkBehaviour
             previewObject.gameObject.GetComponent<Collider>().enabled = false;
 
             // If the cell is occupied
-            if (BuildableDatabase.IsCellTaken(cellPos))
+            if (BuildableDatabase.IsCellTaken(cellPos) && !placingVertical)
             {
                 if (BuildableDatabase.GetOccupiedID(cellPos) != spawnCellID)
                 {
@@ -225,11 +271,17 @@ public class GridPlacement : NetworkBehaviour
 
             // Set the preview object's position to the grid cell
             previewObject.transform.position = grid.CellToWorld(cellPos);
+            currentOriginPosition = cellPos;
 
             // Offset the object's position based on its rotation
             previewObject.transform.position += (Quaternion.Euler(0, rotation.Value, 0) * (offset - new Vector3(0.5f, 0.5f, 0.5f))) + new Vector3(0.5f, 0.5f, 0.5f);
+
         }
-        if (buildable) canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value);
+        if (buildable)
+        {
+            if (buildable.Type != Buildable.BuildType.Explosive) { canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value); }
+            else { canPlace.Value = !BuildableDatabase.IsCellTaken(cellPos); }
+        }
         else canPlace.Value = isObjectVisible;
 
         // If any of the cells of the object are taken, change color to red
@@ -250,30 +302,62 @@ public class GridPlacement : NetworkBehaviour
         for (int i = 0; i < previewRenderer.materials.Length; i++)
         {
             if (!canPlace.Value)
-                previewRenderer.materials[i].color = new Color(2f, defaultColors[i].g, defaultColors[i].b, 0.1f);
+                previewRenderer.materials[i].color = new Color(2f, defaultColors[i].g, defaultColors[i].b, 0.5f);
             else
-                previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.1f);
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, 2f, defaultColors[i].b, 0.5f);
         }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void EvaluateBuildOrBreakServerRpc(Vector3Int cellPos)
+    {
+        if (buildable.Type != Buildable.BuildType.Explosive) { PlaceBuildableServerRpc(cellPos); }
+        else { ExplodeAreaServerRpc(cellPos); }
+        placingVertical = false;
     }
 
     [Rpc(SendTo.Server)]
     private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (currentPlacements.Value >= maxPlacements) return;
+        if (currentWeight.Value + buildable.weight > maxWeight)
+        {
+            PlacementResultRpc(false);
+            return;
+        }
         // Send Server Request to create object
         Buildable obj = Instantiate(buildable, previewObject.transform.position, Quaternion.Euler(0, rotation.Value, 0));
         obj.NetworkObject.Spawn();
+        obj.originPosition = currentOriginPosition;
         BuildableDatabase.SetCellsToOccupied(buildable, cellPos, rotation.Value);
-        currentPlacements.Value++;
+        PlacementResultRpc(true);
+        currentWeight.Value += buildable.weight;
         BreakableToClientRpc(obj.NetworkObjectId);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ExplodeAreaServerRpc(Vector3Int cellPos)
+    {
+        if (!buildable) return;
+        if (currentWeight.Value >= maxWeight)
+        {
+            PlacementResultRpc(false);
+            return;
+        }
+        List<GameObject> buildablesToExplode = GetBuildableInBox(grid.GetCellCenterWorld(cellPos), buildable.Dimensions);
+        foreach (GameObject builtObject in buildablesToExplode)
+        {
+            BuildableDatabase.SetCellsToClear(builtObject);
+            Destroy(builtObject);
+        }
+        currentWeight.Value += buildable.weight;
     }
 
     [Rpc(SendTo.ClientsAndHost)]
     private void BreakableToClientRpc(ulong networkObjID)
     {
         NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(networkObjID, out NetworkObject obj);
-        if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj.gameObject);}
+        if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj.gameObject); }
         //if (obj.gameObject.GetComponent<BreakableStructureEntity>() != null) { builtObjects.Add(obj); }
     }
 
@@ -319,8 +403,14 @@ public class GridPlacement : NetworkBehaviour
         // Create the preview object and make it transparent
         previewObject = Instantiate(buildable);
         previewObject.NetworkObject.Spawn();
+        previewRenderer = previewObject.ObjectRenderer;
+        Material[] modifiedMaterials = previewRenderer.materials;
+        for (int i = 0; i < modifiedMaterials.Length; i++)
+        {
+            modifiedMaterials[i] = previewMaterial;
+        }
+        previewRenderer.materials = modifiedMaterials;
         UpdateOffset();
-        Debug.Log(offset);
         PreviewClientRpc(previewObject.NetworkObjectId);
     }
 
@@ -338,7 +428,7 @@ public class GridPlacement : NetworkBehaviour
             for (int i = 0; i < previewRenderer.materials.Length; i++)
             {
                 defaultColors.Add(previewRenderer.materials[i].color);
-                previewRenderer.materials[i].color = new Color(defaultColors[i].r, defaultColors[i].g, defaultColors[i].b, 0.1f);
+                previewRenderer.materials[i].color = new Color(defaultColors[i].r, defaultColors[i].g, defaultColors[i].b, 0.5f);
                 defaultColors[i] = previewRenderer.materials[i].color;
             }
         }
@@ -365,14 +455,14 @@ public class GridPlacement : NetworkBehaviour
         if (buildable == null)
             return false;
 
-        // Player has used all their placements
-        if (currentPlacements.Value >= maxPlacements)
+        // Player has used all their placement weight
+        if (currentWeight.Value >= maxWeight)
             return false;
 
         // Why tho?
         // Don't place/preview while interacting with the build UI
         //if (barCheck.IsHoveringBuildableBar)
-             //return false;
+        //return false;
 
         return true;
     }
@@ -388,9 +478,9 @@ public class GridPlacement : NetworkBehaviour
     {
         string buildableName = "None";
         if (buildable) buildableName = $"{buildable.name} ({buildable.Id})";
-        debugInfo.Value =  $@"(Grid Placement)
+        debugInfo.Value = $@"(Grid Placement)
         Current Buildable: {buildableName}
-        Current Placements: {currentPlacements.Value} / {maxPlacements}
+        Current Weight: {currentWeight.Value} / {maxWeight}
         Preview Object: {previewObject}
         CanPreviewBuildable: {CanPreviewBuildable()}
         ";
@@ -458,6 +548,20 @@ public class GridPlacement : NetworkBehaviour
         else if (distToPosZ == lowestDist) { return Vector3Int.forward; }
         return Vector3Int.zero;
     }
+    private List<GameObject> GetBuildableInBox(Vector3 center, Vector3 dimensions)
+    {
+        List<GameObject> buildablesInBox = new List<GameObject>();
+        Vector3 adjustedHalfExtents = new Vector3((dimensions.x / 2) - 0.1f, (dimensions.y / 2) - 0.1f, (dimensions.z / 2) - 0.1f);
+        Collider[] colliders = Physics.OverlapBox(center, adjustedHalfExtents);
+        foreach (Collider collider in colliders)
+        {
+            if (collider.gameObject.GetComponent<Buildable>() != null)
+            {
+                buildablesInBox.Add(collider.gameObject);
+            }
+        }
+        return buildablesInBox;
+    }
     public void ClearBuildable()
     {
         if (!IsSpawned || !IsOwner) return;
@@ -485,6 +589,16 @@ public class GridPlacement : NetworkBehaviour
 
         previewObject = null;
         previewRenderer = null;
+    }
+
+    //Used for playing placement sounds
+    [Rpc(SendTo.Owner)]
+    private void PlacementResultRpc(bool placed)
+    {
+        if (placed)
+            AudioManager.Instance?.PlayPlacement();
+        else
+            AudioManager.Instance?.PlayInvalidPlacement();
     }
 }
 

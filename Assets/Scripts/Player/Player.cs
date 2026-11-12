@@ -68,7 +68,7 @@ public class Player : Entity
         // Check if the computer running this script is the client.
         // If it is then IsOwner = true.
         Input.Init(IsOwner);
-        Body.Init(IsOwner);
+        Body.Init(IsOwner, OwnerClientId);
         Move.Init(IsOwner);
         Look.Init(IsOwner);
         if (IsOwner)
@@ -77,6 +77,10 @@ public class Player : Entity
             deathCamera.Init();
 
             Interaction.Init(Look.cam.transform, Hud);
+
+            Combat.onWallKick += () => {
+                Move.WallKick();
+            };
         }
 
         Combat.Init(IsOwner, Hud);
@@ -303,6 +307,20 @@ public class Player : Entity
         Debug.Log("OwnerID: " + OwnerClientId);
         if (!IsOwner) return; // just in case
         Move.AddForce(dir, force, (ForceMode) forceMode);
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void ApplyContinuousForceRpc(Vector3 dir, float force, RpcParams rpcParams = default)
+    {
+        if (!IsOwner) return; // just in case
+        Move.ApplyContinuousForcerpc(dir * force);
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void ApplySpeedMultiplierRpc(float speedMultiplier, RpcParams rpcParams = default)
+    {
+        if (!IsOwner) return;
+        Move.ApplySpeedMultiplier(speedMultiplier);
     }
 }
 

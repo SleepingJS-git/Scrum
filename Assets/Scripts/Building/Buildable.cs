@@ -5,6 +5,15 @@ using UnityEngine;
 
 public class Buildable : NetworkBehaviour
 {
+    public enum BuildType
+    {
+        Basic,
+        Trap,
+        Explosive
+    }
+    [SerializeField]
+    private BuildType type = BuildType.Basic;
+
     [SerializeField]
     private Vector3Int[] occupiedCells;
 
@@ -13,6 +22,7 @@ public class Buildable : NetworkBehaviour
 
     private Vector3Int dimensions;
     public ulong Id;
+    public float weight = 1f;
     public Vector3Int[] OccupiedCells
     {
         get { return occupiedCells; }
@@ -26,7 +36,10 @@ public class Buildable : NetworkBehaviour
         get
         {
             SetDimensions();
-            Debug.Log(dimensions);
+            if (type == BuildType.Explosive)
+            {
+                return new Vector3(0.5f, 0.5f, 0.5f);
+            }
             return new Vector3(dimensions[0] / 2f, dimensions[1] / 2f, dimensions[2] / 2f);
         }
     }
@@ -39,11 +52,18 @@ public class Buildable : NetworkBehaviour
         // get { return mesh.GetComponent<Renderer>(); }
         get { return mesh; } // Just do this, because u can reference the Mesh in the inspector.
     }
+
+    public BuildType Type
+    {
+        get { return type; }
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
         SetDimensions();
     }
+
+    public Vector3Int originPosition;
 
     // Update is called once per frame
     void Update()

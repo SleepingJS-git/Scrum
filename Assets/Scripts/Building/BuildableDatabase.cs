@@ -82,6 +82,14 @@ public class BuildableDatabase : MonoBehaviour
         }
     }
 
+    public static void ClearCell(Vector3Int position)
+    {
+        if (IsCellTaken(position))
+        {
+            OccupiedCells.Remove(position);
+        }
+    }
+
     /// <summary>
     /// Sets all cells of the object being placed to occupid
     /// </summary>
@@ -95,11 +103,23 @@ public class BuildableDatabase : MonoBehaviour
         {
             //Debug.Log(pos);
         }
-        Debug.Log("New Incoming Cells:");
         for (int i = 0; i < buildable.OccupiedCells.Length; i++)
         {
-            //Debug.Log(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]));
+            Debug.Log("Occupying: " + (originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i])));
+            Debug.Log(rotation);
             OccupyCell(originPos + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]), buildable.Id);
+        }
+    }
+
+    public static void SetCellsToClear(GameObject builtObject)
+    {
+        Buildable buildable = builtObject.GetComponent<Buildable>();
+        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+        {
+            float rotation = builtObject.transform.localEulerAngles.y;
+            Debug.Log("Clearing: " + (buildable.originPosition + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i])));
+            Debug.Log(rotation);
+            ClearCell(buildable.originPosition + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i]));
         }
     }
     public static Buildable GetBuildable(ulong id)
