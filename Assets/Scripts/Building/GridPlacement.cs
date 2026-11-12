@@ -32,6 +32,9 @@ public class GridPlacement : NetworkBehaviour
     [SerializeField]
     LayerMask buildableLayerMask;
 
+    [SerializeField] private LayerMask boxCastLayerMask;
+
+
     // The current rotation of the object
     public NetworkVariable<float> rotation = new(
         0,
@@ -604,6 +607,19 @@ public class GridPlacement : NetworkBehaviour
         else
             AudioManager.Instance?.PlayInvalidPlacement();
     }
+    //private bool IsAnyCellAttachedToSomething(Vector3Int originPosition, Buildable buildable, float rotation)
+    //{
+    //    for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+    //    {
+
+    //    }
+    //}
+
+    //private bool IsCellAttachedToSomething(Vector3Int position)
+    //{
+    //    RaycastHit hit;
+    //    Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.down, out hit, Quaternion.identity, 0.5f, boxCastLayerMask);
+    //}
 }
 
 /*
