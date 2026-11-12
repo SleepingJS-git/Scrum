@@ -58,6 +58,7 @@ MonoBehaviour:
   - {fileID: 109157664505137737, guid: 19b1cc69ae46f274eb8b3d3081c2ef46, type: 3}
   - {fileID: 7995557805340929873, guid: f9ce619844daf5649b6a48cff836cdc7, type: 3}
   - {fileID: 2092274868051475516, guid: f44c2f78bde44c54da23c0a8178ad65d, type: 3}
+  - {fileID: 1026980750256354395, guid: 60de82dd1ffd2414e90a2e1070ce2610, type: 3}
   spawnPoints: []
   grid: {fileID: 0}
   minBuildBound: {x: 0, y: 0, z: 0}
