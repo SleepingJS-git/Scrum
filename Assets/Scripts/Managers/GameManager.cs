@@ -126,7 +126,7 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.SpecifiedInParams)]
     private void SetSDRewardRpc(int numOfPlayers, RpcParams rpcParams = default)
     {
-        suddenDeathReward.SetText("Reward is +" + numOfPlayers + " points.");
+        suddenDeathReward.SetText("Bonus +" + numOfPlayers + " points");
     }
 
     /// <summary>

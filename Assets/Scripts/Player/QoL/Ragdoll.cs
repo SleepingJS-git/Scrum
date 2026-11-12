@@ -19,9 +19,10 @@ public class Ragdoll : MonoBehaviour
     {
         foreach(Rigidbody rb in rigidbodies)
             rb.isKinematic = true;
-        yield return new WaitForEndOfFrame();
         CopyBoneTransforms(source, rootTransform);
         Physics.SyncTransforms();
+        yield return new WaitForEndOfFrame();
+
         foreach (Rigidbody rb in rigidbodies)
         {
             rb.isKinematic = false;

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -22,6 +23,7 @@ public class PlayerBody : MonoBehaviour
     private Material playerMaterial;
     private bool isOwner;
     private DeathCamera deathCam;
+    private List<Ragdoll> ragdolls = new List<Ragdoll>();
     public void Init(bool IsOwner, ulong ownerClientId)
     {
         ShowBodyRenderer(!IsOwner);
@@ -70,8 +72,19 @@ public class PlayerBody : MonoBehaviour
         Ragdoll ragdoll = Instantiate(ragdollPrefab, transform.position, transform.rotation);
         ragdoll.Create(hipTransform, playerMaterial, onHitData);
 
+        ragdolls.Add(ragdoll);
+
         if (isOwner)
             deathCam.SetTarget(ragdoll.spineTransform);
+    }
+    
+    public void ClearRagdolls()
+    {
+        for (int i = ragdolls.Count - 1; i >= 0; i--)
+        {
+            Destroy(ragdolls[i]);
+            ragdolls.RemoveAt(i);
+        }
     }
 
     public void SetPlayerMaterial(Material newMaterial)
