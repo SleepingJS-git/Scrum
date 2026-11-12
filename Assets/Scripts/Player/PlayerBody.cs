@@ -11,12 +11,14 @@ public class PlayerBody : MonoBehaviour
     public Renderer bodyRenderer;
     public Renderer[] renderersToColor;
     [Tooltip("First in list is order -> RBYG")] public Material[] playerColors;
+    public Ragdoll ragdollPrefab;
     public Animator fpsPlayerModel;
     public Animator fpsLegModel;
     public Animator weaponAnimator;
     public GameObject accessoryFolder;
     public OnHitData onHitData;
     [SerializeField] private float blendDampTime;
+    private Material playerMaterial;
     public void Init(bool IsOwner, ulong ownerClientId)
     {
         ShowBodyRenderer(!IsOwner);
@@ -31,31 +33,35 @@ public class PlayerBody : MonoBehaviour
     public void Ragdoll()
     {
         // Turn on the renderer so that the instantiated body has its renderer on
-        ShowBodyRenderer(true);
+        // ShowBodyRenderer(true);
 
-        animator.enabled = false;
+        // animator.enabled = false;
 
         // Turn off the renderer to hide the dead player's actual renderer
         // bodyRenderer.gameObject.SetActive(false);
-        Debug.Log("OnHitData Force: " + onHitData.explosionForce);
-        Debug.Log("OnHitData Upwards Modifier: " + onHitData.upwardsModifier);
-        foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
-        {
-            rb.useGravity = true;
-            rb.isKinematic = false;
-            rb.linearVelocity = Vector3.zero;
 
-            rb.AddExplosionForce(
-                onHitData.explosionForce * 10f, 
-                onHitData.sourceHit, 2f, onHitData.upwardsModifier,
-                ForceMode.Impulse);
-        }
+        // foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
+        // {
+        //     rb.useGravity = true;
+        //     rb.isKinematic = false;
+        //     rb.linearVelocity = Vector3.zero;
+
+        //     rb.AddExplosionForce(
+        //         onHitData.explosionForce * 10f, 
+        //         onHitData.sourceHit, 2f, onHitData.upwardsModifier,
+        //         ForceMode.Impulse);
+        // }
+
+        Ragdoll ragdoll = Instantiate(ragdollPrefab, transform.position, transform.rotation);
+        ragdoll.Create(transform, playerMaterial, onHitData);
     }
 
     public void SetPlayerMaterial(Material newMaterial)
     {
         foreach(Renderer r in renderersToColor)
             r.material = newMaterial;
+
+        playerMaterial = newMaterial;
     }
 
     public void ShowBodyRenderer(bool showRenderer)

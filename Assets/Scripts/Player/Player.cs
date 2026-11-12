@@ -43,7 +43,7 @@ public class Player : Entity
 
     private Coroutine regenRoutine;
     private float actualHealth;
-
+    public OnHitData LastOnHitData{ get; private set; }
     /// <summary>
     /// When the object is spawned on the network, intialize these scripts.
     /// 
@@ -126,53 +126,6 @@ public class Player : Entity
         RotateRigAimRpc(Look.XRot);
     }
 
-    /// <summary>
-    /// Play death sound
-    /// </summary>
-    /// <param name="soundIndex"></param>
-    public void PlayDeathSound()
-    {
-        // Instead of an Everyone Rpc, just add this method to OnDeathEffects in Inspector.
-        int soundIndex = AudioManager.Instance.GetRandomDeathSoundIndex();
-        AudioClip clip = AudioManager.Instance.GetDeathSound(soundIndex);
-        playerAudioSource.spatialBlend = IsOwner ? 0f : 1f;
-        playerAudioSource.PlayOneShot(clip);
-    }
-
-    public void ToggleDeathHud(bool isDead)
-    {
-        if (!IsOwner) return;
-        Hud.youAreDeadObj.SetActive(isDead);
-    }
-
-    /// <summary>
-    /// [Called by Server] (This method is still being ran on the server)
-    /// When the entity is hit, subtract health, then check if it is dead.
-    /// </summary>
-    /// <param name="damage"></param>
-    public override void OnHit(OnHitData onHitData)
-    {
-        OnHitClientRpc(
-            onHitData.damage, 
-            onHitData.sourceHit, 
-            onHitData.explosionForce, 
-            onHitData.upwardsModifier,
-            onHitData.attacker.transform.position);
-        
-        
-        base.OnHit(onHitData);
-
-        if (isAlive.Value)
-        {
-            if (regenRoutine != null) StopCoroutine(regenRoutine);
-
-            regenRoutine = StartCoroutine(RegenRoutine());
-        }
-        else
-            if (regenRoutine != null) StopCoroutine(regenRoutine);
-    }
-
-
     private IEnumerator RegenRoutine()
     {
         yield return new WaitForSeconds(regenDelay - regenRate);
@@ -195,6 +148,60 @@ public class Player : Entity
         Hud.UpdateHealth(health.Value, maxHealth);
     }
 
+
+    /// <summary>
+    /// Play death sound
+    /// </summary>
+    /// <param name="soundIndex"></param>
+    public void PlayDeathSound()
+    {
+        // Instead of an Everyone Rpc, just add this method to OnDeathEffects in Inspector.
+        int soundIndex = AudioManager.Instance.GetRandomDeathSoundIndex();
+        AudioClip clip = AudioManager.Instance.GetDeathSound(soundIndex);
+        playerAudioSource.spatialBlend = IsOwner ? 0f : 1f;
+        playerAudioSource.PlayOneShot(clip);
+    }
+
+    public void ToggleDeathHud(bool isDead)
+    {
+        if (!IsOwner) return;
+
+        Hud.youAreDeadObj.SetActive(isDead);
+        Hud.ToggleRespawnTimer(isDead);
+
+    }
+
+    /// <summary>
+    /// [Called by Server] (This method is still being ran on the server)
+    /// When the entity is hit, subtract health, then check if it is dead.
+    /// </summary>
+    /// <param name="damage"></param>
+    public override void OnHit(OnHitData onHitData)
+    {
+        if (GameManager.Instance && GameManager.GamePhase == GamePhase.Building) return;
+
+        OnHitClientRpc(
+            onHitData.damage, 
+            onHitData.sourceHit, 
+            onHitData.explosionForce, 
+            onHitData.upwardsModifier,
+            onHitData.attacker.transform.position);
+        
+        
+        base.OnHit(onHitData);
+
+        if (isAlive.Value)
+        {
+            if (regenRoutine != null) StopCoroutine(regenRoutine);
+
+            regenRoutine = StartCoroutine(RegenRoutine());
+        }
+        else
+            if (regenRoutine != null) StopCoroutine(regenRoutine);
+    }
+
+
+
     /// <summary>
     /// Temporary rpc that makes it so ragdolls get pushed when dying for all clients.
     /// </summary>
@@ -212,7 +219,6 @@ public class Player : Entity
         Body.onHitData.explosionForce = explosionForce;
         Body.onHitData.sourceHit = sourceHit;
         Body.onHitData.upwardsModifier = upwardsModifier;
-
 
         if (!IsOwner) return;
 

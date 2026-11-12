@@ -14,6 +14,26 @@ public class OnHitData
     public float explosionForce;
     public float upwardsModifier;
     public DamageType damageType;
+
+    public void CopyData(
+        Entity attacker,
+        int damage,
+        Vector3 sourceHit,
+        Vector3 movingDir,
+        float radius,
+        float explosionForce,
+        float upwardsModifier,
+        DamageType damageType)
+    {
+        this.attacker = attacker;
+        this.damage = damage;
+        this.sourceHit = sourceHit;
+        this.movingDir = movingDir;
+        this.radius = radius;
+        this.explosionForce = explosionForce;
+        this.upwardsModifier = upwardsModifier;
+        this.damageType = damageType;
+    }
 }
 
 public enum DamageType

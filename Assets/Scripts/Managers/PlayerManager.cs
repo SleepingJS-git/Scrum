@@ -59,7 +59,8 @@ public class PlayerManager : NetworkBehaviour
     public static event Action<ulong> OnPlayerDeath;   // What happens when the player dies.
     public static event Action OnAllPlayersReset;
     private static int DefaultPov;
-
+    public NetworkVariable<float> Net_RespawnTime = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    [SerializeField] private float _respawnTime = 6f;
     void Awake()
     {
         Instance = this;
@@ -125,6 +126,8 @@ public class PlayerManager : NetworkBehaviour
                     Invoke(nameof(ResetPlayer), 1f);
                     Invoke(nameof(ToDefaultPov), 1f);
                 };
+
+                Net_RespawnTime.Value = 1f;
             break;
 
             case ConfigType.Solo_Building:
@@ -158,6 +161,8 @@ public class PlayerManager : NetworkBehaviour
                 OnPlayerDeath += GameManager.Instance.PlayerDeath;
                 OnPlayerDeath += StartRespawn;
 
+                Net_RespawnTime.Value = _respawnTime;
+
             break;
 
             case ConfigType.Single_Player_Full:
@@ -180,7 +185,7 @@ public class PlayerManager : NetworkBehaviour
                     Invoke(nameof(ServerResetsAllPlayers), 2f);
                     Invoke(nameof(ClientPlayerResetRpc), 2f);
                 };
-
+                
             break;
         }
     }
@@ -263,7 +268,7 @@ public class PlayerManager : NetworkBehaviour
     private IEnumerator RespawnRoutine(ulong clientID)
     {
         Debug.Log("Waiting for respawn: " + clientID);
-        yield return new WaitForSeconds(6f);
+        yield return new WaitForSeconds(Net_RespawnTime.Value);
         Debug.Log("Finished respawn timing: " + clientID);
         Debug.Log("Checking Gamephase gate: " + (GameManager.GamePhase == GamePhase.Combat));
         if (GameManager.GamePhase == GamePhase.Combat)
@@ -521,7 +526,7 @@ public class PlayerManager : NetworkBehaviour
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(false);
 
                 if (builderHud) builderHud.gameObject.SetActive(false);  
-                if (playerHud) playerHud.gameObject.SetActive(true);                 
+                if (playerHud) playerHud.Toggle(true);                 
                 TogglePlayerControls(true);
 
                 ToCombat?.Invoke();
@@ -538,7 +543,7 @@ public class PlayerManager : NetworkBehaviour
                 } 
                 if (LocalBuilder) LocalBuilder.gameObject.SetActive(true);
                 if (builderHud) builderHud.gameObject.SetActive(true);  
-                if (playerHud) playerHud.gameObject.SetActive(false);  
+                if (playerHud) playerHud.Toggle(false);   
 
                 TogglePlayerControls(false);
                 ToBuilding?.Invoke();
