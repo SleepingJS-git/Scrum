@@ -59,6 +59,7 @@ public class GridPlacement : NetworkBehaviour
 
     private bool placingVertical = false;
     private Vector3Int lockedCellPos;
+    private float verticalMouseMovement = 0;
 
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
@@ -185,22 +186,26 @@ public class GridPlacement : NetworkBehaviour
 
         Vector3Int cellPos = new Vector3Int();
 
+        Vector3 mousePos = MouseToWorldSpace();
         if (!placingVertical)
         {
             // Find the position of the mouse on the grid, show the preview there
-            Vector3 mousePos = MouseToWorldSpace();
             cellPos = grid.WorldToCell(mousePos);
-
-            PreviewObjectServerRpc(mousePos, cellPos);
         }
         else
         {
             cellPos = lockedCellPos;
             Vector2 mouseDelta = Mouse.current.delta.ReadValue();
-            cellPos.y = (int)(lockedCellPos.y + mouseDelta.y);
+            verticalMouseMovement += mouseDelta.y;
+            if (Mathf.Abs(verticalMouseMovement) >= 40)
+            {
+                cellPos.y += Mathf.RoundToInt(verticalMouseMovement/40);
+                verticalMouseMovement = 0;
+            }
             lockedCellPos = cellPos;
         }
 
+        PreviewObjectServerRpc(mousePos, cellPos);
         if (verticalPlace.WasPressedThisFrame())
         {
             placingVertical = !placingVertical;
@@ -256,7 +261,7 @@ public class GridPlacement : NetworkBehaviour
             previewObject.gameObject.GetComponent<Collider>().enabled = false;
 
             // If the cell is occupied
-            if (BuildableDatabase.IsCellTaken(cellPos))
+            if (BuildableDatabase.IsCellTaken(cellPos) && !placingVertical)
             {
                 if (BuildableDatabase.GetOccupiedID(cellPos) != spawnCellID)
                 {
@@ -308,6 +313,7 @@ public class GridPlacement : NetworkBehaviour
     {
         if (buildable.Type != Buildable.BuildType.Explosive) { PlaceBuildableServerRpc(cellPos); }
         else { ExplodeAreaServerRpc(cellPos); }
+        placingVertical = false;
     }
 
     [Rpc(SendTo.Server)]
