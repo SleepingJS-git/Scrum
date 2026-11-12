@@ -4,23 +4,27 @@ using UnityEngine;
 public class Ragdoll : MonoBehaviour
 {
     public Rigidbody[] rigidbodies;
-    public MeshRenderer bodyRenderer;
+    public Renderer bodyRenderer;
     public Transform rootTransform; // hips
+    public Transform spineTransform;
     public void Create(Transform source, Material material, OnHitData onHitData)
     {
         
-        CopyBoneTransforms(source, rootTransform);
         bodyRenderer.material = material;
 
-        StartCoroutine(RagdollRoutine(onHitData));
+        StartCoroutine(RagdollRoutine(source, onHitData));
     }
 
-    private IEnumerator RagdollRoutine(OnHitData onHitData)
+    private IEnumerator RagdollRoutine(Transform source, OnHitData onHitData)
     {
+        foreach(Rigidbody rb in rigidbodies)
+            rb.isKinematic = true;
         yield return new WaitForEndOfFrame();
-        
+        CopyBoneTransforms(source, rootTransform);
+        Physics.SyncTransforms();
         foreach (Rigidbody rb in rigidbodies)
         {
+            rb.isKinematic = false;
             rb.useGravity = true;
             rb.linearVelocity = Vector3.zero;
 

@@ -677,7 +677,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camObj: {fileID: 8181130621336270977}
-  followTransform: {fileID: 4724692457937012778}
 --- !u!1 &2591663617399637228
 GameObject:
   m_ObjectHideFlags: 0
@@ -2919,7 +2918,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 4033486178
   InScenePlacedSourceGlobalObjectIdHash: 2508019869
-  m_InScenePlacedDisabledByDefault: 0
+  m_InScenePlacedDisabledByDefault: 1
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -3141,10 +3140,12 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 4e954a2f9f6f9f74a83154ac73833da2, type: 2}
   - {fileID: 2100000, guid: 2a93c006c97d0d1479f9a196607681d1, type: 2}
   - {fileID: 2100000, guid: 755f0a42fb425434399ae9dd7fd4a76d, type: 2}
+  ragdollPrefab: {fileID: 4517815191899052359, guid: b5b392475f53dea47973362e1578db59, type: 3}
   fpsPlayerModel: {fileID: 6473903460907918152}
   fpsLegModel: {fileID: 7827524680669334559}
   weaponAnimator: {fileID: 8947472681213056992}
   accessoryFolder: {fileID: 2032461095849471320}
+  hipTransform: {fileID: 5042205384400960441}
   blendDampTime: 0.05
 --- !u!114 &7517925231291135140
 MonoBehaviour:
@@ -3454,6 +3455,11 @@ MonoBehaviour:
         byte0060: 0
         byte0061: 0
   Kills:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  TotalKills:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0

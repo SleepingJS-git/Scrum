@@ -17,14 +17,24 @@ public class PlayerBody : MonoBehaviour
     public Animator weaponAnimator;
     public GameObject accessoryFolder;
     public OnHitData onHitData;
+    public Transform hipTransform;
     [SerializeField] private float blendDampTime;
     private Material playerMaterial;
+    private bool isOwner;
+    private DeathCamera deathCam;
     public void Init(bool IsOwner, ulong ownerClientId)
     {
         ShowBodyRenderer(!IsOwner);
         onHitData = new OnHitData();
 
         SetPlayerMaterial(playerColors[ownerClientId]);
+
+        isOwner = IsOwner;
+    }
+
+    public void SetDeathCamera(DeathCamera cam)
+    {
+        deathCam = cam;
     }
 
     /// <summary>
@@ -33,9 +43,14 @@ public class PlayerBody : MonoBehaviour
     public void Ragdoll()
     {
         // Turn on the renderer so that the instantiated body has its renderer on
-        // ShowBodyRenderer(true);
+        bodyRenderer.enabled = false;
+        accessoryFolder.SetActive(false);
+        if (fpsPlayerModel)
+            fpsPlayerModel.gameObject.SetActive(false);
+        if (fpsLegModel)
+            fpsLegModel.gameObject.SetActive(false);
 
-        // animator.enabled = false;
+        animator.enabled = false;
 
         // Turn off the renderer to hide the dead player's actual renderer
         // bodyRenderer.gameObject.SetActive(false);
@@ -53,7 +68,10 @@ public class PlayerBody : MonoBehaviour
         // }
 
         Ragdoll ragdoll = Instantiate(ragdollPrefab, transform.position, transform.rotation);
-        ragdoll.Create(transform, playerMaterial, onHitData);
+        ragdoll.Create(hipTransform, playerMaterial, onHitData);
+
+        if (isOwner)
+            deathCam.SetTarget(ragdoll.spineTransform);
     }
 
     public void SetPlayerMaterial(Material newMaterial)
@@ -79,7 +97,7 @@ public class PlayerBody : MonoBehaviour
         if (fpsPlayerModel)
             fpsPlayerModel.gameObject.SetActive(!showRenderer);
         if (fpsLegModel)
-        fpsLegModel.gameObject.SetActive(!showRenderer);
+            fpsLegModel.gameObject.SetActive(!showRenderer);
     }
 
     public void UnRagdoll()

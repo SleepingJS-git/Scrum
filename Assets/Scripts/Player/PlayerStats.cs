@@ -11,7 +11,13 @@ public class PlayerStats : NetworkBehaviour
         NetworkVariableWritePermission.Server
     );
 
-    public NetworkVariable<int> Kills = new(
+    public NetworkVariable<int> Kills = new(    // Represents kills during the current round
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    public NetworkVariable<int> TotalKills = new(
         0,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
@@ -72,11 +78,18 @@ public class PlayerStats : NetworkBehaviour
         PlayerName.Value = playerName;
     }
 
+    public void ResetCurrentKills()
+    {
+        if (!IsServer) return;
+        
+        Kills.Value = 0;
+    }
 
     public void AddKill()
     {
         if (!IsServer) return;
 
+        TotalKills.Value++;
         Kills.Value++;
     }
 

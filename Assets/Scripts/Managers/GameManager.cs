@@ -18,6 +18,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private TMP_Text roundWinnerText;
     [SerializeField] private CanvasGroup roundWinnerCanvasGroup;
     [SerializeField] private GameObject suddenDeathObj;
+    [SerializeField] private TextMeshProUGUI suddenDeathReward;
     private int _loadedPlayers;
     private int _deadPlayers;
     private int _readyPlayers;
@@ -118,6 +119,14 @@ public class GameManager : NetworkBehaviour
         {
             ChangeGamePhaseServerRpc(GamePhase.Building);
         }
+
+        SetSDRewardRpc(numOfPlayers, RpcTarget.Single(clientId, RpcTargetUse.Temp));
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void SetSDRewardRpc(int numOfPlayers, RpcParams rpcParams = default)
+    {
+        suddenDeathReward.SetText("Reward is +" + numOfPlayers + " points.");
     }
 
     /// <summary>
@@ -344,9 +353,9 @@ public class GameManager : NetworkBehaviour
 
             if (player != null)
             {
-                PlayerStats stats = client.PlayerObject.GetComponent<PlayerStats>();
-
-                if (mostPoints < player.Stats.Kills.Value)
+                int points = player.Stats.Kills.Value;
+                if (player.isAlive.Value) points += numOfPlayers;
+                if (mostPoints < points)
                 {
                     mostPoints = player.Stats.Kills.Value;
                     winner = player;

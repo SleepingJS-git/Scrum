@@ -253,6 +253,8 @@ public class PlayerManager : NetworkBehaviour
             if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
             {
                 Player player = client.PlayerObject.GetComponent<Player>();
+
+                if (player) player.Stats.ResetCurrentKills();
             }
 
         }
