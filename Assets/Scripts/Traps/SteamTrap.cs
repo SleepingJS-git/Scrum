@@ -43,6 +43,7 @@ public class SteamTrap : BreakableStructureEntity
 
     protected override void FractureApart()
     {
+        audioPlayer.Stop();
         StopCoroutine(toggleRoutine);
         StopCoroutine(combatEnd);
         steamParticles.Pause();
@@ -53,16 +54,16 @@ public class SteamTrap : BreakableStructureEntity
 
     private IEnumerator OnOff()
     {
+        audioPlayer.Play();
         while (!GameManager.Instance || GameManager.GamePhase == GamePhase.Combat)
         {
-            //audioPlayer.clip = ;
-            //audioPlayer.Play();
+            AudioFadeInOut(0.01f, true);
+            
             damageCollider.enabled = true;
             steamParticles.Play();
             yield return new WaitForSeconds(onTime);
 
-            //audioPlayer.clip = ;
-            //audioPlayer.Play();
+            AudioFadeInOut(0.05f, false);
             steamParticles.Clear();
             steamParticles.Pause();
             damageCollider.enabled = false;
@@ -71,8 +72,29 @@ public class SteamTrap : BreakableStructureEntity
         //StartCoroutine(WaitForCombat());
     }
 
+    IEnumerator AudioFadeInOut(float speed, bool fade)
+    {
+        //True Fades in
+        if(fade)
+        {
+            for (float i = 0; i < 1; i += speed)
+            {
+                audioPlayer.volume = i;
+            }
+        }
+        else
+        {
+            for (float i = 1; i > 0; i -= speed)
+            {
+                audioPlayer.volume = i;
+            }
+        }
+            yield return null;
+    }
+
     private IEnumerator WaitForCombat()
     {
+        audioPlayer.Stop();
         steamParticles.Play();
         damageCollider.enabled = false;
         Debug.Log("SteamTrap waiting for combat.");
