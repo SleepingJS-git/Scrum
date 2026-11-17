@@ -75,7 +75,7 @@ public class Player : Entity
         {
             PlayerManager.Instance.SetLocalPlayer(this);
             deathCamera.Init();
-
+            Body.SetDeathCamera(deathCamera);
             Interaction.Init(Look.cam.transform, Hud);
 
             Combat.onWallKick += () => {
