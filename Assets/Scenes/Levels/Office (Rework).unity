@@ -774,7 +774,7 @@ GameObject:
   - component: {fileID: 44337859}
   - component: {fileID: 44337858}
   m_Layer: 0
-  m_Name: Cube (4)
+  m_Name: Curve Stair
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15442,7 +15442,7 @@ GameObject:
   - component: {fileID: 788770213}
   - component: {fileID: 788770212}
   m_Layer: 0
-  m_Name: Cube (2)
+  m_Name: Curve Stair
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
