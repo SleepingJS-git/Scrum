@@ -32,8 +32,6 @@ public class GridPlacement : NetworkBehaviour
     [SerializeField]
     LayerMask buildableLayerMask;
 
-    [SerializeField] private LayerMask boxCastLayerMask;
-
 
     // The current rotation of the object
     public NetworkVariable<float> rotation = new(
@@ -286,7 +284,8 @@ public class GridPlacement : NetworkBehaviour
         }
         if (buildable)
         {
-            if (buildable.Type != Buildable.BuildType.Explosive) { canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value); }
+            if (buildable.Type != Buildable.BuildType.Explosive) { canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value) &&
+                    IsAnyCellAttachedToSomething(cellPos, buildable, rotation.Value); }
             else { canPlace.Value = !BuildableDatabase.IsCellTaken(cellPos); }
         }
         else canPlace.Value = isObjectVisible;
@@ -607,19 +606,69 @@ public class GridPlacement : NetworkBehaviour
         else
             AudioManager.Instance?.PlayInvalidPlacement();
     }
-    //private bool IsAnyCellAttachedToSomething(Vector3Int originPosition, Buildable buildable, float rotation)
-    //{
-    //    for (int i = 0; i < buildable.OccupiedCells.Length; i++)
-    //    {
+    private bool IsAnyCellAttachedToSomething(Vector3Int originPosition, Buildable buildable, float rotation)
+    {
+        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+        {
+            if (IsCellAttachedToSomething(originPosition + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i])))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    //    }
-    //}
+    private bool IsCellAttachedToSomething(Vector3Int position)
+    {
+        RaycastHit[] allHits = new RaycastHit[6];
+        RaycastHit currentHit;
+        if(Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.down, out currentHit, Quaternion.identity, 1.5f, buildableLayerMask))
+        {
+            Debug.Log("Hit 1");
+            allHits[0] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.up, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        {
+            Debug.Log("Hit 2");
+            allHits[1] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.left, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        {
+            Debug.Log("Hit 3");
 
-    //private bool IsCellAttachedToSomething(Vector3Int position)
-    //{
-    //    RaycastHit hit;
-    //    Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.down, out hit, Quaternion.identity, 0.5f, boxCastLayerMask);
-    //}
+            allHits[2] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.right, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        {
+            Debug.Log("Hit 4");
+
+            allHits[3] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.forward, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        {
+            Debug.Log("Hit 5");
+
+            allHits[4] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.back, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        {
+            Debug.Log("Hit 6");
+
+            allHits[5] = currentHit;
+        }
+
+        for (int i = 0; i < allHits.Length; i++)
+        {
+            Debug.Log("Checking");
+            if (allHits[i].collider!= null)
+            {
+                Debug.Log("Colliding");
+                return true;
+            }
+        }
+        Debug.Log("Not Colliding");
+        return false;
+    }
 }
 
 /*
