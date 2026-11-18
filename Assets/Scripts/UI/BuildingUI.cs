@@ -63,9 +63,9 @@ public class BuildingUI : MonoBehaviour
 
         wasBuilding = isBuilding;
 
-        if (placementInfo) placementInfo.text = gridPlacement ? $"Placed Weight: {gridPlacement.currentWeight.Value}/{gridPlacement.maxWeight}" : "";
+        if (placementInfo) placementInfo.text = gridPlacement ? $"Placed Weight: {gridPlacement.currentWeight.Value}/{gridPlacement.maxWeight.Value}" : "";
 
-        UpdateWeight(gridPlacement.currentWeight.Value, gridPlacement.maxWeight);
+        UpdateWeight(gridPlacement.currentWeight.Value, gridPlacement.maxWeight.Value);
 
         if (!isBuilding || !gridPlacement || !gridPlacement.IsSpawned || !gridPlacement.IsOwner) return;
 

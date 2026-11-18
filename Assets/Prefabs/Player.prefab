@@ -2916,14 +2916,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2508019869
+  GlobalObjectIdHash: 3649480734
   InScenePlacedSourceGlobalObjectIdHash: 2508019869
-  m_InScenePlacedDisabledByDefault: 1
+  m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 0
+  m_InScenePlaced: 1
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -3181,7 +3181,7 @@ MonoBehaviour:
   slideCancelDelay: 0.3
   slideInputDrag: 1.5
   slideAudio: {fileID: 1961101384068258025}
-  kickUpForce: 3.75
+  kickUpForce: 4.25
   kickHorizForce: 3.25
   mass: 0.25
   castingDist: 1.3
@@ -3233,7 +3233,7 @@ MonoBehaviour:
   weaponHolder: {fileID: 6241798226129361827}
   rightHandWeapon: {fileID: 2459833691623427690}
   wallKickCooldown: 0.65
-  kickReach: 2
+  kickReach: 2.5
 --- !u!114 &5329963382740541591
 MonoBehaviour:
   m_ObjectHideFlags: 0

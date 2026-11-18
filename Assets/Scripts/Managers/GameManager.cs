@@ -39,6 +39,7 @@ public class GameManager : NetworkBehaviour
     private Coroutine timerRoutine;
     public bool SuddenDeath {get; private set;}
     public List<WeaponDrop> droppedWeapons = new List<WeaponDrop>();
+    public NetworkVariable<int> Net_Rounds = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server); 
     void Awake()
     {
         Instance = this;
@@ -58,6 +59,7 @@ public class GameManager : NetworkBehaviour
         MusicManager.Instance?.StopMusic();
 
         Net_TotalTime.OnValueChanged += UpdateTimerUI;
+
         if (!IsServer) return;
         ChangeGamePhaseServerRpc(GamePhase.Loading);
     }  
@@ -127,6 +129,7 @@ public class GameManager : NetworkBehaviour
     private void SetSDRewardRpc(int numOfPlayers, RpcParams rpcParams = default)
     {
         suddenDeathReward.SetText("Bonus +" + numOfPlayers + " points");
+        Net_Rounds.OnValueChanged += PlayerManager.LocalBuilder.gridBuilding.IncreaseBuildWeight;
     }
 
     /// <summary>
@@ -222,6 +225,7 @@ public class GameManager : NetworkBehaviour
                 ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
+                Net_Rounds.Value++;
                 PlayerControllerRpc((int) gamePhase);
 
                 foreach(WeaponDrop wpn in droppedWeapons)

@@ -184,7 +184,7 @@ public class Weapon : NetworkBehaviour
                     e.OnHit(new OnHitData()
                     {
                         attacker = player,
-                        damage = 5,
+                        damage = 15,
                         explosionForce = 10f,
                         sourceHit = hit.point,
                         movingDir = dir,

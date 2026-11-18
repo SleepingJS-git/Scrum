@@ -95,6 +95,7 @@ public class PlayerManager : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        if (IsServer) Net_RespawnTime.Value = _respawnTime;
     }
 
     /// <summary>

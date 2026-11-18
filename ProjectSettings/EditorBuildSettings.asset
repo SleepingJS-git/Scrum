@@ -59,7 +59,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/MAGIC/MAGIC_Office.unity
     guid: 9c47eac4cf5b6c44e99a51e5a429183e
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Flat Map.unity
     guid: 0725f88571022db43b630794401d3d19
   - enabled: 1

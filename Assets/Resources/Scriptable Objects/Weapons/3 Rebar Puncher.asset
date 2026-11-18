@@ -16,7 +16,7 @@ MonoBehaviour:
   weaponID: 3
   firingType: 0
   WeaponType: 0
-  damage: 55
+  damage: 75
   fireRate: 1.5
   bulletCount: 4
   bulletsPerShot: 1
@@ -28,6 +28,7 @@ MonoBehaviour:
   weaponModel: {fileID: 2730317370518482686, guid: 6d09330a2435e5146bc438d77c341ce1, type: 3}
   shootingEffect: {fileID: 0}
   fireSound: {fileID: 8300000, guid: b9fd3f93a2be5e84aae63553a2c7cbfe, type: 3}
+  pickupSound: {fileID: 0}
   trail: {fileID: 2059742913133304835, guid: 23e894f2da81ee8499685b78125ad8c8, type: 3}
   bulletImpact: {fileID: 4623250405035984504, guid: 5eb77df42ed0a7e47999dcc3c35d4e8a, type: 3}
   recoilAmplitude: 300
