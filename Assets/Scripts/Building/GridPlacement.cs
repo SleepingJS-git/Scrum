@@ -618,39 +618,45 @@ public class GridPlacement : NetworkBehaviour
         return false;
     }
 
+        Vector3 boxExtents = Vector3.one;
+        float distanceCheck = 1.5f;
+    Vector3 gridPosition = Vector3.zero;
     private bool IsCellAttachedToSomething(Vector3Int position)
     {
         RaycastHit[] allHits = new RaycastHit[6];
         RaycastHit currentHit;
-        if(Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.down, out currentHit, Quaternion.identity, 1.5f, buildableLayerMask))
+
+        gridPosition = grid.GetCellCenterWorld(position);
+
+        if(Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.down, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
         {
             Debug.Log("Hit 1");
             allHits[0] = currentHit;
         }
-        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.up, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.up, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
         {
             Debug.Log("Hit 2");
             allHits[1] = currentHit;
         }
-        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.left, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.left, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
         {
             Debug.Log("Hit 3");
 
             allHits[2] = currentHit;
         }
-        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.right, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.right, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
         {
             Debug.Log("Hit 4");
 
             allHits[3] = currentHit;
         }
-        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.forward, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.forward, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
         {
             Debug.Log("Hit 5");
 
             allHits[4] = currentHit;
         }
-        if (Physics.BoxCast(grid.GetCellCenterWorld(position), new Vector3(0.5f, 0.5f, 0.5f), Vector3.back, out currentHit, Quaternion.identity, 1f, buildableLayerMask))
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.back, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
         {
             Debug.Log("Hit 6");
 
@@ -662,12 +668,16 @@ public class GridPlacement : NetworkBehaviour
             Debug.Log("Checking");
             if (allHits[i].collider!= null)
             {
-                Debug.Log("Colliding");
+                Debug.Log(allHits[i].collider.gameObject);
                 return true;
             }
         }
         Debug.Log("Not Colliding");
         return false;
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawCube(gridPosition + Vector3.down * distanceCheck, boxExtents);
     }
 }
 
