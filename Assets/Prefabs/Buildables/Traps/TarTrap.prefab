@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6707670037663232496
+--- !u!1 &2167661909748906335
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,51 +8,46 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4583857987138693874}
-  - component: {fileID: 9094969038015430944}
-  - component: {fileID: 8415475790922782836}
-  - component: {fileID: 5565416710354322052}
-  - component: {fileID: 1695640490289460509}
-  - component: {fileID: 7311395229195826779}
-  - component: {fileID: 2092274868051475516}
-  - component: {fileID: 7850199747022574477}
-  m_Layer: 0
-  m_Name: TarTrap
+  - component: {fileID: 5214830668905479648}
+  - component: {fileID: 1830704612981541591}
+  - component: {fileID: 6911083705841123171}
+  m_Layer: 2
+  m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4583857987138693874
+--- !u!4 &5214830668905479648
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6707670037663232496}
+  m_GameObject: {fileID: 2167661909748906335}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.9}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -1.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 4583857987138693874}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &9094969038015430944
+--- !u!33 &1830704612981541591
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6707670037663232496}
+  m_GameObject: {fileID: 2167661909748906335}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &8415475790922782836
+--- !u!23 &6911083705841123171
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6707670037663232496}
+  m_GameObject: {fileID: 2167661909748906335}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -91,6 +86,43 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6707670037663232496
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4583857987138693874}
+  - component: {fileID: 5565416710354322052}
+  - component: {fileID: 1695640490289460509}
+  - component: {fileID: 7311395229195826779}
+  - component: {fileID: 2092274868051475516}
+  - component: {fileID: 7850199747022574477}
+  m_Layer: 10
+  m_Name: TarTrap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4583857987138693874
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6707670037663232496}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5214830668905479648}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &5565416710354322052
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -110,8 +142,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 10, y: 0.2, z: 10}
-  m_Center: {x: 0, y: 0.1, z: 0}
+  m_Size: {x: 10, y: 0.3, z: 10}
+  m_Center: {x: 0, y: -1.6, z: 0}
 --- !u!114 &1695640490289460509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,7 +202,10 @@ MonoBehaviour:
   type: 1
   occupiedCells:
   - {x: 0, y: 0, z: 0}
-  mesh: {fileID: 8415475790922782836}
+  - {x: 1, y: 0, z: 0}
+  - {x: 0, y: 0, z: 1}
+  - {x: 1, y: 0, z: 1}
+  mesh: {fileID: 6911083705841123171}
   Id: 16
   weight: 5
   originPosition: {x: 0, y: 0, z: 0}

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 120089360064824565}
   - component: {fileID: 9102594465176416869}
   - component: {fileID: 7718552504359481185}
-  m_Layer: 10
+  m_Layer: 2
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5642301148220355279}
   - component: {fileID: 2665318762029285993}
-  m_Layer: 10
+  m_Layer: 2
   m_Name: DamageCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}

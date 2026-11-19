@@ -27,6 +27,7 @@ public class SlowTrap : NetworkBehaviour
         if (!other.CompareTag("Player")) return;
         Player targetPlayer = other.GetComponent<Player>();
         targetPlayer.ApplySpeedMultiplierRpc(speedMultiplier, RpcTarget.Single(targetPlayer.OwnerClientId, RpcTargetUse.Temp));
+        Debug.Log("Slowing Player");
     }
 
     private void OnTriggerExit(Collider other)

@@ -89,7 +89,7 @@ public class SteamTrap : BreakableStructureEntity
                 audioPlayer.volume = i;
             }
         }
-            yield return null;
+        yield return null;
     }
 
     private IEnumerator WaitForCombat()
