@@ -40,6 +40,8 @@ public class GameManager : NetworkBehaviour
     public bool SuddenDeath {get; private set;}
     public List<WeaponDrop> droppedWeapons = new List<WeaponDrop>();
     public NetworkVariable<int> Net_Rounds = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server); 
+    public int maxRounds = 3;
+    public Action OnGameEnd;
     void Awake()
     {
         Instance = this;
@@ -171,6 +173,11 @@ public class GameManager : NetworkBehaviour
 
         if (_resetPlayers == numOfPlayers)
         {
+            if (Net_Rounds.Value == maxRounds)
+            {
+                OnGameEnd?.Invoke();
+                return;
+            }
             if (gamePhase != GamePhase.Building)
                 ChangeGamePhaseServerRpc(GamePhase.Building);
         }
@@ -388,8 +395,32 @@ public class GameManager : NetworkBehaviour
         roundWinnerCanvasGroup.alpha = 1f;
     }
 
+    public PlayerResults[] BuildPlayerResults(out int numOfPlayers)
+    {
+        PlayerResults[] playerResults = new PlayerResults[4];
+        numOfPlayers = NetworkManager.Singleton.ConnectedClientsList.Count;
+        for (int i = 0; i < numOfPlayers; i++)
+        {
+            PlayerStats stats = NetworkManager.Singleton.ConnectedClientsList[i].PlayerObject.GetComponent<Player>().Stats;
+
+            playerResults[i] = new PlayerResults()
+            {
+                playerID = (ulong) i, playerName = stats.PlayerName.Value.ToString(),
+                wins = stats.RoundsWon.Value, kills = stats.Kills.Value, deaths = stats.Deaths.Value
+            };
+        }
+        Array.Sort(playerResults, (p1, p2) => p1.wins.CompareTo(p2.wins));
+        return playerResults;
+    }
 }
 
+[Serializable]
+public class PlayerResults
+{
+    public ulong playerID; // client id
+    public string playerName;
+    public int wins, kills, deaths;
+}
 
 
 public enum GamePhase
