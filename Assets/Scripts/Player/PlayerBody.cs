@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -11,18 +12,31 @@ public class PlayerBody : MonoBehaviour
     public Renderer bodyRenderer;
     public Renderer[] renderersToColor;
     [Tooltip("First in list is order -> RBYG")] public Material[] playerColors;
+    public Ragdoll ragdollPrefab;
     public Animator fpsPlayerModel;
     public Animator fpsLegModel;
     public Animator weaponAnimator;
     public GameObject accessoryFolder;
     public OnHitData onHitData;
+    public Transform hipTransform;
     [SerializeField] private float blendDampTime;
+    private Material playerMaterial;
+    private bool isOwner;
+    private DeathCamera deathCam;
+    private List<Ragdoll> ragdolls = new List<Ragdoll>();
     public void Init(bool IsOwner, ulong ownerClientId)
     {
         ShowBodyRenderer(!IsOwner);
         onHitData = new OnHitData();
 
         SetPlayerMaterial(playerColors[ownerClientId]);
+
+        isOwner = IsOwner;
+    }
+
+    public void SetDeathCamera(DeathCamera cam)
+    {
+        deathCam = cam;
     }
 
     /// <summary>
@@ -31,24 +45,45 @@ public class PlayerBody : MonoBehaviour
     public void Ragdoll()
     {
         // Turn on the renderer so that the instantiated body has its renderer on
-        ShowBodyRenderer(true);
+        bodyRenderer.enabled = false;
+        accessoryFolder.SetActive(false);
+        if (fpsPlayerModel)
+            fpsPlayerModel.gameObject.SetActive(false);
+        if (fpsLegModel)
+            fpsLegModel.gameObject.SetActive(false);
 
         animator.enabled = false;
 
         // Turn off the renderer to hide the dead player's actual renderer
         // bodyRenderer.gameObject.SetActive(false);
-        Debug.Log("OnHitData Force: " + onHitData.explosionForce);
-        Debug.Log("OnHitData Upwards Modifier: " + onHitData.upwardsModifier);
-        foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
-        {
-            rb.useGravity = true;
-            rb.isKinematic = false;
-            rb.linearVelocity = Vector3.zero;
 
-            rb.AddExplosionForce(
-                onHitData.explosionForce * 10f, 
-                onHitData.sourceHit, 2f, onHitData.upwardsModifier,
-                ForceMode.Impulse);
+        // foreach (Rigidbody rb in animator.GetComponentsInChildren<Rigidbody>())
+        // {
+        //     rb.useGravity = true;
+        //     rb.isKinematic = false;
+        //     rb.linearVelocity = Vector3.zero;
+
+        //     rb.AddExplosionForce(
+        //         onHitData.explosionForce * 10f, 
+        //         onHitData.sourceHit, 2f, onHitData.upwardsModifier,
+        //         ForceMode.Impulse);
+        // }
+
+        Ragdoll ragdoll = Instantiate(ragdollPrefab, transform.position, transform.rotation);
+        ragdoll.Create(hipTransform, playerMaterial, onHitData);
+
+        ragdolls.Add(ragdoll);
+
+        if (isOwner)
+            deathCam.SetTarget(ragdoll.spineTransform);
+    }
+    
+    public void ClearRagdolls()
+    {
+        for (int i = ragdolls.Count - 1; i >= 0; i--)
+        {
+            Destroy(ragdolls[i]);
+            ragdolls.RemoveAt(i);
         }
     }
 
@@ -56,6 +91,8 @@ public class PlayerBody : MonoBehaviour
     {
         foreach(Renderer r in renderersToColor)
             r.material = newMaterial;
+
+        playerMaterial = newMaterial;
     }
 
     public void ShowBodyRenderer(bool showRenderer)
@@ -73,7 +110,7 @@ public class PlayerBody : MonoBehaviour
         if (fpsPlayerModel)
             fpsPlayerModel.gameObject.SetActive(!showRenderer);
         if (fpsLegModel)
-        fpsLegModel.gameObject.SetActive(!showRenderer);
+            fpsLegModel.gameObject.SetActive(!showRenderer);
     }
 
     public void UnRagdoll()

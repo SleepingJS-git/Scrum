@@ -108,7 +108,7 @@ ParticleSystem:
       m_RotationOrder: 4
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
-  scalingMode: 0
+  scalingMode: 1
   randomSeed: 0
   InitialModule:
     serializedVersion: 3
@@ -4999,7 +4999,7 @@ ParticleSystem:
       m_RotationOrder: 4
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
-  scalingMode: 0
+  scalingMode: 1
   randomSeed: 0
   InitialModule:
     serializedVersion: 3
@@ -14729,14 +14729,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3169086801
+  GlobalObjectIdHash: 3301507825
   InScenePlacedSourceGlobalObjectIdHash: 3169086801
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 0
+  m_InScenePlaced: 1
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -14809,6 +14809,7 @@ MonoBehaviour:
   mesh: {fileID: 5047416908333565366}
   Id: 11
   weight: 2.5
+  originPosition: {x: 0, y: 0, z: 0}
 --- !u!33 &3143865495374475159
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -14962,7 +14963,7 @@ MonoBehaviour:
   explosionForce: 10
   explosionRadius: 3
   upwardsModifier: 0.06
-  damage: 45
+  damage: 75
   explosionParticles:
   - {fileID: 1968398663482894880}
   - {fileID: 4954875207698188092}
