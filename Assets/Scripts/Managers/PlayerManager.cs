@@ -253,6 +253,8 @@ public class PlayerManager : NetworkBehaviour
             if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientID, out NetworkClient client))
             {
                 Player player = client.PlayerObject.GetComponent<Player>();
+
+                if (player) player.Stats.ResetCurrentKills();
             }
 
         }
@@ -355,9 +357,12 @@ public class PlayerManager : NetworkBehaviour
         foreach (NetworkClient networkClient in NetworkManager.Singleton.ConnectedClientsList)
         {
             Player player = networkClient.PlayerObject.GetComponent<Player>();
+            
+            if (player == null) continue;
 
-            if (player == null || player == LocalPlayer)
-                continue;
+            player.Body.ClearRagdolls();
+
+            if (player == LocalPlayer) continue;
 
             player.Body.UnRagdoll();
             player.Body.Play("IsMoving", false);

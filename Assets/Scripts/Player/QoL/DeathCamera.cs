@@ -4,7 +4,7 @@ using UnityEngine;
 public class DeathCamera : MonoBehaviour
 {
     [SerializeField] private GameObject camObj;
-    [SerializeField] private Transform followTransform;
+    private Transform followTransform;
     private bool _enabled = false;
     public void Init()
     {
@@ -16,10 +16,14 @@ public class DeathCamera : MonoBehaviour
     void Update()
     {
         if (!_enabled) return;
-
-        camObj.transform.LookAt(followTransform);
+        
+        if (followTransform)
+            camObj.transform.LookAt(followTransform);
     }
-
+    public void SetTarget(Transform target)
+    {
+        followTransform = target;
+    }
     public void Toggle(bool isOn)
     {
         camObj.SetActive(isOn);
