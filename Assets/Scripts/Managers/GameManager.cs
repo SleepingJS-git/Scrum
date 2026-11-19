@@ -37,8 +37,6 @@ public class GameManager : NetworkBehaviour
     private Coroutine timerRoutine;
     public bool SuddenDeath {get; private set;}
     public List<WeaponDrop> droppedWeapons = new List<WeaponDrop>();
-    public float startingMaxWeight = 15.0f;
-    [SerializeField] private float weightAddedPerRound = 5.0f;
     void Awake()
     {
         Instance = this;
@@ -225,7 +223,7 @@ public class GameManager : NetworkBehaviour
                     StopCoroutine(timerRoutine);
                     timerRoutine = null;
                 }
-                startingMaxWeight += weightAddedPerRound;
+
                 PlayerControllerRpc((int)gamePhase);
                 Net_TotalTime.Value = 0;
                 ShowRoundWinner();
