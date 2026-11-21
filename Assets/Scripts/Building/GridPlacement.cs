@@ -32,6 +32,7 @@ public class GridPlacement : NetworkBehaviour
     [SerializeField]
     LayerMask buildableLayerMask;
 
+
     // The current rotation of the object
     public NetworkVariable<float> rotation = new(
         0,
@@ -44,7 +45,9 @@ public class GridPlacement : NetworkBehaviour
     private InputAction placeAction;
     private InputAction rotateLeftAction;
     private InputAction rotateRightAction;
-    private InputAction verticalPlace;
+    private InputAction lockPlace;
+
+    private InputAction adjustment;
 
     // Dictionary representing which cells are occupied and what they are occupied with
 
@@ -57,9 +60,9 @@ public class GridPlacement : NetworkBehaviour
     // The default color of the placed object
     private List<Color> defaultColors = new List<Color>();
 
-    private bool placingVertical = false;
+    private bool placementLocked = false;
     private Vector3Int lockedCellPos;
-    private float verticalMouseMovement = 0;
+    private float adjustCooldown = 0.5f;
 
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
@@ -108,7 +111,8 @@ public class GridPlacement : NetworkBehaviour
         placeAction = playerInput.actions.FindAction("Place");
         rotateLeftAction = playerInput.actions.FindAction("Rotate Left");
         rotateRightAction = playerInput.actions.FindAction("Rotate Right");
-        verticalPlace = playerInput.actions.FindAction("Vertical Place");
+        lockPlace = playerInput.actions.FindAction("Lock Placement");
+        adjustment = playerInput.actions.FindAction("Build Adjust");
 
         buildable = null;
         // Update the info of the buildable object
@@ -156,6 +160,7 @@ public class GridPlacement : NetworkBehaviour
             if (GameManager.GamePhase == GamePhase.Loading) return;
         }
 
+        adjustCooldown -= Time.deltaTime;
         // Controls
 
         // If the right rotate action is pressed, increase the rotation angle
@@ -187,7 +192,7 @@ public class GridPlacement : NetworkBehaviour
         Vector3Int cellPos = new Vector3Int();
 
         Vector3 mousePos = MouseToWorldSpace();
-        if (!placingVertical)
+        if (!placementLocked)
         {
             // Find the position of the mouse on the grid, show the preview there
             cellPos = grid.WorldToCell(mousePos);
@@ -195,21 +200,21 @@ public class GridPlacement : NetworkBehaviour
         else
         {
             cellPos = lockedCellPos;
-            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
-            verticalMouseMovement += mouseDelta.y;
-            if (Mathf.Abs(verticalMouseMovement) >= 40)
+            Vector2 adjustmentVector = adjustment.ReadValue<Vector2>().normalized;
+            if (adjustCooldown <= 0 && adjustmentVector != Vector2.zero)
             {
-                cellPos.y += Mathf.RoundToInt(verticalMouseMovement/40);
-                verticalMouseMovement = 0;
+                cellPos.x += Mathf.RoundToInt(adjustmentVector.x);
+                cellPos.z += Mathf.RoundToInt(adjustmentVector.y);
+                lockedCellPos = cellPos;
+                adjustCooldown = 0.1f;
             }
-            lockedCellPos = cellPos;
         }
 
         PreviewObjectServerRpc(mousePos, cellPos);
-        if (verticalPlace.WasPressedThisFrame())
+        if (lockPlace.WasPressedThisFrame())
         {
-            placingVertical = !placingVertical;
-            if (placingVertical) lockedCellPos = cellPos;
+            placementLocked = !placementLocked;
+            if (placementLocked) lockedCellPos = cellPos;
             else lockedCellPos = new Vector3Int();
         }
 
@@ -261,7 +266,7 @@ public class GridPlacement : NetworkBehaviour
             previewObject.gameObject.GetComponent<Collider>().enabled = false;
 
             // If the cell is occupied
-            if (BuildableDatabase.IsCellTaken(cellPos) && !placingVertical)
+            if (BuildableDatabase.IsCellTaken(cellPos) && !placementLocked)
             {
                 if (BuildableDatabase.GetOccupiedID(cellPos) != spawnCellID)
                 {
@@ -279,7 +284,8 @@ public class GridPlacement : NetworkBehaviour
         }
         if (buildable)
         {
-            if (buildable.Type != Buildable.BuildType.Explosive) { canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value); }
+            if (buildable.Type != Buildable.BuildType.Explosive) { canPlace.Value = !BuildableDatabase.IsAnyCellTaken(cellPos, buildable, rotation.Value) &&
+                    IsAnyCellAttachedToSomething(cellPos, buildable, rotation.Value); }
             else { canPlace.Value = !BuildableDatabase.IsCellTaken(cellPos); }
         }
         else canPlace.Value = isObjectVisible;
@@ -313,7 +319,7 @@ public class GridPlacement : NetworkBehaviour
     {
         if (buildable.Type != Buildable.BuildType.Explosive) { PlaceBuildableServerRpc(cellPos); }
         else { ExplodeAreaServerRpc(cellPos); }
-        placingVertical = false;
+        placementLocked = false;
     }
 
     [Rpc(SendTo.Server)]
@@ -599,6 +605,59 @@ public class GridPlacement : NetworkBehaviour
             AudioManager.Instance?.PlayPlacement();
         else
             AudioManager.Instance?.PlayInvalidPlacement();
+    }
+    private bool IsAnyCellAttachedToSomething(Vector3Int originPosition, Buildable buildable, float rotation)
+    {
+        for (int i = 0; i < buildable.OccupiedCells.Length; i++)
+        {
+            if (IsCellAttachedToSomething(originPosition + Vector3Int.RoundToInt(Quaternion.Euler(0, rotation, 0) * buildable.OccupiedCells[i])))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool IsCellAttachedToSomething(Vector3Int position)
+    {
+        Vector3 boxExtents = new Vector3(0.9f, 0.9f, 0.9f);
+        float distanceCheck = 0.5f;
+        Vector3 gridPosition = grid.GetCellCenterWorld(position);
+        RaycastHit[] allHits = new RaycastHit[6];
+        RaycastHit currentHit;
+        if(Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.down, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
+        {
+            allHits[0] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.up, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
+        {
+            allHits[1] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.left, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
+        {
+            allHits[2] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.right, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
+        {
+            allHits[3] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.forward, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
+        {
+            allHits[4] = currentHit;
+        }
+        if (Physics.BoxCast(grid.GetCellCenterWorld(position), boxExtents/2, Vector3.back, out currentHit, Quaternion.identity, distanceCheck, buildableLayerMask))
+        {
+            allHits[5] = currentHit;
+        }
+
+        for (int i = 0; i < allHits.Length; i++)
+        {
+            if (allHits[i].collider!= null)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
