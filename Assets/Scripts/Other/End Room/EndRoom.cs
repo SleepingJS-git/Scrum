@@ -25,6 +25,7 @@ public class EndRoom : MonoBehaviour
             {
                 podium.playerModel.gameObject.SetActive(false);
                 podium.username.text = "";
+                podium.statsText.text = "";
                 podium.light.gameObject.SetActive(false);
                 return;
             }
@@ -36,6 +37,8 @@ public class EndRoom : MonoBehaviour
 
             podium.renderer.material = playerMats[result.playerID];
             //podium.username.SetText(result.playerName);
+            podium.statsText.SetText($"Wins: {result.wins}" + 
+            $"\nKills: {result.kills}");
 
             StartCoroutine(SpawnDeadBodies(result.kills, playerMats[result.playerID], numOfPlayers));
         }
@@ -67,6 +70,7 @@ public class Podium
     public Animator playerModel;
     public SkinnedMeshRenderer renderer;
     public TextMeshPro username;
+    public TextMeshPro statsText;
     public Light light;
     public Transform bodySpawner;
 }
