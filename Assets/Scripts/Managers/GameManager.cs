@@ -39,6 +39,9 @@ public class GameManager : NetworkBehaviour
     private Coroutine timerRoutine;
     public bool SuddenDeath {get; private set;}
     public List<WeaponDrop> droppedWeapons = new List<WeaponDrop>();
+    public NetworkVariable<int> Net_Rounds = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server); 
+    public int maxRounds = 3;
+    public Action OnGameEnd;
     void Awake()
     {
         Instance = this;
@@ -58,6 +61,7 @@ public class GameManager : NetworkBehaviour
         MusicManager.Instance?.StopMusic();
 
         Net_TotalTime.OnValueChanged += UpdateTimerUI;
+
         if (!IsServer) return;
         ChangeGamePhaseServerRpc(GamePhase.Loading);
     }  
@@ -127,6 +131,7 @@ public class GameManager : NetworkBehaviour
     private void SetSDRewardRpc(int numOfPlayers, RpcParams rpcParams = default)
     {
         suddenDeathReward.SetText("Bonus +" + numOfPlayers + " points");
+        Net_Rounds.OnValueChanged += PlayerManager.LocalBuilder.gridBuilding.IncreaseBuildWeight;
     }
 
     /// <summary>
@@ -168,9 +173,21 @@ public class GameManager : NetworkBehaviour
 
         if (_resetPlayers == numOfPlayers)
         {
+            if (Net_Rounds.Value == maxRounds)
+            {
+                GameEndRpc();
+                return;
+            }
             if (gamePhase != GamePhase.Building)
                 ChangeGamePhaseServerRpc(GamePhase.Building);
         }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void GameEndRpc()
+    {
+        roundWinnerCanvasGroup.alpha = 0f;
+        OnGameEnd?.Invoke();
     }
 
     [Rpc(SendTo.Server)]
@@ -222,6 +239,7 @@ public class GameManager : NetworkBehaviour
                 ReadyCountUI.Value = 0;
                 _resetPlayers = 0;
                 _deadPlayers = 0;
+                Net_Rounds.Value++;
                 PlayerControllerRpc((int) gamePhase);
 
                 foreach(WeaponDrop wpn in droppedWeapons)
@@ -384,8 +402,37 @@ public class GameManager : NetworkBehaviour
         roundWinnerCanvasGroup.alpha = 1f;
     }
 
+    public PlayerResults[] BuildPlayerResults(out int numOfPlayers)
+    {
+        PlayerResults[] playerResults = new PlayerResults[4];
+        numOfPlayers = NetworkManager.Singleton.ConnectedClientsList.Count;
+        PlayerResults[] validResults = new PlayerResults[numOfPlayers];
+        for (int i = 0; i < numOfPlayers; i++)
+        {
+            PlayerStats stats = NetworkManager.Singleton.ConnectedClientsList[i].PlayerObject.GetComponent<Player>().Stats;
+
+            validResults[i] = new PlayerResults()
+            {
+                playerID = (ulong) i, playerName = stats.PlayerName.Value.ToString(),
+                wins = stats.RoundsWon.Value, kills = stats.TotalKills.Value, deaths = stats.Deaths.Value
+            };
+        }
+
+        Array.Sort(validResults, (p1, p2) => p2.wins.CompareTo(p1.wins));
+
+        for (int i = 0; i < numOfPlayers; i++)
+            playerResults[i] = validResults[i];
+        return playerResults;
+    }
 }
 
+[Serializable]
+public class PlayerResults
+{
+    public ulong playerID; // client id
+    public string playerName;
+    public int wins, kills, deaths;
+}
 
 
 public enum GamePhase

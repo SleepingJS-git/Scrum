@@ -31,8 +31,8 @@ MonoBehaviour:
   pickupSound: {fileID: 8300000, guid: 5e4301e17f214b749894eeda08e54733, type: 3}
   attackRange: 3
   windupTime: 0.33
-  hitBoxHeight: 1
-  hitBoxWidth: 1.25
+  hitBoxHeight: 1.5
+  hitBoxWidth: 1.5
   lungeAmount: 3
   damageType: 5
   impactParticles: {fileID: 8419526965441767673, guid: fadbdac4f97f5ee4e8c2ba0eafb373dc, type: 3}

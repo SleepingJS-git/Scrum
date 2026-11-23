@@ -144,6 +144,8 @@ public class PlayerCombat : MonoBehaviour
     {
         // Create the new gun
         weaponInHand = Instantiate(data.weaponInHand, weaponHolder);
+        weaponHolder.localRotation = Quaternion.identity;
+        weaponHolder.localPosition = Vector3.zero;
 
         // Give the weapon handler the firing point
         // This client's firing point is on the weapon overlay

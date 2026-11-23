@@ -2677,7 +2677,7 @@ CharacterController:
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.35
-  m_SlopeLimit: 37.5
+  m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
@@ -2918,7 +2918,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 2508019869
   InScenePlacedSourceGlobalObjectIdHash: 2508019869
-  m_InScenePlacedDisabledByDefault: 1
+  m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -3181,7 +3181,7 @@ MonoBehaviour:
   slideCancelDelay: 0.3
   slideInputDrag: 1.5
   slideAudio: {fileID: 1961101384068258025}
-  kickUpForce: 3.75
+  kickUpForce: 4.25
   kickHorizForce: 3.25
   mass: 0.25
   castingDist: 1.3
@@ -3233,7 +3233,7 @@ MonoBehaviour:
   weaponHolder: {fileID: 6241798226129361827}
   rightHandWeapon: {fileID: 2459833691623427690}
   wallKickCooldown: 0.65
-  kickReach: 2
+  kickReach: 2.5
 --- !u!114 &5329963382740541591
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -95,6 +95,7 @@ public class PlayerManager : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        if (IsServer) Net_RespawnTime.Value = _respawnTime;
     }
 
     /// <summary>
@@ -595,7 +596,7 @@ public class PlayerManager : NetworkBehaviour
     }
 
 
-    private void TeleportPlayer(Vector3 pos)
+    public void TeleportPlayer(Vector3 pos)
     {
         LocalPlayer.transform.position = pos;
     }

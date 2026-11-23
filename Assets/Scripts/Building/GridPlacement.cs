@@ -67,7 +67,11 @@ public class GridPlacement : NetworkBehaviour
     // The maximum number of building placements/placement tracking
     public int maxPlacements;
     //The maximum weight of all placed buildable objects
-    public float maxWeight = 15.0f;
+    public NetworkVariable<float> maxWeight = new NetworkVariable<float>(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     public NetworkVariable<int> currentPlacements = new NetworkVariable<int>(
         0,
         NetworkVariableReadPermission.Everyone,
@@ -95,7 +99,10 @@ public class GridPlacement : NetworkBehaviour
     );
 
     public static bool IsBuildingPhase => GameManager.Instance == null || GameManager.GamePhase == GamePhase.Building;
-
+    public void IncreaseBuildWeight(int oldVal, int newVal)
+    {
+        
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public override void OnNetworkSpawn()
     {
@@ -105,6 +112,7 @@ public class GridPlacement : NetworkBehaviour
         playerInput = GetComponent<PlayerInput>();
         playerInput.enabled = IsOwner;
         buildCam.gameObject.SetActive(IsOwner);
+        if (IsServer) maxWeight.Value = 15f;
         if (!IsOwner) return;
         PlayerManager.BuildingUI.SetGridPlacement(this);
         // Initialize all inputs
@@ -144,6 +152,7 @@ public class GridPlacement : NetworkBehaviour
         //ResetBreakablesRpc();
         //currentPlacements.Value = 0;
         currentWeight.Value = 0;
+        maxWeight.Value += Mathf.Pow(GameManager.Instance.Net_Rounds.Value, 2);
     }
 
     // Update is called once per frame
@@ -326,7 +335,7 @@ public class GridPlacement : NetworkBehaviour
     private void PlaceBuildableServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (currentWeight.Value + buildable.weight > maxWeight)
+        if (currentWeight.Value + buildable.weight > maxWeight.Value)
         {
             PlacementResultRpc(false);
             return;
@@ -345,7 +354,7 @@ public class GridPlacement : NetworkBehaviour
     private void ExplodeAreaServerRpc(Vector3Int cellPos)
     {
         if (!buildable) return;
-        if (currentWeight.Value >= maxWeight)
+        if (currentWeight.Value >= maxWeight.Value)
         {
             PlacementResultRpc(false);
             return;
@@ -462,7 +471,7 @@ public class GridPlacement : NetworkBehaviour
             return false;
 
         // Player has used all their placement weight
-        if (currentWeight.Value >= maxWeight)
+        if (currentWeight.Value >= maxWeight.Value)
             return false;
 
         // Why tho?
@@ -486,7 +495,7 @@ public class GridPlacement : NetworkBehaviour
         if (buildable) buildableName = $"{buildable.name} ({buildable.Id})";
         debugInfo.Value = $@"(Grid Placement)
         Current Buildable: {buildableName}
-        Current Weight: {currentWeight.Value} / {maxWeight}
+        Current Weight: {currentWeight.Value} / {maxWeight.Value}
         Preview Object: {previewObject}
         CanPreviewBuildable: {CanPreviewBuildable()}
         ";
