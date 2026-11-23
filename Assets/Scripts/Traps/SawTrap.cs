@@ -8,6 +8,7 @@ public class SawTrap : BreakableStructureEntity
     [SerializeField] private GameObject blade;
     public int damage;
     private OnHitData hitData;
+    private AudioSource audioPlayer;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -18,6 +19,7 @@ public class SawTrap : BreakableStructureEntity
             damage = damage,
             sourceHit = this.transform.position
         };
+        audioPlayer = GetComponent<AudioSource>();
         StartCoroutine(WaitForCombat());
     }
 
@@ -56,6 +58,10 @@ public class SawTrap : BreakableStructureEntity
     private void OnTriggerStay(Collider other)
     {
         if (!IsServer) return;
-        if (other.CompareTag("Player")) {other.GetComponent<Player>().OnHit(hitData);}  
+        if (other.CompareTag("Player")) {
+            other.GetComponent<Player>().OnHit(hitData);
+            if (audioPlayer.isPlaying) return;
+            //audioPlayer.Play();
+        }  
     }
 }

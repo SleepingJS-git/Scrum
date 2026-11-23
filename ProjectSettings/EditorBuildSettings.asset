@@ -45,6 +45,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Levels/TheCreek.unity
     guid: 94adb9573a1ab374e8b64db6316887f6
   - enabled: 1
+    path: Assets/Scenes/Levels/Office (Rework).unity
+    guid: f582ce008a37e5643b6acf06132d2ba3
+  - enabled: 0
     path: Assets/Scenes/Levels/Office.unity
     guid: cd06e3abbc77cac4e904f8463dcec0a9
   - enabled: 0

@@ -13,17 +13,6 @@ public class SlowTrap : NetworkBehaviour
     [SerializeField] private float speedMultiplier;
     Coroutine toggleRoutine;
     private Dictionary<GameObject, Coroutine> playersSlowed = new Dictionary<GameObject, Coroutine>();
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     private IEnumerator ToggleSlow(Player targetPlayer)
     {
@@ -38,6 +27,7 @@ public class SlowTrap : NetworkBehaviour
         if (!other.CompareTag("Player")) return;
         Player targetPlayer = other.GetComponent<Player>();
         targetPlayer.ApplySpeedMultiplierRpc(speedMultiplier, RpcTarget.Single(targetPlayer.OwnerClientId, RpcTargetUse.Temp));
+        Debug.Log("Slowing Player");
     }
 
     private void OnTriggerExit(Collider other)
