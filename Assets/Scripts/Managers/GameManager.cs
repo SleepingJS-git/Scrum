@@ -175,12 +175,19 @@ public class GameManager : NetworkBehaviour
         {
             if (Net_Rounds.Value == maxRounds)
             {
-                OnGameEnd?.Invoke();
+                GameEndRpc();
                 return;
             }
             if (gamePhase != GamePhase.Building)
                 ChangeGamePhaseServerRpc(GamePhase.Building);
         }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void GameEndRpc()
+    {
+        roundWinnerCanvasGroup.alpha = 0f;
+        OnGameEnd?.Invoke();
     }
 
     [Rpc(SendTo.Server)]
@@ -399,17 +406,22 @@ public class GameManager : NetworkBehaviour
     {
         PlayerResults[] playerResults = new PlayerResults[4];
         numOfPlayers = NetworkManager.Singleton.ConnectedClientsList.Count;
+        PlayerResults[] validResults = new PlayerResults[numOfPlayers];
         for (int i = 0; i < numOfPlayers; i++)
         {
             PlayerStats stats = NetworkManager.Singleton.ConnectedClientsList[i].PlayerObject.GetComponent<Player>().Stats;
 
-            playerResults[i] = new PlayerResults()
+            validResults[i] = new PlayerResults()
             {
                 playerID = (ulong) i, playerName = stats.PlayerName.Value.ToString(),
-                wins = stats.RoundsWon.Value, kills = stats.Kills.Value, deaths = stats.Deaths.Value
+                wins = stats.RoundsWon.Value, kills = stats.TotalKills.Value, deaths = stats.Deaths.Value
             };
         }
-        Array.Sort(playerResults, (p1, p2) => p1.wins.CompareTo(p2.wins));
+
+        Array.Sort(validResults, (p1, p2) => p2.wins.CompareTo(p1.wins));
+
+        for (int i = 0; i < numOfPlayers; i++)
+            playerResults[i] = validResults[i];
         return playerResults;
     }
 }

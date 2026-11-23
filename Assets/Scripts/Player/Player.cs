@@ -178,7 +178,7 @@ public class Player : Entity
     /// <param name="damage"></param>
     public override void OnHit(OnHitData onHitData)
     {
-        if (GameManager.Instance && GameManager.GamePhase == GamePhase.Building) return;
+        if (GameManager.Instance && GameManager.GamePhase != GamePhase.Combat) return;
 
         OnHitClientRpc(
             onHitData.damage, 

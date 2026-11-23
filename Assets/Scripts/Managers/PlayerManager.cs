@@ -596,7 +596,7 @@ public class PlayerManager : NetworkBehaviour
     }
 
 
-    private void TeleportPlayer(Vector3 pos)
+    public void TeleportPlayer(Vector3 pos)
     {
         LocalPlayer.transform.position = pos;
     }
