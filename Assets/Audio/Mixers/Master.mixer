@@ -6,7 +6,7 @@ AudioMixerGroupController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SawHums
+  m_Name: TrapHums
   m_AudioMixer: {fileID: 24100000}
   m_GroupID: 8e545fa4f9ab5e04e8c84e65d5727f58
   m_Children: []

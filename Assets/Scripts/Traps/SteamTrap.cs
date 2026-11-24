@@ -13,29 +13,61 @@ public class SteamTrap : BreakableStructureEntity
 
     [SerializeField] private Collider damageCollider;
     [SerializeField] private ParticleSystem steamParticles;
-    
+    [SerializeField] private AudioSource humSource;
+    [SerializeField] private AudioSource hitSource;
 
     private OnHitData hitData;
     private Coroutine toggleRoutine;
     private Coroutine combatEnd;
-    private AudioSource audioPlayer;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private float humVolume;
+    private float hitVolume;
+    private float lastHitTime = float.NegativeInfinity;
+
     void Start()
     {
-        audioPlayer = GetComponent<AudioSource>();
+        humVolume = humSource.volume;
+        humSource.volume = 0f;
+
+        hitVolume = hitSource.volume;
+        hitSource.loop = true;
+        hitSource.playOnAwake = false;
+        hitSource.Stop();
+        hitSource.volume = 0f;
+
         hitData = new()
         {
             attacker = this,
             damage = damage,
-            sourceHit = this.transform.position
+            sourceHit = transform.position
         };
 
         StartCoroutine(WaitForCombat());
     }
 
+    void Update()
+    {
+        bool steaming = damageCollider.enabled;
+
+        float humTarget = steaming ? humVolume : 0f;
+        humSource.volume = Mathf.MoveTowards(humSource.volume, humTarget, humVolume * Time.deltaTime / 0.15f);
+
+        bool hitting = steaming && IsServer && Time.time - lastHitTime < 0.1f;
+
+        if (hitting && !hitSource.isPlaying)
+            hitSource.Play();
+
+        float hitTarget = hitting ? hitVolume : 0f;
+        float fadeTime = hitting ? 0.08f : 0.1f;
+        hitSource.volume = Mathf.MoveTowards(hitSource.volume, hitTarget, hitVolume * Time.deltaTime / fadeTime);
+
+        if (!hitting && hitSource.volume <= 0f && hitSource.isPlaying)
+            hitSource.Stop();
+    }
+
     public override void ResetBreakable()
     {
+        lastHitTime = float.NegativeInfinity;
         steamParticles.Play();
         base.ResetBreakable();
         StartCoroutine(WaitForCombat());
@@ -43,9 +75,12 @@ public class SteamTrap : BreakableStructureEntity
 
     protected override void FractureApart()
     {
-        audioPlayer.Stop();
-        StopCoroutine(toggleRoutine);
-        StopCoroutine(combatEnd);
+        if (toggleRoutine != null)
+            StopCoroutine(toggleRoutine);
+
+        if (combatEnd != null)
+            StopCoroutine(combatEnd);
+
         steamParticles.Pause();
         steamParticles.Clear();
         damageCollider.enabled = false;
@@ -54,58 +89,39 @@ public class SteamTrap : BreakableStructureEntity
 
     private IEnumerator OnOff()
     {
-        audioPlayer.Play();
         while (!GameManager.Instance || GameManager.GamePhase == GamePhase.Combat)
         {
-            AudioFadeInOut(0.01f, true);
-            
             damageCollider.enabled = true;
             steamParticles.Play();
             yield return new WaitForSeconds(onTime);
 
-            AudioFadeInOut(0.05f, false);
             steamParticles.Clear();
             steamParticles.Pause();
             damageCollider.enabled = false;
             yield return new WaitForSeconds(offTime);
         }
-        //StartCoroutine(WaitForCombat());
-    }
-
-    IEnumerator AudioFadeInOut(float speed, bool fade)
-    {
-        //True Fades in
-        if(fade)
-        {
-            for (float i = 0; i < 1; i += speed)
-            {
-                audioPlayer.volume = i;
-            }
-        }
-        else
-        {
-            for (float i = 1; i > 0; i -= speed)
-            {
-                audioPlayer.volume = i;
-            }
-        }
-        yield return null;
     }
 
     private IEnumerator WaitForCombat()
     {
-        audioPlayer.Stop();
+        lastHitTime = float.NegativeInfinity;
         steamParticles.Play();
         damageCollider.enabled = false;
         Debug.Log("SteamTrap waiting for combat.");
-        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
+
+        yield return new WaitUntil(() => GameManager.GamePhase == GamePhase.Combat);
+
         toggleRoutine = StartCoroutine(OnOff());
         combatEnd = StartCoroutine(WaitForCombatEnd());
     }
 
     private IEnumerator WaitForCombatEnd()
     {
-        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.EndOfCombat; });
+        yield return new WaitUntil(() => GameManager.GamePhase == GamePhase.EndOfCombat);
+
+        if (toggleRoutine != null)
+            StopCoroutine(toggleRoutine);
+
         damageCollider.enabled = false;
         StartCoroutine(WaitForCombat());
         Debug.Log("Combat has ended.");
@@ -113,13 +129,17 @@ public class SteamTrap : BreakableStructureEntity
 
     private void OnTriggerStay(Collider other)
     {
-        if (!IsServer) return;
-        RaycastHit hit;
+        if (!IsServer || !damageCollider.enabled) return;
+
         if (other.CompareTag("Player"))
         {
-            Physics.Raycast(this.transform.position, other.transform.position - this.transform.position, out hit, Layer.Player | Layer.Buildable | Layer.Ground | Layer.Wall);
-            if (!hit.collider.CompareTag("Player")) return;
-            other.GetComponent<Player>().OnHit(hitData); 
+            bool blocked = !Physics.Raycast(transform.position, other.transform.position - transform.position,
+                out RaycastHit hit, Mathf.Infinity, Layer.Player | Layer.Buildable | Layer.Ground | Layer.Wall);
+
+            if (blocked || !hit.collider.CompareTag("Player")) return;
+
+            lastHitTime = Time.time;
+            other.GetComponent<Player>().OnHit(hitData);
         }
     }
 }
