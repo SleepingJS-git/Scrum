@@ -189,6 +189,9 @@ public class TitleScreen : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.Confined;
+
         ShowScreen(MenuScreen.Main);
 
         if (LobbyManager.Instance != null)

@@ -69,16 +69,16 @@ public class EndRoom : MonoBehaviour
         yield return new WaitForSeconds(10f);
 
         Debug.Log("Game Ends");
-        // if (PlayerManager.IsHostClient)
-        // {
-        //     yield return new WaitForSeconds(2f);
-        //     ExitMenu.Instance.ExitToMainMenu();
-        // }
-        // else
-        // {
-        //     yield return new WaitForSeconds(1f - (PlayerManager.LocalClientId * .25f));
-        //     ExitMenu.Instance.ExitToMainMenu();
-        // }
+        if (PlayerManager.IsHostClient)
+        {
+            yield return new WaitForSeconds(2f);
+            ExitMenu.Instance.ExitToMainMenu();
+        }
+        else
+        {
+            yield return new WaitForSeconds(1f - (PlayerManager.LocalClientId * .25f));
+            ExitMenu.Instance.ExitToMainMenu();
+        }
     }
 
     private IEnumerator SpawnDeadBodies(int kills, Material culledMaterial, int numOfPlayers, Transform bodySpawner)
@@ -99,7 +99,7 @@ public class EndRoom : MonoBehaviour
             {
                 Ragdoll ragdoll = Instantiate(ragdollPrefab, bodySpawner.parent.parent.position, bodySpawner.parent.parent.rotation);
                 ragdoll.Create(bodySpawner, randMat, onHitData);
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.25f);
             }
         }
     }

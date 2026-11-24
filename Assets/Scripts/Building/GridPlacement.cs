@@ -152,7 +152,7 @@ public class GridPlacement : NetworkBehaviour
         //ResetBreakablesRpc();
         //currentPlacements.Value = 0;
         currentWeight.Value = 0;
-        maxWeight.Value += Mathf.Pow(GameManager.Instance.Net_Rounds.Value, 2);
+        maxWeight.Value = 40f;
     }
 
     // Update is called once per frame
