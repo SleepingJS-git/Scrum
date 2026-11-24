@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class SawTrap : BreakableStructureEntity
 {
@@ -8,32 +7,59 @@ public class SawTrap : BreakableStructureEntity
     [SerializeField] private GameObject blade;
     public int damage;
     private OnHitData hitData;
-    private AudioSource audioPlayer;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] private GameAudioData audioData;
+    [SerializeField] private AudioSource humSource;
+    [SerializeField] private AudioSource hitSource;
+
+    private float hitVolume;
+    private float lastHitTime = float.NegativeInfinity;
+
     void Start()
     {
         hitData = new()
         {
             attacker = this,
             damage = damage,
-            sourceHit = this.transform.position
+            sourceHit = transform.position
         };
-        audioPlayer = GetComponent<AudioSource>();
+
+        hitVolume = hitSource.volume;
+        hitSource.clip = audioData.sawTrapHit;
+        hitSource.loop = true;
+        hitSource.playOnAwake = false;
+        hitSource.Stop();
+        hitSource.volume = 0f;
+
         StartCoroutine(WaitForCombat());
     }
 
-    // Update is called once per frame
+    //Math for getting the cutting sound fading in and out
     void Update()
     {
-        
+        if (!IsServer) return;
+
+        bool hitting = damageCollider.enabled && blade.activeInHierarchy && Time.time - lastHitTime < 0.1f;
+
+        if (hitting && !hitSource.isPlaying)
+            hitSource.Play();
+
+        float targetVolume = hitting ? hitVolume : 0f;
+        float fadeTime = hitting ? 0.08f : 0.1f;
+
+        hitSource.volume = Mathf.MoveTowards(hitSource.volume, targetVolume, hitVolume * Time.deltaTime / fadeTime);
+
+        if (!hitting && hitSource.volume <= 0f && hitSource.isPlaying)
+            hitSource.Stop();
     }
 
     public override void ResetBreakable()
-    {       
+    {
         base.ResetBreakable();
+        lastHitTime = float.NegativeInfinity;
         blade.SetActive(true);
     }
+
     protected override void FractureApart()
     {
         blade.SetActive(false);
@@ -43,14 +69,14 @@ public class SawTrap : BreakableStructureEntity
 
     private IEnumerator WaitForCombat()
     {
-        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat;});
+        yield return new WaitUntil(() => GameManager.GamePhase == GamePhase.Combat);
         damageCollider.enabled = true;
         StartCoroutine(WaitForCombatEnd());
     }
 
     private IEnumerator WaitForCombatEnd()
     {
-        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.EndOfCombat; });
+        yield return new WaitUntil(() => GameManager.GamePhase == GamePhase.EndOfCombat);
         damageCollider.enabled = false;
         StartCoroutine(WaitForCombat());
     }
@@ -58,10 +84,12 @@ public class SawTrap : BreakableStructureEntity
     private void OnTriggerStay(Collider other)
     {
         if (!IsServer) return;
-        if (other.CompareTag("Player")) {
+        if (!damageCollider.enabled) return;
+
+        if (other.CompareTag("Player"))
+        {
+            lastHitTime = Time.time;
             other.GetComponent<Player>().OnHit(hitData);
-            if (audioPlayer.isPlaying) return;
-            //audioPlayer.Play();
-        }  
+        }
     }
 }

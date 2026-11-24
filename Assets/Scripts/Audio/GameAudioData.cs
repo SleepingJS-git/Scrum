@@ -14,4 +14,8 @@ public class GameAudioData : ScriptableObject
     [Header("Placement Sounds")]
     public AudioClip[] placementSounds;
     public AudioClip invalidPlacementSound;
+
+    [Header("Trap Sound")]
+    public AudioClip sawTrapHum;
+    public AudioClip sawTrapHit;
 }

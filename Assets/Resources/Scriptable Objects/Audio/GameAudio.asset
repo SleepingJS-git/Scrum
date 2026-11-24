@@ -30,3 +30,5 @@ MonoBehaviour:
   placementSounds:
   - {fileID: 8300000, guid: 3fb74a9cb44d8244692dd6a1c07ba386, type: 3}
   invalidPlacementSound: {fileID: 8300000, guid: 565902253437f0b4f9d2a4c4a91bda33, type: 3}
+  sawTrapHum: {fileID: 8300000, guid: 0b0d46ac6153a8a41be5ec332efd97ab, type: 3}
+  sawTrapHit: {fileID: 8300000, guid: 68770f9bc349d5046888a4f47444fdde, type: 3}
