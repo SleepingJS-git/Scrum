@@ -11,12 +11,24 @@ public class FanTrap : BreakableStructureEntity
     [SerializeField] private ParticleSystem windParticles;
     [SerializeField] private AreaEffector3D areaEffector3D;
     [SerializeField] private Collider fanCollider;
+    [SerializeField] private AudioSource fanSource;
+
     private Coroutine toggleRoutine;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start() 
+    private float fanVolume;
+
+    void Start()
     {
+        fanVolume = fanSource.volume;
+        fanSource.volume = 0f;
+
         AddDeathEvent(() => areaEffector3D.ClearAffected());
         StartCoroutine(WaitForCombat());
+    }
+
+    void Update()
+    {
+        float targetVolume = windBox.enabled ? fanVolume : 0f;
+        fanSource.volume = Mathf.MoveTowards(fanSource.volume, targetVolume, fanVolume * Time.deltaTime / 0.15f);
     }
 
     public override void ResetBreakable()
@@ -39,18 +51,19 @@ public class FanTrap : BreakableStructureEntity
     {
         while (!GameManager.Instance || GameManager.GamePhase == GamePhase.Combat)
         {
-            //Turn on and wait
+            // Turn on and wait
             windBox.enabled = true;
             windParticles.Play();
             yield return new WaitForSeconds(onTime);
 
-            //Turn off and wait
+            // Turn off and wait
             windBox.enabled = false;
             windParticles.Clear();
             windParticles.Pause();
             areaEffector3D.ClearAffected();
             yield return new WaitForSeconds(offTime);
         }
+
         StartCoroutine(WaitForCombat());
     }
 
@@ -58,7 +71,7 @@ public class FanTrap : BreakableStructureEntity
     {
         windParticles.Play();
         windBox.enabled = false;
-        yield return new WaitUntil(() => { return GameManager.GamePhase == GamePhase.Combat; });
+        yield return new WaitUntil(() => GameManager.GamePhase == GamePhase.Combat);
         toggleRoutine = StartCoroutine(OnOff());
     }
 }
